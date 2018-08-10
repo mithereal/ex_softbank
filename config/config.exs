@@ -10,11 +10,11 @@ use Mix.Config
 
 # You can configure your application as:
 #
-#     config :softbank, key: :value
+#     config :soft_bank, key: :value
 #
 # and access this configuration in your application as:
 #
-#     Application.get_env(:softbank, :key)
+#     Application.get_env(:soft_bank, :key)
 #
 # You can also configure a 3rd-party app:
 #
@@ -30,7 +30,7 @@ use Mix.Config
 #     import_config "#{Mix.env()}.exs"
 
 config :bank,
-       ecto_repos: [SoftBank.Repo]
+       soft_bank: [SoftBank.Repo]
        
        
 config :soft_bank, SoftBank.Repo,
