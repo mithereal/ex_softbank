@@ -145,7 +145,7 @@ def fetch(%{ban: ban, type: type}) do
     query =
       Account
       |> where([a],  a.ban == ^ban)
-      |> select([a, %{ban: a.ban, type: a.type, contra: a.contra, currency: a.currency})
+      |> select([a], %{ban: a.ban, type: a.type, contra: a.contra, currency: a.currency})
       |> Repo.all
 
  end
