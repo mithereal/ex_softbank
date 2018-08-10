@@ -10,6 +10,7 @@ defmodule SoftBank.Teller do
 
   alias SoftBank.Transfer
   alias SoftBank.Account
+  alias SoftBank.Amount
   alias SoftBank.Entry
   alias SoftBank.Note
 

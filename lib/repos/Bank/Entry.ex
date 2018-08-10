@@ -20,7 +20,7 @@ defmodule SoftBank.Entry do
 
 
 
-  schema "SoftBank_entries" do
+  schema "softbank_entries" do
     field :description, :string
     field :date, Ecto.Date
 

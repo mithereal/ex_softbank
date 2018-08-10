@@ -12,7 +12,7 @@ alias SoftBank.Entry
 
   @moduledoc false
 
-  schema "SoftBank_accounts" do
+  schema "softbank_accounts" do
     field :ban, :string
     field :type, :string
     field :contra, :boolean
@@ -20,7 +20,6 @@ alias SoftBank.Entry
     field :balance, :string, virtual: true
 
     has_many :amounts, Amount, on_delete: :delete_all
-    has_many :entries, Entry, on_delete: :delete_all
 
     timestamps
   end

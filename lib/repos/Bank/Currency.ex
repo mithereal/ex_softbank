@@ -10,7 +10,7 @@ defmodule SoftBank.Currency do
 
   @moduledoc false
 
-  schema "SoftBank_currencies" do
+  schema "softbank_currencies" do
     field :name, :string
     field :value, :string
     field :symbol, :string

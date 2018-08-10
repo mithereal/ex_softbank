@@ -12,7 +12,7 @@ defmodule SoftBank.Amount do
   alias SoftBank.Account
 
 
-  schema "SoftBank_amounts" do
+  schema "softbank_amounts" do
     field :amount, SoftBank.Note.Ecto.Type
     field :type, :string
     field :currency, :string
