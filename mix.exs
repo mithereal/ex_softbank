@@ -1,10 +1,10 @@
 defmodule SoftBank.MixProject do
   use Mix.Project
-
+  @version "0.0.1"
   def project do
     [
       app: :soft_bank,
-      version: "0.1.0",
+      version: @version ,
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -12,7 +12,10 @@ defmodule SoftBank.MixProject do
       description: description(),
       package: package(),
       name: "soft bank",
-      source_url: "https://github.com/mithereal/elixir-softbank"
+      source_url: "https://github.com/mithereal/elixir-softbank",
+      docs: [source_ref: "v#{@version}", main: "Bank",
+        canonical: "",
+        source_url: "https://github.com/mithereal/softbank"]
     ]
   end
 
@@ -32,7 +35,8 @@ defmodule SoftBank.MixProject do
       {:ecto, "~> 2.1"},
       {:httpotion, "~> 3.1.0"},
       {:poison, "~> 3.0"},
-       {:ex_doc, ">= 0.0.0", only: :dev}
+      {:ex_doc, ">= 0.0.0", only: :dev},
+      {:poolboy, "~> 1.5"}
     ]
   end
   
