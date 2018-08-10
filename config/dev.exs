@@ -3,7 +3,7 @@ use Mix.Config
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
 
-config :soft_SoftBank, SoftBank.Repo,
+config :soft_bank, SoftBank.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
   password: "postgres",
@@ -11,9 +11,9 @@ config :soft_SoftBank, SoftBank.Repo,
   hostname: "localhost",
   pool_size: 10
 
-config :soft_SoftBank, app_mode: "test"
+config :soft_bank, app_mode: "test"
 
-config :soft_SoftBank,
+config :soft_bank,
        default_currency: :USD,
        separator: ".",
        delimiter: ",",
@@ -22,11 +22,11 @@ config :soft_SoftBank,
        symbol_space: false,
        fractional_unit: false
 
-config :soft_SoftBank,
+config :soft_bank,
        pool_size: 10,
        pool_max_overflow: 1
 
-config :soft_SoftBank,
+config :soft_bank,
        #source: CurrencyConversion.Source.Fixer,
        source: SoftBank.Currency.Conversion.Source.Test,
        #source_api_key: "FIXER_ACCESS_KEY",
