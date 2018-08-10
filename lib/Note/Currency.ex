@@ -1,6 +1,6 @@
-defmodule Bank.Note.Currency do
+defmodule SoftBank.Note.Currency do
   @moduledoc """
-  Provides currency support to `Bank.Note`
+  Provides currency support to `SoftBank.Note`
 
   Some useful helper methods include:
   - `get/1`
@@ -16,8 +16,8 @@ defmodule Bank.Note.Currency do
 
   ## Example:
 
-      iex> Bank.Note.Currency.usd(100)
-      %Bank.Note{amount: 100, currency: :USD}
+      iex> SoftBank.Note.Currency.usd(100)
+      %SoftBank.Note{amount: 100, currency: :USD}
   """
 
   @currencies %{
@@ -202,80 +202,80 @@ defmodule Bank.Note.Currency do
   @currencies |> Enum.each(fn ({cur, detail}) ->
     currency = to_string(cur) |> String.downcase
     @doc """
-    Convenience method to create a `Bank.Note` object for the #{detail.name} (#{cur}) currency.
+    Convenience method to create a `SoftBank.Note` object for the #{detail.name} (#{cur}) currency.
 
     ## Example:
 
-        iex> Bank.Note.Currency.#{currency}(100)
-        %Bank.Note{amount: 100, currency: :#{cur}}
+        iex> SoftBank.Note.Currency.#{currency}(100)
+        %SoftBank.Note{amount: 100, currency: :#{cur}}
     """
     def unquote(:"#{currency}")(amount) do
-      Bank.Note.new(amount, unquote(cur))
+      SoftBank.Note.new(amount, unquote(cur))
     end
   end)
 
-  @spec exists?(Bank.Note.t | String.t | atom) :: boolean
+  @spec exists?(SoftBank.Note.t | String.t | atom) :: boolean
   @doc ~S"""
   Returns true if a currency is defined
 
   ## Example:
 
-      iex> Bank.Note.Currency.exists?(:USD)
+      iex> SoftBank.Note.Currency.exists?(:USD)
       true
-      iex> Bank.Note.Currency.exists?("USD")
+      iex> SoftBank.Note.Currency.exists?("USD")
       true
-      iex> Bank.Note.Currency.exists?(:WRONG)
+      iex> SoftBank.Note.Currency.exists?(:WRONG)
       false
   """
-  def exists?(%Bank.Note{currency: currency}),
+  def exists?(%SoftBank.Note{currency: currency}),
     do: exists?(currency)
   def exists?(currency),
     do: Map.has_key?(@currencies, convert_currency(currency))
 
-  @spec get(Bank.Note.t | String.t | atom) :: map | nil
+  @spec get(SoftBank.Note.t | String.t | atom) :: map | nil
   @doc ~S"""
   Returns a map with the name and symbol of the currency or nil if it doesn’t exist.
 
   ## Example:
 
-      iex> Bank.Note.Currency.get(:USD)
+      iex> SoftBank.Note.Currency.get(:USD)
       %{name: "US Dollar", symbol: "$"}
-      iex> Bank.Note.Currency.get(:WRONG)
+      iex> SoftBank.Note.Currency.get(:WRONG)
       nil
   """
-  def get(%Bank.Note{currency: currency}),
+  def get(%SoftBank.Note{currency: currency}),
     do: get(currency)
   def get(currency),
     do: @currencies[convert_currency(currency)]
 
-  @spec get!(Bank.Note.t | String.t | atom) :: map
+  @spec get!(SoftBank.Note.t | String.t | atom) :: map
   @doc ~S"""
   Returns a map with the name and symbol of the currency.
   An ArgumentError is raised if the currency doesn’t exist.
 
   ## Example:
 
-      iex> Bank.Note.Currency.get!(:USD)
+      iex> SoftBank.Note.Currency.get!(:USD)
       %{name: "US Dollar", symbol: "$"}
-      iex> Bank.Note.Currency.get!(:WRONG)
+      iex> SoftBank.Note.Currency.get!(:WRONG)
       ** (ArgumentError) currency WRONG doesn’t exist
   """
   def get!(currency),
     do: get(currency) || currency_doesnt_exist_error(currency)
 
-  @spec to_atom(Bank.Note.t | String.t | atom) :: atom
+  @spec to_atom(SoftBank.Note.t | String.t | atom) :: atom
   @doc ~S"""
   Returns the atom representation of the currency key
   An ArgumentError is raised if the currency doesn’t exist.
 
   ## Example:
 
-      iex> Bank.Note.Currency.to_atom("usd")
+      iex> SoftBank.Note.Currency.to_atom("usd")
       :USD
-      iex> Bank.Note.Currency.to_atom(:WRONG)
+      iex> SoftBank.Note.Currency.to_atom(:WRONG)
       ** (ArgumentError) currency WRONG doesn’t exist
   """
-  def to_atom(%Bank.Note{currency: currency}),
+  def to_atom(%SoftBank.Note{currency: currency}),
     do: to_atom(currency)
   def to_atom(currency) do
     currency = convert_currency(currency)
@@ -283,63 +283,63 @@ defmodule Bank.Note.Currency do
     currency
   end
 
-  @spec name(Bank.Note.t | String.t | atom) :: String.t
+  @spec name(SoftBank.Note.t | String.t | atom) :: String.t
   @doc ~S"""
   Returns the name of the currency or nil if it doesn’t exist.
 
   ## Example:
 
-      iex> Bank.Note.Currency.name(:USD)
+      iex> SoftBank.Note.Currency.name(:USD)
       "US Dollar"
-      iex> Bank.Note.Currency.name(:WRONG)
+      iex> SoftBank.Note.Currency.name(:WRONG)
       nil
   """
-  def name(%Bank.Note{currency: currency}),
+  def name(%SoftBank.Note{currency: currency}),
     do: name(currency)
   def name(currency),
     do: get(currency)[:name]
 
-  @spec name!(Bank.Note.t | String.t | atom) :: String.t
+  @spec name!(SoftBank.Note.t | String.t | atom) :: String.t
   @doc ~S"""
   Returns the name of the currency.
   An ArgumentError is raised if the currency doesn’t exist.
 
   ## Example:
 
-      iex> Bank.Note.Currency.name!(:USD)
+      iex> SoftBank.Note.Currency.name!(:USD)
       "US Dollar"
-      iex> Bank.Note.Currency.name!(:WRONG)
+      iex> SoftBank.Note.Currency.name!(:WRONG)
       ** (ArgumentError) currency WRONG doesn’t exist
   """
   def name!(currency),
     do: name(currency) || currency_doesnt_exist_error(currency)
 
-  @spec symbol(Bank.Note.t | String.t | atom) :: String.t
+  @spec symbol(SoftBank.Note.t | String.t | atom) :: String.t
   @doc ~S"""
   Returns the symbol of the currency or nil if it doesn’t exist.
 
   ## Example:
 
-      iex> Bank.Note.Currency.symbol(:USD)
+      iex> SoftBank.Note.Currency.symbol(:USD)
       "$"
-      iex> Bank.Note.Currency.symbol(:WRONG)
+      iex> SoftBank.Note.Currency.symbol(:WRONG)
       nil
   """
-  def symbol(%Bank.Note{currency: currency}),
+  def symbol(%SoftBank.Note{currency: currency}),
     do: symbol(currency)
   def symbol(currency),
     do: get(currency)[:symbol]
 
-  @spec symbol!(Bank.Note.t | String.t | atom) :: String.t
+  @spec symbol!(SoftBank.Note.t | String.t | atom) :: String.t
   @doc ~S"""
   Returns the symbol of the currency.
   An ArgumentError is raised if the currency doesn’t exist.
 
   ## Example:
 
-      iex> Bank.Note.Currency.symbol!(:USD)
+      iex> SoftBank.Note.Currency.symbol!(:USD)
       "$"
-      iex> Bank.Note.Currency.symbol!(:WRONG)
+      iex> SoftBank.Note.Currency.symbol!(:WRONG)
       ** (ArgumentError) currency WRONG doesn’t exist
   """
   def symbol!(currency),

@@ -1,4 +1,4 @@
-defmodule Bank.Amount do
+defmodule SoftBank.Amount do
   @moduledoc """
   An Amount represents the individual debit or credit for a given account and is
   part of a balanced entry.
@@ -8,12 +8,12 @@ defmodule Bank.Amount do
 
   import Ecto.Changeset
   import Ecto.Query, only: [from: 1, from: 2]
-  alias Bank.Entry
-  alias Bank.Account
+  alias SoftBank.Entry
+  alias SoftBank.Account
 
 
-  schema "bank_amounts" do
-    field :amount, Bank.Note.Ecto.Type
+  schema "SoftBank_amounts" do
+    field :amount, SoftBank.Note.Ecto.Type
     field :type, :string
     field :currency, :string
 
@@ -29,7 +29,7 @@ defmodule Bank.Amount do
   @amount_types ["credit", "debit"]
 
   @doc """
-  Creates an amount changeset associated with a `Bank.Entry` and `Bank.Account`.
+  Creates an amount changeset associated with a `SoftBank.Entry` and `SoftBank.Account`.
   A type ("credit" or "debit"), as well as, an amount greater than 0 must be specified.
   """
   def changeset(model, params \\ %{}) do
@@ -85,7 +85,7 @@ defmodule Bank.Amount do
   end
 
   def note(amount) do
-    currency = Application.get_env(:bank, :default_currency)
+    currency = Application.get_env(:soft_bank, :default_currency)
     if currency do
       new(amount, currency)
     else
@@ -98,6 +98,6 @@ defmodule Bank.Amount do
   end
 
 #  def note(int, currency) when is_integer(int),
-#      do: %Bank.Note{amount: int, currency: Currency.to_atom(currency)}
+#      do: %SoftBank.Note{amount: int, currency: Currency.to_atom(currency)}
 
 end

@@ -1,10 +1,10 @@
-defmodule Bank.Note.Sigils do
+defmodule SoftBank.Note.Sigils do
 
-  alias Bank.Note
+  alias SoftBank.Note
   defmacro sigil_N({:<<>>, _meta, [amount]}, []),
-    do: Macro.escape(Bank.Note.new(to_integer(amount)))
+    do: Macro.escape(SoftBank.Note.new(to_integer(amount)))
   defmacro sigil_N({:<<>>, _meta, [amount]}, [_ | _]=currency),
-    do: Macro.escape(Bank.Note.new(to_integer(amount), List.to_atom(currency)))
+    do: Macro.escape(SoftBank.Note.new(to_integer(amount), List.to_atom(currency)))
 
   defp to_integer(string) do
     string

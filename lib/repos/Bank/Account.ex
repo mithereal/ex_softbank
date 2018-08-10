@@ -1,18 +1,18 @@
-defmodule Bank.Account do
+defmodule SoftBank.Account do
   import Kernel, except: [abs: 1]
 
   use Ecto.Schema
 
   import Ecto.Changeset
   import Ecto.Query
-alias Bank.Repo
-alias Bank.Amount
-alias Bank.Account
-alias Bank.Entry
+alias SoftBank.Repo
+alias SoftBank.Amount
+alias SoftBank.Account
+alias SoftBank.Entry
 
   @moduledoc false
 
-  schema "bank_accounts" do
+  schema "SoftBank_accounts" do
     field :ban, :string
     field :type, :string
     field :contra, :boolean

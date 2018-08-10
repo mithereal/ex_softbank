@@ -1,16 +1,16 @@
-defmodule Bank.Currency do
+defmodule SoftBank.Currency do
 
   use Ecto.Schema
 
   import Ecto.Changeset
 
-  alias Bank.Repo
-  alias Bank.Currency
+  alias SoftBank.Repo
+  alias SoftBank.Currency
 
 
   @moduledoc false
 
-  schema "bank_currencies" do
+  schema "SoftBank_currencies" do
     field :name, :string
     field :value, :string
     field :symbol, :string

@@ -1,4 +1,4 @@
-defmodule Bank.Entry do
+defmodule SoftBank.Entry do
   @moduledoc """
   Entries are the recording of account debits and credits and can be considered
   as consituting a traditional accounting Journal.
@@ -14,17 +14,17 @@ defmodule Bank.Entry do
   import Ecto.Changeset
   import Ecto.Query, only: [from: 1, from: 2]
 
-  alias Bank.Account
-  alias Bank.Amount
-  alias Bank.Entry
+  alias SoftBank.Account
+  alias SoftBank.Amount
+  alias SoftBank.Entry
 
 
 
-  schema "bank_entries" do
+  schema "SoftBank_entries" do
     field :description, :string
     field :date, Ecto.Date
 
-    has_many :amounts, Bank.Amount, on_delete: :delete_all
+    has_many :amounts, SoftBank.Amount, on_delete: :delete_all
 
     timestamps()
   end
@@ -32,8 +32,8 @@ defmodule Bank.Entry do
   @fields ~w(description date)
 
   @doc """
-  Creates a changeset for `Bank.Entry`, validating a required `:description` and `:date`,
-  casting an provided "debit" and "credit" `Bank.Amount`s, and validating that
+  Creates a changeset for `SoftBank.Entry`, validating a required `:description` and `:date`,
+  casting an provided "debit" and "credit" `SoftBank.Amount`s, and validating that
   those amounts balance.
   """
   def changeset(model, params \\ %{}) do
@@ -63,10 +63,10 @@ defmodule Bank.Entry do
   end
 
   @doc """
-  Accepts an `Bank.Entry` and `Ecto.Repo` and returns true/false based on whether
+  Accepts an `SoftBank.Entry` and `Ecto.Repo` and returns true/false based on whether
   the associated amounts for that entry sum to zero.
   """
-  @spec balanced?(Ecto.Repo.t, Bank.Entry.t) :: Boolean.t
+  @spec balanced?(Ecto.Repo.t, SoftBank.Entry.t) :: Boolean.t
   def balanced?(repo \\ Repo, entry = %Entry{}) do
     credits = Amount
     |> Amount.for_entry(entry)
