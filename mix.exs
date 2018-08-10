@@ -11,8 +11,7 @@ defmodule SoftBank.MixProject do
       build_embedded: Mix.env == :prod,
       description: description(),
       package: package(),
-      elixir: "~> 1.0",
-      name: "gasrate",
+      name: "soft bank",
       source_url: "https://github.com/mithereal/elixir-softbank"
     ]
   end
