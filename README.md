@@ -10,7 +10,7 @@ by adding `softbank` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:softbank, "~> 0.1.0"}
+    {:soft_bank, "~> 0.1.0"}
   ]
 end
 ```
