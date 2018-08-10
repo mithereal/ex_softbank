@@ -1,5 +1,5 @@
 if Code.ensure_compiled?(Ecto.Type) do
-  defmodule Bank.Note.Ecto.Type do
+  defmodule SoftBank.Note.Ecto.Type do
     @moduledoc """
     Provides a type for Ecto usage.
     The underlying data type should be an integer.
@@ -19,7 +19,7 @@ if Code.ensure_compiled?(Ecto.Type) do
     ## Schema Example
 
         schema "my_table" do
-          field :amount, Bank.Note.Ecto.Type
+          field :amount, SoftBank.Note.Ecto.Type
         end
     """
 
@@ -28,21 +28,21 @@ if Code.ensure_compiled?(Ecto.Type) do
     @spec type :: :integer
     def type, do: :integer
 
-    @spec cast(String.t | integer) :: {:ok, Bank.Note.t}
+    @spec cast(String.t | integer) :: {:ok, SoftBank.Note.t}
     def cast(val)
     def cast(str) when is_binary(str) do
-      Bank.Note.parse(str)
+      SoftBank.Note.parse(str)
     end
-    def cast(int) when is_integer(int), do: {:ok, Bank.Note.new(int)}
-    def cast(%Bank.Note{}=money), do: {:ok, money}
+    def cast(int) when is_integer(int), do: {:ok, SoftBank.Note.new(int)}
+    def cast(%SoftBank.Note{}=money), do: {:ok, money}
     def cast(_), do: :error
 
-    @spec load(integer) :: {:ok, Bank.Note.t}
-    def load(int) when is_integer(int), do: {:ok, Bank.Note.new(int)}
+    @spec load(integer) :: {:ok, SoftBank.Note.t}
+    def load(int) when is_integer(int), do: {:ok, SoftBank.Note.new(int)}
 
-    @spec dump(integer | Bank.Note.t) :: {:ok, :integer}
+    @spec dump(integer | SoftBank.Note.t) :: {:ok, :integer}
     def dump(int) when is_integer(int), do: {:ok, int}
-    def dump(%Bank.Note{} = m), do: {:ok, m.amount}
+    def dump(%SoftBank.Note{} = m), do: {:ok, m.amount}
     def dump(_), do: :error
   end
 end
