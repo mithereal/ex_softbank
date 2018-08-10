@@ -1,9 +1,9 @@
-defmodule Softbank.MixProject do
+defmodule soft_bank.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :softbank,
+      app: :soft_bank,
       version: "0.1.0",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
@@ -13,7 +13,7 @@ defmodule Softbank.MixProject do
       package: package(),
       elixir: "~> 1.0",
       name: "gasrate",
-      source_url: "https://github.com/mithereal/elixir-softbank"
+      source_url: "https://github.com/mithereal/elixir-soft_bank"
     ]
   end
 
@@ -21,7 +21,7 @@ defmodule Softbank.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {Softbank.Application, []}
+      mod: {soft_bank.Application, []}
     ]
   end
 
@@ -40,7 +40,7 @@ defmodule Softbank.MixProject do
 
   defp package() do
     [
-      name: "gasrate",
+      name: "soft_bank",
       files: ["lib",  "mix.exs", "README*"],
       maintainers: ["Jason Clark"],
       licenses: ["MIT"],
