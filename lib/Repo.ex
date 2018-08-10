@@ -1,5 +1,5 @@
 defmodule SoftBank.Repo do
-  use Ecto.Repo, otp_app: :SoftBank
+  use Ecto.Repo, otp_app: :soft_bank
 
   @doc """
   Dynamically loads the repository url from the
