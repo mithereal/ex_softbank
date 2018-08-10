@@ -1,29 +1,29 @@
-defmodule Bank.Note do
+defmodule SoftBank.Note do
   import Kernel, except: [abs: 1]
 
   @moduledoc """
-  Defines a `Bank.Note` struct along with convenience methods for working with currencies.
+  Defines a `SoftBank.Note` struct along with convenience methods for working with currencies.
 
   ## Example:
 
-      iex> note = Bank.Note.new(500, :USD)
-      %Bank.Note{amount: 500, currency: :USD}
-      iex> note = Bank.Note.add(note, 550)
-      %Bank.Note{amount: 1050, currency: :USD}
-      iex> Bank.Note.to_string(note)
+      iex> note = SoftBank.Note.new(500, :USD)
+      %SoftBank.Note{amount: 500, currency: :USD}
+      iex> note = SoftBank.Note.add(note, 550)
+      %SoftBank.Note{amount: 1050, currency: :USD}
+      iex> SoftBank.Note.to_string(note)
       "$10.50"
 
   ## Configuration options
 
-  You can set defaults in your Mix configuration to make working with `Bank.Note` a little easier.
+  You can set defaults in your Mix configuration to make working with `SoftBank.Note` a little easier.
 
   ## Configuration:
 
       config :note,
-        default_currency: :EUR,  # this allows you to do Bank.Note.new(100)
-        separator: ".",          # change the default thousands separator for Bank.Note.to_string
-        delimiter: ",",          # change the default decimal delimeter for Bank.Note.to_string
-        symbol: false            # don’t display the currency symbol in Bank.Note.to_string
+        default_currency: :EUR,  # this allows you to do SoftBank.Note.new(100)
+        separator: ".",          # change the default thousands separator for SoftBank.Note.to_string
+        delimiter: ",",          # change the default decimal delimeter for SoftBank.Note.to_string
+        symbol: false            # don’t display the currency symbol in SoftBank.Note.to_string
         symbol_on_right: false,  # position the symbol
         symbol_space: false      # add a space between symbol and number
         fractional_unit: false   # don’t display the remainder or the delimeter
@@ -36,11 +36,11 @@ defmodule Bank.Note do
 
   defstruct amount: 0, currency: :USD
 
-  alias Bank.Note.Currency
+  alias SoftBank.Note.Currency
 
   @spec new(integer) :: t
   @doc ~S"""
-  Create a new `Bank.Note` struct using a default currency.
+  Create a new `SoftBank.Note` struct using a default currency.
   The default currency can be set in the system Mix config.
 
   ## Example Config:
@@ -50,33 +50,33 @@ defmodule Bank.Note do
 
   ## Example:
 
-      Bank.Note.new(123)
-      %Bank.Note{amount: 123, currency: :USD}
+      SoftBank.Note.new(123)
+      %SoftBank.Note{amount: 123, currency: :USD}
   """
   def new(amount) do
     currency = Application.get_env(:note, :default_currency)
     if currency do
       new(amount, currency)
     else
-      raise ArgumentError, "to use Bank.Note.new/1 you must set a default currency in your application config."
+      raise ArgumentError, "to use SoftBank.Note.new/1 you must set a default currency in your application config."
     end
   end
 
   @spec new(integer, atom | String.t) :: t
   @doc """
-  Create a new `Bank.Note` struct from currency sub-units (cents)
+  Create a new `SoftBank.Note` struct from currency sub-units (cents)
 
   ## Example:
 
-      iex> Bank.Note.new(1_000_00, :USD)
-      %Bank.Note{amount: 1_000_00, currency: :USD}
+      iex> SoftBank.Note.new(1_000_00, :USD)
+      %SoftBank.Note{amount: 1_000_00, currency: :USD}
   """
   def new(int, currency) when is_integer(int),
-      do: %Bank.Note{amount: int, currency: Currency.to_atom(currency)}
+      do: %SoftBank.Note{amount: int, currency: Currency.to_atom(currency)}
 
   @spec parse(String.t | float, atom | String.t, Keyword.t) :: {:ok, t}
   @doc ~S"""
-  Parse a value into a `Bank.Note` type.
+  Parse a value into a `SoftBank.Note` type.
 
   The following options are available:
 
@@ -87,16 +87,16 @@ defmodule Bank.Note do
 
   ## Examples:
 
-      iex> Bank.Note.parse("$1,234.56", :USD)
-      {:ok, %Bank.Note{amount: 123456, currency: :USD}}
-      iex> Bank.Note.parse("1.234,56", :EUR, separator: ".", delimeter: ",")
-      {:ok, %Bank.Note{amount: 123456, currency: :EUR}}
-      iex> Bank.Note.parse("1.234,56", :WRONG)
+      iex> SoftBank.Note.parse("$1,234.56", :USD)
+      {:ok, %SoftBank.Note{amount: 123456, currency: :USD}}
+      iex> SoftBank.Note.parse("1.234,56", :EUR, separator: ".", delimeter: ",")
+      {:ok, %SoftBank.Note{amount: 123456, currency: :EUR}}
+      iex> SoftBank.Note.parse("1.234,56", :WRONG)
       :error
-      iex> Bank.Note.parse(1_234.56, :USD)
-      {:ok, %Bank.Note{amount: 123456, currency: :USD}}
-      iex> Bank.Note.parse(-1_234.56, :USD)
-      {:ok, %Bank.Note{amount: -123456, currency: :USD}}
+      iex> SoftBank.Note.parse(1_234.56, :USD)
+      {:ok, %SoftBank.Note{amount: 123456, currency: :USD}}
+      iex> SoftBank.Note.parse(-1_234.56, :USD)
+      {:ok, %SoftBank.Note{amount: -123456, currency: :USD}}
   """
   def parse(value, currency \\ nil, opts \\ [])
   def parse(value, nil, opts) do
@@ -104,7 +104,7 @@ defmodule Bank.Note do
     if currency do
       parse(value, currency, opts)
     else
-      raise ArgumentError, "to use Bank.Note.new/1 you must set a default currency in your application config."
+      raise ArgumentError, "to use SoftBank.Note.new/1 you must set a default currency in your application config."
     end
   end
   def parse(str, currency, opts) when is_binary(str) do
@@ -166,14 +166,14 @@ defmodule Bank.Note do
 
   @spec parse(String.t | float, atom | String.t, Keyword.t) :: t
   @doc ~S"""
-  Parse a value into a `Bank.Note` type.
-  Similar to `parse/3` but returns a `%Bank.Note{}` or raises an error if parsing fails.
+  Parse a value into a `SoftBank.Note` type.
+  Similar to `parse/3` but returns a `%SoftBank.Note{}` or raises an error if parsing fails.
 
   ## Example:
 
-      iex> Bank.Note.parse!("1,234.56", :USD)
-      %Bank.Note{amount: 123456, currency: :USD}
-      iex> Bank.Note.parse!("wrong", :USD)
+      iex> SoftBank.Note.parse!("1,234.56", :USD)
+      %SoftBank.Note{amount: 123456, currency: :USD}
+      iex> SoftBank.Note.parse!("wrong", :USD)
       ** (ArgumentError) unable to parse "wrong"
   """
   def parse!(value, currency \\ nil, opts \\ []) do
@@ -185,19 +185,19 @@ defmodule Bank.Note do
 
   @spec compare(t, t) :: t
   @doc ~S"""
-  Compares two `Bank.Note` structs with each other.
+  Compares two `SoftBank.Note` structs with each other.
   They must each be of the same currency and then their amounts are compared
 
   ## Example:
 
-      iex> Bank.Note.compare(Bank.Note.new(100, :USD), Bank.Note.new(100, :USD))
+      iex> SoftBank.Note.compare(SoftBank.Note.new(100, :USD), SoftBank.Note.new(100, :USD))
       0
-      iex> Bank.Note.compare(Bank.Note.new(100, :USD), Bank.Note.new(101, :USD))
+      iex> SoftBank.Note.compare(SoftBank.Note.new(100, :USD), SoftBank.Note.new(101, :USD))
       -1
-      iex> Bank.Note.compare(Bank.Note.new(101, :USD), Bank.Note.new(100, :USD))
+      iex> SoftBank.Note.compare(SoftBank.Note.new(101, :USD), SoftBank.Note.new(100, :USD))
       1
   """
-  def compare(%Bank.Note{currency: cur} = a, %Bank.Note{currency: cur} = b) do
+  def compare(%SoftBank.Note{currency: cur} = a, %SoftBank.Note{currency: cur} = b) do
     case a.amount - b.amount do
       x when x >  0 -> 1
       x when x <  0 -> -1
@@ -208,164 +208,164 @@ defmodule Bank.Note do
 
   @spec zero?(t) :: boolean
   @doc ~S"""
-  Returns true if the amount of a `Bank.Note` struct is zero
+  Returns true if the amount of a `SoftBank.Note` struct is zero
 
   ## Example:
 
-      iex> Bank.Note.zero?(Bank.Note.new(0, :USD))
+      iex> SoftBank.Note.zero?(SoftBank.Note.new(0, :USD))
       true
-      iex> Bank.Note.zero?(Bank.Note.new(1, :USD))
+      iex> SoftBank.Note.zero?(SoftBank.Note.new(1, :USD))
       false
   """
-  def zero?(%Bank.Note{amount: amount}) do
+  def zero?(%SoftBank.Note{amount: amount}) do
     amount == 0
   end
 
   @spec positive?(t) :: boolean
   @doc ~S"""
-  Returns true if the amount of a `Bank.Note` is greater than zero
+  Returns true if the amount of a `SoftBank.Note` is greater than zero
 
   ## Example:
 
-      iex> Bank.Note.positive?(Bank.Note.new(0, :USD))
+      iex> SoftBank.Note.positive?(SoftBank.Note.new(0, :USD))
       false
-      iex> Bank.Note.positive?(Bank.Note.new(1, :USD))
+      iex> SoftBank.Note.positive?(SoftBank.Note.new(1, :USD))
       true
-      iex> Bank.Note.positive?(Bank.Note.new(-1, :USD))
+      iex> SoftBank.Note.positive?(SoftBank.Note.new(-1, :USD))
       false
   """
-  def positive?(%Bank.Note{amount: amount}) do
+  def positive?(%SoftBank.Note{amount: amount}) do
     amount > 0
   end
 
   @spec negative?(t) :: boolean
   @doc ~S"""
-  Returns true if the amount of a `Bank.Note` is less than zero
+  Returns true if the amount of a `SoftBank.Note` is less than zero
 
   ## Example:
 
-      iex> Bank.Note.negative?(Bank.Note.new(0, :USD))
+      iex> SoftBank.Note.negative?(SoftBank.Note.new(0, :USD))
       false
-      iex> Bank.Note.negative?(Bank.Note.new(1, :USD))
+      iex> SoftBank.Note.negative?(SoftBank.Note.new(1, :USD))
       false
-      iex> Bank.Note.negative?(Bank.Note.new(-1, :USD))
+      iex> SoftBank.Note.negative?(SoftBank.Note.new(-1, :USD))
       true
   """
-  def negative?(%Bank.Note{amount: amount}) do
+  def negative?(%SoftBank.Note{amount: amount}) do
     amount < 0
   end
 
   @spec equals?(t, t) :: boolean
   @doc ~S"""
-  Returns true if two `Bank.Note` of the same currency have the same amount
+  Returns true if two `SoftBank.Note` of the same currency have the same amount
 
   ## Example:
 
-      iex> Bank.Note.equals?(Bank.Note.new(100, :USD), Bank.Note.new(100, :USD))
+      iex> SoftBank.Note.equals?(SoftBank.Note.new(100, :USD), SoftBank.Note.new(100, :USD))
       true
-      iex> Bank.Note.equals?(Bank.Note.new(101, :USD), Bank.Note.new(100, :USD))
+      iex> SoftBank.Note.equals?(SoftBank.Note.new(101, :USD), SoftBank.Note.new(100, :USD))
       false
   """
-  def equals?(%Bank.Note{amount: amount, currency: cur}, %Bank.Note{amount: amount, currency: cur}), do: true
-  def equals?(%Bank.Note{currency: cur}, %Bank.Note{currency: cur}), do: false
+  def equals?(%SoftBank.Note{amount: amount, currency: cur}, %SoftBank.Note{amount: amount, currency: cur}), do: true
+  def equals?(%SoftBank.Note{currency: cur}, %SoftBank.Note{currency: cur}), do: false
   def equals?(a, b), do: fail_currencies_must_be_equal(a, b)
 
   @spec neg(t) :: t
   @doc ~S"""
-  Returns a `Bank.Note` with the amount negated.
+  Returns a `SoftBank.Note` with the amount negated.
 
   ## Examples:
 
-      iex> Bank.Note.new(100, :USD) |> Bank.Note.neg
-      %Bank.Note{amount: -100, currency: :USD}
-      iex> Bank.Note.new(-100, :USD) |> Bank.Note.neg
-      %Bank.Note{amount: 100, currency: :USD}
+      iex> SoftBank.Note.new(100, :USD) |> SoftBank.Note.neg
+      %SoftBank.Note{amount: -100, currency: :USD}
+      iex> SoftBank.Note.new(-100, :USD) |> SoftBank.Note.neg
+      %SoftBank.Note{amount: 100, currency: :USD}
   """
-  def neg(%Bank.Note{amount: amount, currency: cur}),
-      do: %Bank.Note{amount: -amount, currency: cur}
+  def neg(%SoftBank.Note{amount: amount, currency: cur}),
+      do: %SoftBank.Note{amount: -amount, currency: cur}
 
   @spec abs(t) :: t
   @doc ~S"""
-  Returns a `Bank.Note` with the arithmetical absolute of the amount.
+  Returns a `SoftBank.Note` with the arithmetical absolute of the amount.
 
   ## Examples:
 
-      iex> Bank.Note.new(-100, :USD) |> Bank.Note.abs
-      %Bank.Note{amount: 100, currency: :USD}
-      iex> Bank.Note.new(100, :USD) |> Bank.Note.abs
-      %Bank.Note{amount: 100, currency: :USD}
+      iex> SoftBank.Note.new(-100, :USD) |> SoftBank.Note.abs
+      %SoftBank.Note{amount: 100, currency: :USD}
+      iex> SoftBank.Note.new(100, :USD) |> SoftBank.Note.abs
+      %SoftBank.Note{amount: 100, currency: :USD}
   """
-  def abs(%Bank.Note{amount: amount, currency: cur}),
-      do: %Bank.Note{amount: Kernel.abs(amount), currency: cur}
+  def abs(%SoftBank.Note{amount: amount, currency: cur}),
+      do: %SoftBank.Note{amount: Kernel.abs(amount), currency: cur}
 
   @spec add(t, t | integer | float) :: t
   @doc ~S"""
-  Adds two `Bank.Note` together or an integer (cents) amount to a `Bank.Note`
+  Adds two `SoftBank.Note` together or an integer (cents) amount to a `SoftBank.Note`
 
   ## Example:
 
-      iex> Bank.Note.add(Bank.Note.new(100, :USD), Bank.Note.new(50, :USD))
-      %Bank.Note{amount: 150, currency: :USD}
-      iex> Bank.Note.add(Bank.Note.new(100, :USD), 50)
-      %Bank.Note{amount: 150, currency: :USD}
-      iex> Bank.Note.add(Bank.Note.new(100, :USD), 5.55)
-      %Bank.Note{amount: 655, currency: :USD}
+      iex> SoftBank.Note.add(SoftBank.Note.new(100, :USD), SoftBank.Note.new(50, :USD))
+      %SoftBank.Note{amount: 150, currency: :USD}
+      iex> SoftBank.Note.add(SoftBank.Note.new(100, :USD), 50)
+      %SoftBank.Note{amount: 150, currency: :USD}
+      iex> SoftBank.Note.add(SoftBank.Note.new(100, :USD), 5.55)
+      %SoftBank.Note{amount: 655, currency: :USD}
   """
-  def add(%Bank.Note{amount: a, currency: cur}, %Bank.Note{amount: b, currency: cur}),
-      do: Bank.Note.new(a + b, cur)
-  def add(%Bank.Note{amount: amount, currency: cur}, addend) when is_integer(addend),
-      do: Bank.Note.new(amount + addend, cur)
-  def add(%Bank.Note{} = m, addend) when is_float(addend),
+  def add(%SoftBank.Note{amount: a, currency: cur}, %SoftBank.Note{amount: b, currency: cur}),
+      do: SoftBank.Note.new(a + b, cur)
+  def add(%SoftBank.Note{amount: amount, currency: cur}, addend) when is_integer(addend),
+      do: SoftBank.Note.new(amount + addend, cur)
+  def add(%SoftBank.Note{} = m, addend) when is_float(addend),
       do: add(m, round(addend * 100))
   def add(a, b), do: fail_currencies_must_be_equal(a, b)
 
   @spec subtract(t, t | integer | float) :: t
   @doc ~S"""
-  Subtracts one `Bank.Note` from another or an integer (cents) from a `Bank.Note`
+  Subtracts one `SoftBank.Note` from another or an integer (cents) from a `SoftBank.Note`
 
   ## Example:
 
-      iex> Bank.Note.subtract(Bank.Note.new(150, :USD), Bank.Note.new(50, :USD))
-      %Bank.Note{amount: 100, currency: :USD}
-      iex> Bank.Note.subtract(Bank.Note.new(150, :USD), 50)
-      %Bank.Note{amount: 100, currency: :USD}
-      iex> Bank.Note.subtract(Bank.Note.new(150, :USD), 1.25)
-      %Bank.Note{amount: 25, currency: :USD}
+      iex> SoftBank.Note.subtract(SoftBank.Note.new(150, :USD), SoftBank.Note.new(50, :USD))
+      %SoftBank.Note{amount: 100, currency: :USD}
+      iex> SoftBank.Note.subtract(SoftBank.Note.new(150, :USD), 50)
+      %SoftBank.Note{amount: 100, currency: :USD}
+      iex> SoftBank.Note.subtract(SoftBank.Note.new(150, :USD), 1.25)
+      %SoftBank.Note{amount: 25, currency: :USD}
   """
-  def subtract(%Bank.Note{amount: a, currency: cur}, %Bank.Note{amount: b, currency: cur}),
-      do: Bank.Note.new(a - b, cur)
-  def subtract(%Bank.Note{amount: a, currency: cur}, subtractend) when is_integer(subtractend),
-      do: Bank.Note.new(a - subtractend, cur)
-  def subtract(%Bank.Note{} = m, subtractend) when is_float(subtractend),
+  def subtract(%SoftBank.Note{amount: a, currency: cur}, %SoftBank.Note{amount: b, currency: cur}),
+      do: SoftBank.Note.new(a - b, cur)
+  def subtract(%SoftBank.Note{amount: a, currency: cur}, subtractend) when is_integer(subtractend),
+      do: SoftBank.Note.new(a - subtractend, cur)
+  def subtract(%SoftBank.Note{} = m, subtractend) when is_float(subtractend),
       do: subtract(m, round(subtractend * 100))
   def subtract(a, b), do: fail_currencies_must_be_equal(a, b)
 
   @spec multiply(t, integer | float) :: t
   @doc ~S"""
-  Multiplies a `Bank.Note` by an amount
+  Multiplies a `SoftBank.Note` by an amount
 
   ## Example:
-      iex> Bank.Note.multiply(Bank.Note.new(100, :USD), 10)
-      %Bank.Note{amount: 1000, currency: :USD}
-      iex> Bank.Note.multiply(Bank.Note.new(100, :USD), 1.5)
-      %Bank.Note{amount: 150, currency: :USD}
+      iex> SoftBank.Note.multiply(SoftBank.Note.new(100, :USD), 10)
+      %SoftBank.Note{amount: 1000, currency: :USD}
+      iex> SoftBank.Note.multiply(SoftBank.Note.new(100, :USD), 1.5)
+      %SoftBank.Note{amount: 150, currency: :USD}
   """
-  def multiply(%Bank.Note{amount: amount, currency: cur}, multiplier) when is_integer(multiplier),
-      do: Bank.Note.new(amount * multiplier, cur)
-  def multiply(%Bank.Note{amount: amount, currency: cur}, multiplier) when is_float(multiplier),
-      do: Bank.Note.new(round(amount * multiplier), cur)
+  def multiply(%SoftBank.Note{amount: amount, currency: cur}, multiplier) when is_integer(multiplier),
+      do: SoftBank.Note.new(amount * multiplier, cur)
+  def multiply(%SoftBank.Note{amount: amount, currency: cur}, multiplier) when is_float(multiplier),
+      do: SoftBank.Note.new(round(amount * multiplier), cur)
 
   @spec divide(t, integer) :: [t]
   @doc ~S"""
-  Divides up `Bank.Note` by an amount
+  Divides up `SoftBank.Note` by an amount
 
   ## Example:
-      iex> Bank.Note.divide(Bank.Note.new(100, :USD), 2)
-      [%Bank.Note{amount: 50, currency: :USD}, %Bank.Note{amount: 50, currency: :USD}]
-      iex> Bank.Note.divide(Bank.Note.new(101, :USD), 2)
-      [%Bank.Note{amount: 51, currency: :USD}, %Bank.Note{amount: 50, currency: :USD}]
+      iex> SoftBank.Note.divide(SoftBank.Note.new(100, :USD), 2)
+      [%SoftBank.Note{amount: 50, currency: :USD}, %SoftBank.Note{amount: 50, currency: :USD}]
+      iex> SoftBank.Note.divide(SoftBank.Note.new(101, :USD), 2)
+      [%SoftBank.Note{amount: 51, currency: :USD}, %SoftBank.Note{amount: 50, currency: :USD}]
   """
-  def divide(%Bank.Note{amount: amount, currency: cur}, denominator) when is_integer(denominator) do
+  def divide(%SoftBank.Note{amount: amount, currency: cur}, denominator) when is_integer(denominator) do
     value = div(amount, denominator)
     rem   = rem(amount, denominator)
     do_divide(cur, value, rem, denominator, [])
@@ -391,7 +391,7 @@ defmodule Bank.Note do
 
   @spec to_string(t, Keyword.t) :: String.t
   @doc ~S"""
-  Converts a `Bank.Note` struct to a string representation
+  Converts a `SoftBank.Note` struct to a string representation
 
   The following options are available:
 
@@ -406,27 +406,27 @@ defmodule Bank.Note do
 
   ## Example:
 
-      iex> Bank.Note.to_string(Bank.Note.new(123456, :GBP))
+      iex> SoftBank.Note.to_string(SoftBank.Note.new(123456, :GBP))
       "£1,234.56"
-      iex> Bank.Note.to_string(Bank.Note.new(123456, :EUR), separator: ".", delimeter: ",")
+      iex> SoftBank.Note.to_string(SoftBank.Note.new(123456, :EUR), separator: ".", delimeter: ",")
       "€1.234,56"
-      iex> Bank.Note.to_string(Bank.Note.new(123456, :EUR), symbol: false)
+      iex> SoftBank.Note.to_string(SoftBank.Note.new(123456, :EUR), symbol: false)
       "1,234.56"
-      iex> Bank.Note.to_string(Bank.Note.new(123456, :EUR), symbol: false, separator: "")
+      iex> SoftBank.Note.to_string(SoftBank.Note.new(123456, :EUR), symbol: false, separator: "")
       "1234.56"
-      iex> Bank.Note.to_string(Bank.Note.new(123456, :EUR), fractional_unit: false)
+      iex> SoftBank.Note.to_string(SoftBank.Note.new(123456, :EUR), fractional_unit: false)
       "€1,234"
 
   It can also be interpolated (It implements the String.Chars protocol)
   To control the formatting, you can use the above options in your config,
-  more information is in the introduction to `Bank.Note`
+  more information is in the introduction to `SoftBank.Note`
 
   ## Example:
 
-      iex> "Total: #{Bank.Note.new(100_00, :USD)}"
+      iex> "Total: #{SoftBank.Note.new(100_00, :USD)}"
       "Total: $100.00"
   """
-  def to_string(%Bank.Note{}=note, opts \\ []) do
+  def to_string(%SoftBank.Note{}=note, opts \\ []) do
     {separator, delimeter, symbol, symbol_on_right, symbol_space, fractional_unit} = get_display_options(note, opts)
 
     number = format_number(note, separator, delimeter, fractional_unit)
@@ -441,7 +441,7 @@ defmodule Bank.Note do
     parts |> Enum.join |> String.lstrip
   end
 
-  defp format_number(%Bank.Note{amount: amount}, separator, delimeter, fractional_unit) do
+  defp format_number(%SoftBank.Note{amount: amount}, separator, delimeter, fractional_unit) do
     super_unit = div(Kernel.abs(amount), 100) |> Integer.to_string |> reverse_group(3) |> Enum.join(separator)
     sub_unit = rem(Kernel.abs(amount), 100) |> Integer.to_string |> String.rjust(2, ?0)
     if fractional_unit do
@@ -491,8 +491,8 @@ defmodule Bank.Note do
   end
 
   defimpl String.Chars do
-    def to_string(%Bank.Note{} = m) do
-      Bank.Note.to_string(m)
+    def to_string(%SoftBank.Note{} = m) do
+      SoftBank.Note.to_string(m)
     end
   end
 end
