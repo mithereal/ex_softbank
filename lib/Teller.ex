@@ -13,6 +13,7 @@ defmodule SoftBank.Teller do
   alias SoftBank.Amount
   alias SoftBank.Entry
   alias SoftBank.Note
+  alias SoftBank.Repo
 
 
   defstruct ban: nil,
@@ -26,6 +27,10 @@ defmodule SoftBank.Teller do
 
     GenServer.start_link(__MODULE__, [state])
   end
+
+   def init(args) do
+      {:ok, args}
+    end
 
 
   def handle_cast({:deposit},  state) do

@@ -29,7 +29,7 @@ use Mix.Config
 #
 #     import_config "#{Mix.env()}.exs"
 
-config :bank,
+config :soft_bank,
        soft_bank: [SoftBank.Repo]
        
        
