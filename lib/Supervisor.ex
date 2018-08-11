@@ -37,7 +37,32 @@ defmodule SoftBank.Tellers.Supervisor do
     supervise(children, strategy: :one_for_one)
   end
 
-  def call(args) do
-    #:poolboy.transaction(@pool_name, fn(worker) -> GenServer.call(worker, %{command: :query, params: args}) end, Config.get(:timeout, 5000))
+
+  def transfer(dest_ban) do
+    :poolboy.transaction(@pool_name, fn(worker) -> GenServer.cast(worker, {:transfer, dest_ban}) end, Config.get(:timeout, 5000))
+  end
+
+  def withdrawl(amount) do
+    :poolboy.transaction(@pool_name, fn(worker) -> GenServer.call(worker, {:withdrawl, amount}) end, Config.get(:timeout, 5000))
+  end
+
+  def deposit(amount) do
+    :poolboy.transaction(@pool_name, fn(worker) -> GenServer.call(worker, {:deposit, amount}) end, Config.get(:timeout, 5000))
+  end
+
+  def convert(amount, dest_currency) do
+    :poolboy.transaction(@pool_name, fn(worker) -> GenServer.call(worker, {:convert, amount, dest_currency}) end, Config.get(:timeout, 5000))
+  end
+
+  def balance(account_number) do
+    :poolboy.transaction(@pool_name, fn(worker) -> GenServer.call(worker, {:balance, account_number}) end, Config.get(:timeout, 5000))
+  end
+
+  def login(account_number) do
+    :poolboy.transaction(@pool_name, fn(worker) -> GenServer.call(worker, {:balance, account_number}) end, Config.get(:timeout, 5000))
+  end
+  
+  def show(account_number) do
+    :poolboy.transaction(@pool_name, fn(worker) -> GenServer.call(worker, :show_state) end, Config.get(:timeout, 5000))
   end
 end
