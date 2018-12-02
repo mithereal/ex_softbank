@@ -2,6 +2,10 @@
 
 **A Soft Bank To Handle your Financal Accounts**
 
+[![Build Status](https://travis-ci.org/mithereal/elixir-softbank.svg?branch=master)](https://travis-ci.org/mithereal/elixir-softbank)
+
+[![Inline docs](http://inch-ci.org/github/mithereal/elixir-softbank.svg)](http://inch-ci.org/github/mithereal/elixir-softbank)
+
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed

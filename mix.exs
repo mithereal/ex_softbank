@@ -36,8 +36,9 @@ defmodule SoftBank.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:httpotion, "~> 3.1"},
       {:poison, "~> 3.0"},
-      {:ex_doc, ">= 0.0.0", only: :dev},
-      {:poolboy, "~> 1.5"}
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:poolboy, "~> 1.5"},
+      {:inch_ex, ">= 0.0.0", only: :docs}
     ]
   end
   
