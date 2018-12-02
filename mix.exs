@@ -11,7 +11,7 @@ defmodule SoftBank.MixProject do
       build_embedded: Mix.env == :prod,
       description: description(),
       package: package(),
-      name: "soft bank",
+      name: "soft_bank",
       source_url: "https://github.com/mithereal/elixir-softbank",
       docs: [source_ref: "v#{@version}", main: "Bank",
         canonical: "",
