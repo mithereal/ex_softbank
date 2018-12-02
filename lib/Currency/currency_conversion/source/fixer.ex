@@ -3,7 +3,7 @@ defmodule SoftBank.Currency.Conversion.Source.Fixer do
   Currency Conversion Source for http://fixer.io/
   """
 
-  alias Poison.Parser
+  alias Poison.Parser, as: Parser
 
   @behaviour SoftBank.Currency.Conversion.Source
   @default_protocol "http"
