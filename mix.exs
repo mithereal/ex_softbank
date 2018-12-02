@@ -15,7 +15,7 @@ defmodule SoftBank.MixProject do
       source_url: "https://github.com/mithereal/elixir-softbank",
       docs: [source_ref: "v#{@version}", main: "Bank",
         canonical: "",
-        source_url: "https://github.com/mithereal/softbank"]
+        source_url: "https://github.com/mithereal/elixir-softbank"]
     ]
   end
 
