@@ -18,6 +18,9 @@ erl_crash.dump
 
 # Also ignore archive artifacts (built via "mix archive.build").
 *.ez
+/.idea
+/.idea/*
+
 
 # Ignore package tarball (built via "mix hex.build").
 softbank-*.tar
