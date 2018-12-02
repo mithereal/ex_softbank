@@ -57,13 +57,18 @@ alias SoftBank.Repo
       source_account = account
       destination_account = transfer.recipient
 
-      amount =  SoftBank.Currency.Conversion.convert(transfer.amount, destination_account.currency)
+      amount = case source_account.currency == destination_account.currency do
+      true -> transfer.amount
+      _-> SoftBank.Currency.Conversion.convert(transfer.amount, destination_account.currency)
+      end
+
+
 
       transfer = %{transfer | amount: amount}
 
       transfer_request = create_request(source_account, destination_account, transfer.description, amount)
 
-      case account.balance() > 0 do
+      case account.balance() - amount > 0 do
         true -> entry_changeset = %Entry{
         description: "Transfer : " <> transfer_request.debit.amount <> " from " <> transfer_request.debit.account <> " to " <> transfer_request.debit.account,
         date: Ecto.Date.utc(),
