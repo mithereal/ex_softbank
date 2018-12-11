@@ -49,7 +49,7 @@ defmodule SoftBank.MixProject do
 
   defp package() do
     [
-      name: "Soft Bank",
+      name: "soft_bank",
       files: ["lib",  "mix.exs", "README*"],
       maintainers: ["Jason Clark"],
       licenses: ["MIT"],
