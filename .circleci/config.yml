@@ -66,3 +66,6 @@ jobs:
       - run: mix ecto.create
 
       - run: mix test
+
+            - store_test_results:  # upload junit test results for display in Test Summary
+                      path: _build/test/lib/soft_bank
