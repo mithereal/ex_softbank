@@ -8,7 +8,7 @@ Tellers
 
 Currency Conversion (with auto update on conversion rates)
 
-Transfers
+Transfers(send amount will be converted to match the recievers accounts currency type)
 
 
 
