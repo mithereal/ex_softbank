@@ -18,6 +18,13 @@ def deps do
   ]
 end
 ```
+## Creating the Database Tables
+
+The Database Tables can be created by running the mix alias.
+
+```elixir
+mix install
+```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
