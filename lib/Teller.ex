@@ -16,14 +16,14 @@ defmodule SoftBank.Teller do
   alias SoftBank.Repo
 
 
-  defstruct ban: nil,
+  defstruct account_number: nil,
             account: nil,
             balance: 0
 
 
   def start_link() do
 
-    state = %{ account: 0, balance: 0, ban: nil }
+    state = %{ account: 0, balance: 0, account_number: nil }
 
     GenServer.start_link(__MODULE__, [state])
   end
@@ -38,8 +38,8 @@ defmodule SoftBank.Teller do
     {:noreply, state}
   end
 
-  def handle_cast({:transfer, dest_ban},  state) do
-    dest = Account.fetch(%{ban: dest_ban, type: "asset"})
+  def handle_cast({:transfer, account_number},  state) do
+    dest = Account.fetch(%{account_number: account_number, type: "asset"})
     Transfer.send(state.account, dest)
     {:noreply, state}
   end
@@ -47,7 +47,7 @@ defmodule SoftBank.Teller do
 
   def handle_call({:withdrawl, amount}, _from,  state) do
     entry_changeset = %Entry{
-      description: "Withdraw : " <> amount.amount <> " from " <> state.account.ban,
+      description: "Withdraw : " <> amount.amount <> " from " <> state.account.account_number,
       date: Ecto.Date.utc(),
       amounts: [
         %Amount{ amount: Note.neg(amount), type: "debit", account_id: state.account.id }]
@@ -59,7 +59,7 @@ defmodule SoftBank.Teller do
 
   def handle_call({:deposit, amount}, _from,  state) do
     entry_changeset = %Entry{
-      description: "deposit : " <> amount.amount <> " into " <> state.account.ban,
+      description: "deposit : " <> amount.amount <> " into " <> state.account.account_number,
       date: Ecto.Date.utc(),
       amounts: [
         %Amount{ amount: amount, type: "debit", account_id: state.account.id }]
@@ -79,10 +79,10 @@ defmodule SoftBank.Teller do
     {:reply, state.balance, state}
   end
 
-  def handle_call({:login, ban}, _from,  state) do
-    account = Account.fetch(%{ban: ban, type: "asset"})
+  def handle_call({:login, account_number}, _from,  state) do
+    account = Account.fetch(%{account_number: account_number, type: "asset"})
     balance = account.balance()
-    updated_state = updated_state = %__MODULE__{ state |  ban: ban, account: account, balance: balance }
+    updated_state = updated_state = %__MODULE__{ state |  account_number: account_number, account: account, balance: balance }
     {:reply, :ok, updated_state}
   end
 

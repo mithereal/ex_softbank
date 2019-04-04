@@ -34,12 +34,12 @@ alias SoftBank.Repo
 
   defp put_destination_customer(%{valid?: false} = changeset, _), do: changeset
   defp put_destination_customer(changeset, sender) do
-    account_number = get_change(changeset, :ban)
+    account_number = get_change(changeset, :account_number)
 
-    if account_number == sender.ban do
+    if account_number == sender.account_number do
       add_error(changeset, :recipient, "cannot transfer to the same account")
     else
-      case Repo.one(from a in Account, where: a.ban == ^account_number) do
+      case Repo.one(from a in Account, where: a.account_number == ^account_number) do
         %Account{} = account ->
           put_embed(changeset, :recipient, account)
         nil ->
@@ -91,8 +91,8 @@ alias SoftBank.Repo
 
   defp create_request(source, destination, description, amount) do
     %{
-      sender: %{account: source.ban, description: source.description, amount: source.amount},
-      reciever: %{account: destination.ban, description: destination.description, amount: destination.amount}
+      sender: %{account: source.account_number, description: source.description, amount: source.amount},
+      reciever: %{account: destination.account_number, description: destination.description, amount: destination.amount}
     }
 
   end

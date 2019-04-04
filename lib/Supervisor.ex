@@ -38,8 +38,8 @@ defmodule SoftBank.Tellers.Supervisor do
   end
 
 
-  def transfer(dest_ban) do
-    :poolboy.transaction(@pool_name, fn(worker) -> GenServer.cast(worker, {:transfer, dest_ban}) end, Config.get(:timeout, 5000))
+  def transfer(destination_account_number) do
+    :poolboy.transaction(@pool_name, fn(worker) -> GenServer.cast(worker, {:transfer, destination_account_number}) end, Config.get(:timeout, 5000))
   end
 
   def withdrawl(amount) do
