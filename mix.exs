@@ -1,6 +1,6 @@
 defmodule SoftBank.MixProject do
   use Mix.Project
-  @version "0.1.0"
+  @version "0.1.1"
   def project do
     [
       app: :soft_bank,
@@ -12,6 +12,7 @@ defmodule SoftBank.MixProject do
       description: description(),
       package: package(),
       name: "soft_bank",
+      aliases: aliases(),
       source_url: "https://github.com/mithereal/elixir-softbank",
       docs: [source_ref: "v#{@version}", main: "Bank",
         canonical: "",
@@ -38,6 +39,7 @@ defmodule SoftBank.MixProject do
       {:poison, "~> 3.0"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:poolboy, "~> 1.5"},
+      {:nanoid, "~> 2.0.1"},
       {:inch_ex, ">= 0.0.0", only: :docs}
     ]
   end
@@ -54,6 +56,14 @@ defmodule SoftBank.MixProject do
       maintainers: ["Jason Clark"],
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/mithereal/elixir-softbank"}
+    ]
+  end
+
+  defp aliases do
+    [
+      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/migrations/tables.exs"],
+      "ecto.reset": ["ecto.drop", "ecto.setup"],
+      "install": ["ecto.setup"]
     ]
   end
 end

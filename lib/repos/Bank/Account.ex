@@ -13,7 +13,9 @@ alias SoftBank.Entry
   @moduledoc false
 
   schema "softbank_accounts" do
-    field :ban, :string
+    field :name, :string
+    field :account_number, :string
+    field :hash, :string
     field :type, :string
     field :contra, :boolean
     field :currency, :string
@@ -24,8 +26,8 @@ alias SoftBank.Entry
     timestamps
   end
 
-  @params ~w(ban type contra currency)a
-  @required_fields ~w(ban)a
+  @params ~w(account_number type contra currency name hash)a
+  @required_fields ~w(account_number)a
 
 
   @credit_types ["asset"]
@@ -43,25 +45,46 @@ alias SoftBank.Entry
 
   end
 
-  def new() do
+  def new(currency \\ "USD", name \\ nil) do
     hash = hash_id()
-    asset_struct = %{ name: "Assets", type: "asset" }
+
+    name = case name do
+      nil -> ""
+      _ -> name <> " "
+      end
+
+    asset_struct = %{ name: name <> "Assets", type: "asset" }
+
+    account_number = bank_account_number()
+
     { _, debit_account } = %Account{}
                            |> Account.changeset(asset_struct)
-                           |> put_change(:ban, hash)
+                           |> put_change(:account_number, account_number)
+                           |> put_change(:hash, hash)
+                           |> put_change(:currency, currency)
                            |> Repo.insert()
-    liablilty_struct = %{ name: "Liabilities", type: "liabilities" }
+
+    liablilty_struct = %{ name: name <> "Liabilities", type: "liability" }
+
+    account_number = bank_account_number()
+
     { _, credit_account } = %Account{}
                             |> Account.changeset(liablilty_struct)
-                            |> put_change(:ban, hash)
+                            |> put_change(:account_number, account_number)
+                            |> put_change(:hash, hash)
+                            |> put_change(:currency, currency)
                             |> Repo.insert()
 
 
-    equity_struct = %{ name: "Equity", type: "liabilities" }
+    equity_struct = %{ name: name <> "Equity", type: "equity" }
+
+    account_number = bank_account_number()
 
     { _, equity_account } = %Account{}
                             |> Account.changeset(equity_struct)
-                            |> put_change(:ban, hash)
+                            |> put_change(:account_number, account_number)
+                            |> put_change(:hash, hash)
+                            |> put_change(:currency, currency)
                             |> Repo.insert()
 
      %{ hash: hash, debit_account: debit_account, credit_account: credit_account, equity_account: equity_account }
@@ -128,23 +151,27 @@ alias SoftBank.Entry
       end)
     end
 
-defp hash_id(number \\ 20) do
-      # Base.encode64(crypto:strong_rand_bytes(number))
-end
+    defp hash_id(number \\ 20) do
+      Base.encode64(:crypto.strong_rand_bytes(number))
+    end
 
-def fetch(%{ban: ban, type: type}) do
+    defp bank_account_number(number \\ 12) do
+      Nanoid.generate(number, "0123456789")
+    end
+
+def fetch(%{account_number: account_number, type: type}) do
     query =
       Account
-      |> where([a], a.type == ^type and a.ban == ^ban)
+      |> where([a], a.type == ^type and a.account_number == ^account_number)
       |> Repo.all
 
  end
 
- def fetch(%{ban: ban}) do
+ def fetch(%{account_number: account_number}) do
     query =
       Account
-      |> where([a],  a.ban == ^ban)
-      |> select([a], %{ban: a.ban, type: a.type, contra: a.contra, currency: a.currency})
+      |> where([a],  a.account_number == ^account_number)
+      |> select([a], %{account_number: a.account_number, type: a.type, contra: a.contra, currency: a.currency})
       |> Repo.all
 
  end
