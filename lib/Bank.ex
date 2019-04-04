@@ -1,7 +1,5 @@
 defmodule Bank do
 
-  @moduledoc """
-  A virtual softBank.
-  """
+  @moduledoc false
 
 end
