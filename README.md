@@ -24,7 +24,7 @@ by adding `soft_bank` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:soft_bank, "~> 0.1.1"}
+    {:soft_bank, "~> 0.1.2"}
   ]
 end
 ```
