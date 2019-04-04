@@ -22,6 +22,7 @@ alias SoftBank.Entry
     field :balance, :string, virtual: true
 
     has_many :amounts, Amount, on_delete: :delete_all
+    has_many :entry, through: [:amounts, :entry], on_delete: :delete_all
 
     timestamps
   end
