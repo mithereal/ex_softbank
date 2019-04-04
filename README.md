@@ -4,11 +4,11 @@
 
 ***This Module has the following banking functions available***
 
-Tellers
+Tellers( a pool of tellers so multiple processes can access. )
 
 Currency Conversion (with auto update on conversion rates)
 
-Transfers(send amount will be converted to match the recievers accounts currency type)
+Transfers(send amount will be converted to match the recievers account currency type)
 
 
 
