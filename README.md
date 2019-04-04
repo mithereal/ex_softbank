@@ -2,6 +2,16 @@
 
 **A Soft Bank To Handle your Financal Accounts**
 
+***This Module has the following banking functions available***
+
+Tellers
+
+Currency Conversion (with auto update on conversion rates)
+
+Transfers
+
+
+
 [![Build Status](https://travis-ci.org/mithereal/elixir-softbank.svg?branch=master)](https://travis-ci.org/mithereal/elixir-softbank)
 
 [![Inline docs](http://inch-ci.org/github/mithereal/elixir-softbank.svg)](http://inch-ci.org/github/mithereal/elixir-softbank)
