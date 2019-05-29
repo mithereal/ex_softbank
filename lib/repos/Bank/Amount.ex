@@ -8,12 +8,13 @@ defmodule SoftBank.Amount do
 
   import Ecto.Changeset
   import Ecto.Query, only: [from: 1, from: 2]
+  
   alias SoftBank.Entry
   alias SoftBank.Account
 
 
   schema "softbank_amounts" do
-    field :amount, SoftBank.Note.Ecto.Type
+    field :amount, Money.Ecto.Composite.Type
     field :type, :string
     field :currency, :string
 
@@ -99,5 +100,6 @@ defmodule SoftBank.Amount do
 
 #  def note(int, currency) when is_integer(int),
 #      do: %SoftBank.Note{amount: int, currency: Currency.to_atom(currency)}
+# end
 
 end

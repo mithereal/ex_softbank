@@ -1,16 +1,10 @@
 defmodule SoftBank.Note.Currency do
+  import Money.Currency
   @moduledoc """
   Provides currency support to `SoftBank.Note`
 
   Some useful helper methods include:
-  - `get/1`
-  - `get!/1`
-  - `exists?/1`
-  - `to_atom/1`
-  - `name/1`
-  - `name!/1`
-  - `symbol/1`
-  - `symbol!/1`
+
 
   A helper function exists for each currency using the lowercase three-character currency code
 

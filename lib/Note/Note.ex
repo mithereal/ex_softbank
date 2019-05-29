@@ -1,5 +1,6 @@
 defmodule SoftBank.Note do
   import Kernel, except: [abs: 1]
+  import Money
 
   @moduledoc """
   Defines a `SoftBank.Note` struct along with convenience methods for working with currencies.
@@ -30,11 +31,11 @@ defmodule SoftBank.Note do
   """
 
   @type t :: %__MODULE__{
-    amount: integer,
+    amount: Money.Ecto.Composite.Type,
     currency: atom
   }
 
-  defstruct amount: 0, currency: :USD
+  defstruct amount: Money.new(:USD, 0), currency: Application.get_env(:note, :default_currency)
 
   alias SoftBank.Note.Currency
 

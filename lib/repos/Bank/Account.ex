@@ -5,6 +5,7 @@ defmodule SoftBank.Account do
 
   import Ecto.Changeset
   import Ecto.Query
+  
 alias SoftBank.Repo
 alias SoftBank.Amount
 alias SoftBank.Account
@@ -19,7 +20,7 @@ alias SoftBank.Entry
     field :type, :string
     field :contra, :boolean
     field :currency, :string
-    field :balance, :string, virtual: true
+    field :balance, Money.Ecto.Composite.Type, virtual: true
 
     has_many :amounts, Amount, on_delete: :delete_all
     has_many :entry, through: [:amounts, :entry], on_delete: :delete_all
