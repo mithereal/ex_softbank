@@ -39,7 +39,7 @@ defmodule SoftBank.MixProject do
       {:tesla, "~> 1.4.0"},
       {:hackney, "~> 1.17.0"},
       {:jason, "~> 1.2"},
-      {:ex_money, "~> 3.0"},
+      {:ex_money, "5.5.2"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:poolboy, "~> 1.5"},
       {:nanoid, "~> 2.0.1"},
