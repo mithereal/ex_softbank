@@ -410,7 +410,7 @@ defmodule SoftBank.Note do
   """
   def divide(%SoftBank.Note{amount: amount, currency: cur}, denominator)
       when is_integer(denominator) do
-    value = div(amount, denominator)
+    value = Money.div(amount, denominator)
     rem = rem(amount, denominator)
     do_divide(cur, value, rem, denominator, [])
   end
@@ -492,7 +492,7 @@ defmodule SoftBank.Note do
 
   defp format_number(%SoftBank.Note{amount: amount}, separator, delimeter, fractional_unit) do
     super_unit =
-      div(Kernel.abs(amount), 100)
+      Money.div(Kernel.abs(amount), 100)
       |> Integer.to_string()
       |> reverse_group(3)
       |> Enum.join(separator)
