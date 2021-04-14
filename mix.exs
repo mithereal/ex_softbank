@@ -8,7 +8,7 @@ defmodule SoftBank.MixProject do
     [
       app: :soft_bank,
       version: @version,
-      elixir: "~> 1.7",
+      elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       build_embedded: Mix.env() == :prod,
@@ -24,7 +24,7 @@ defmodule SoftBank.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger, :httpotion],
+      extra_applications: [:logger],
       mod: {SoftBank.Application, []}
     ]
   end
@@ -41,7 +41,7 @@ defmodule SoftBank.MixProject do
       {:hackney, "~> 1.17.0"},
       {:jason, "~> 1.2"},
       {:money, "~> 1.8"},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.24", only: :dev, runtime: false},
       {:poolboy, "~> 1.5"},
       {:nanoid, "~> 2.0.1"},
       {:inch_ex, ">= 0.0.0", only: :docs}

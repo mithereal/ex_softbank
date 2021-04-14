@@ -1,6 +1,5 @@
 defmodule SoftBank.Note do
   import Kernel, except: [abs: 1]
-  #import Money, except: [round: 1]
 
   @moduledoc """
   Defines a `SoftBank.Note` struct along with convenience methods for working with currencies.
@@ -133,7 +132,7 @@ defmodule SoftBank.Note do
   end
 
   def parse(float, currency, _opts) when is_float(float) do
-    {:ok, new(round(float * 100), currency)}
+    {:ok, Money.new(round(float * 100), currency)}
   end
 
   defp prepare_parse_string(characters, delimeter, acc \\ [])
