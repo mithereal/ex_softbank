@@ -133,7 +133,7 @@ defmodule SoftBank.Note do
   end
 
   def parse(float, currency, _opts) when is_float(float) do
-    {:ok, new(round(float * 100), currency)}
+    {:ok, new(Money.round(float * 100), currency)}
   end
 
   defp prepare_parse_string(characters, delimeter, acc \\ [])
@@ -351,7 +351,7 @@ defmodule SoftBank.Note do
     do: SoftBank.Note.new(amount + addend, cur)
 
   def add(%SoftBank.Note{} = m, addend) when is_float(addend),
-    do: add(m, round(addend * 100))
+    do: add(m, Money.round(addend * 100))
 
   def add(a, b), do: fail_currencies_must_be_equal(a, b)
 
@@ -376,7 +376,7 @@ defmodule SoftBank.Note do
       do: SoftBank.Note.new(a - subtractend, cur)
 
   def subtract(%SoftBank.Note{} = m, subtractend) when is_float(subtractend),
-    do: subtract(m, round(subtractend * 100))
+    do: subtract(m, Money.round(subtractend * 100))
 
   def subtract(a, b), do: fail_currencies_must_be_equal(a, b)
 
@@ -396,7 +396,7 @@ defmodule SoftBank.Note do
 
   def multiply(%SoftBank.Note{amount: amount, currency: cur}, multiplier)
       when is_float(multiplier),
-      do: SoftBank.Note.new(round(amount * multiplier), cur)
+      do: SoftBank.Note.new(Money.round(amount * multiplier), cur)
 
   @spec divide(t, integer) :: [t]
   @doc ~S"""
