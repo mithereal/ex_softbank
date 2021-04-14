@@ -1,17 +1,17 @@
 defmodule SoftBank.MixProject do
   use Mix.Project
-  
-  @version "0.1.2"
+
+  @version "0.1.3"
   @source_url "https://github.com/mithereal/elixir-softbank"
 
   def project do
     [
       app: :soft_bank,
-      version: @version ,
+      version: @version,
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      build_embedded: Mix.env == :prod,
+      build_embedded: Mix.env() == :prod,
       description: description(),
       package: package(),
       name: "soft_bank",
@@ -34,10 +34,11 @@ defmodule SoftBank.MixProject do
     [
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
-      {:ecto, "~> 2.1"},
+      {:ecto, "~> 3.0"},
       {:postgrex, ">= 0.0.0"},
-      {:httpotion, "~> 3.1"},
-      {:poison, "~> 3.0"},
+      {:tesla, "~> 1.4.0"},
+      {:hackney, "~> 1.17.0"},
+      {:jason, "~> 1.2"},
       {:ex_money, "~> 3.0"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:poolboy, "~> 1.5"},
@@ -45,8 +46,7 @@ defmodule SoftBank.MixProject do
       {:inch_ex, ">= 0.0.0", only: :docs}
     ]
   end
-  
-   
+
   defp description() do
     "A Soft Bank To Handle your Financal Accounts."
   end
@@ -54,7 +54,7 @@ defmodule SoftBank.MixProject do
   defp package() do
     [
       name: "soft_bank",
-      files: ["lib",  "mix.exs", "README.md"],
+      files: ["lib", "mix.exs", "README.md"],
       maintainers: ["Jason Clark"],
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/mithereal/elixir-softbank"}
@@ -63,11 +63,11 @@ defmodule SoftBank.MixProject do
 
   defp aliases do
     [
-      c: "compile", 
+      c: "compile",
       test: ["test"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/migrations/tables.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      "install": ["ecto.setup"]
+      install: ["ecto.setup"]
     ]
   end
 
@@ -80,5 +80,4 @@ defmodule SoftBank.MixProject do
       extras: ["README.md"]
     ]
   end
-
 end

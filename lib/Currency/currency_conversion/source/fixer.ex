@@ -3,11 +3,17 @@ defmodule SoftBank.Currency.Conversion.Source.Fixer do
   Currency Conversion Source for http://fixer.io/
   """
 
-  alias Poison.Parser, as: Parser
+  use Tesla
+  adapter(Tesla.Adapter.Hackney, recv_timeout: 30_000)
+  plug(Tesla.Middleware.BaseUrl, base_url())
+  plug(Tesla.Middleware.Query, access_key: get_access_key())
+
+  alias Jason.Parser, as: Parser
 
   @behaviour SoftBank.Currency.Conversion.Source
   @default_protocol "http"
   @base_endpoint "data.fixer.io/api/latest"
+
   @doc """
   Load current currency rates from fixer.io.
 
@@ -25,11 +31,10 @@ defmodule SoftBank.Currency.Conversion.Source.Fixer do
 
   """
   def load do
-    case HTTPotion.get(base_url(), query: %{access_key: get_access_key()}) do
-      %HTTPotion.Response{body: body, status_code: 200} -> parse(body)
+    case get("/") do
+      {:ok, response} -> parse(response.body)
       _ -> {:error, "Fixer.io API unavailable."}
     end
-
   end
 
   defp parse(body) do
@@ -41,18 +46,24 @@ defmodule SoftBank.Currency.Conversion.Source.Fixer do
 
   defp interpret(%{"base" => base, "rates" => rates = %{}}) do
     case interpret_rates(Map.to_list(rates)) do
-      {:ok, interpreted_rates} -> {:ok, %SoftBank.Currency.Conversion.Rates{
-        base: String.to_atom(base),
-        rates: interpreted_rates
-      }}
-      error -> error
+      {:ok, interpreted_rates} ->
+        {:ok,
+         %SoftBank.Currency.Conversion.Rates{
+           base: String.to_atom(base),
+           rates: interpreted_rates
+         }}
+
+      error ->
+        error
     end
   end
+
   defp interpret(_data), do: {:error, "Fixer API Schema has changed."}
 
   defp interpret_rates(rates, accumulator \\ %{})
 
-  defp interpret_rates([{currency, rate} | tail], accumulator) when is_binary(currency) and (is_float(rate) or is_integer(rate)) do
+  defp interpret_rates([{currency, rate} | tail], accumulator)
+       when is_binary(currency) and (is_float(rate) or is_integer(rate)) do
     interpret_rates(tail, Map.put(accumulator, String.to_atom(currency), rate))
   end
 

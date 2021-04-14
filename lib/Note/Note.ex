@@ -31,9 +31,9 @@ defmodule SoftBank.Note do
   """
 
   @type t :: %__MODULE__{
-    amount: Money.Ecto.Composite.Type,
-    currency: atom
-  }
+          amount: Money.Ecto.Composite.Type,
+          currency: atom
+        }
 
   defstruct amount: Money.new(:USD, 0), currency: Application.get_env(:note, :default_currency)
 
@@ -56,14 +56,16 @@ defmodule SoftBank.Note do
   """
   def new(amount) do
     currency = Application.get_env(:note, :default_currency)
+
     if currency do
       new(amount, currency)
     else
-      raise ArgumentError, "to use SoftBank.Note.new/1 you must set a default currency in your application config."
+      raise ArgumentError,
+            "to use SoftBank.Note.new/1 you must set a default currency in your application config."
     end
   end
 
-  @spec new(integer, atom | String.t) :: t
+  @spec new(integer, atom | String.t()) :: t
   @doc """
   Create a new `SoftBank.Note` struct from currency sub-units (cents)
 
@@ -73,9 +75,9 @@ defmodule SoftBank.Note do
       %SoftBank.Note{amount: 1_000_00, currency: :USD}
   """
   def new(int, currency) when is_integer(int),
-      do: %SoftBank.Note{amount: int, currency: Currency.to_atom(currency)}
+    do: %SoftBank.Note{amount: int, currency: Currency.to_atom(currency)}
 
-  @spec parse(String.t | float, atom | String.t, Keyword.t) :: {:ok, t}
+  @spec parse(String.t() | float, atom | String.t(), Keyword.t()) :: {:ok, t}
   @doc ~S"""
   Parse a value into a `SoftBank.Note` type.
 
@@ -100,20 +102,27 @@ defmodule SoftBank.Note do
       {:ok, %SoftBank.Note{amount: -123456, currency: :USD}}
   """
   def parse(value, currency \\ nil, opts \\ [])
+
   def parse(value, nil, opts) do
     currency = Application.get_env(:note, :default_currency)
+
     if currency do
       parse(value, currency, opts)
     else
-      raise ArgumentError, "to use SoftBank.Note.new/1 you must set a default currency in your application config."
+      raise ArgumentError,
+            "to use SoftBank.Note.new/1 you must set a default currency in your application config."
     end
   end
+
   def parse(str, currency, opts) when is_binary(str) do
     try do
       {_separator, delimeter} = get_parse_options(opts)
-      value = str
-              |> prepare_parse_string(delimeter)
-              |> add_missing_leading_digit
+
+      value =
+        str
+        |> prepare_parse_string(delimeter)
+        |> add_missing_leading_digit
+
       case Float.parse(value) do
         {float, _} -> parse(float, currency, [])
         :error -> :error
@@ -122,50 +131,67 @@ defmodule SoftBank.Note do
       _ -> :error
     end
   end
+
   def parse(float, currency, _opts) when is_float(float) do
     {:ok, new(round(float * 100), currency)}
   end
 
   defp prepare_parse_string(characters, delimeter, acc \\ [])
+
   defp prepare_parse_string([], _delimeter, acc),
-       do: Enum.reverse(acc) |> Enum.join
+    do: Enum.reverse(acc) |> Enum.join()
+
   defp prepare_parse_string(["-" | tail], delimeter, acc),
-       do: prepare_parse_string(tail, delimeter, ["-" | acc])
+    do: prepare_parse_string(tail, delimeter, ["-" | acc])
+
   defp prepare_parse_string(["0" | tail], delimeter, acc),
-       do: prepare_parse_string(tail, delimeter, ["0" | acc])
+    do: prepare_parse_string(tail, delimeter, ["0" | acc])
+
   defp prepare_parse_string(["1" | tail], delimeter, acc),
-       do: prepare_parse_string(tail, delimeter, ["1" | acc])
+    do: prepare_parse_string(tail, delimeter, ["1" | acc])
+
   defp prepare_parse_string(["2" | tail], delimeter, acc),
-       do: prepare_parse_string(tail, delimeter, ["2" | acc])
+    do: prepare_parse_string(tail, delimeter, ["2" | acc])
+
   defp prepare_parse_string(["3" | tail], delimeter, acc),
-       do: prepare_parse_string(tail, delimeter, ["3" | acc])
+    do: prepare_parse_string(tail, delimeter, ["3" | acc])
+
   defp prepare_parse_string(["4" | tail], delimeter, acc),
-       do: prepare_parse_string(tail, delimeter, ["4" | acc])
+    do: prepare_parse_string(tail, delimeter, ["4" | acc])
+
   defp prepare_parse_string(["5" | tail], delimeter, acc),
-       do: prepare_parse_string(tail, delimeter, ["5" | acc])
+    do: prepare_parse_string(tail, delimeter, ["5" | acc])
+
   defp prepare_parse_string(["6" | tail], delimeter, acc),
-       do: prepare_parse_string(tail, delimeter, ["6" | acc])
+    do: prepare_parse_string(tail, delimeter, ["6" | acc])
+
   defp prepare_parse_string(["7" | tail], delimeter, acc),
-       do: prepare_parse_string(tail, delimeter, ["7" | acc])
+    do: prepare_parse_string(tail, delimeter, ["7" | acc])
+
   defp prepare_parse_string(["8" | tail], delimeter, acc),
-       do: prepare_parse_string(tail, delimeter, ["8" | acc])
+    do: prepare_parse_string(tail, delimeter, ["8" | acc])
+
   defp prepare_parse_string(["9" | tail], delimeter, acc),
-       do: prepare_parse_string(tail, delimeter, ["9" | acc])
+    do: prepare_parse_string(tail, delimeter, ["9" | acc])
+
   defp prepare_parse_string([delimeter | tail], delimeter, acc),
-       do: prepare_parse_string(tail, delimeter, ["." | acc])
+    do: prepare_parse_string(tail, delimeter, ["." | acc])
+
   defp prepare_parse_string([_head | tail], delimeter, acc),
-       do: prepare_parse_string(tail, delimeter, acc)
+    do: prepare_parse_string(tail, delimeter, acc)
 
   defp prepare_parse_string(string, delimeter, _acc),
-       do: prepare_parse_string(String.codepoints(string), delimeter)
+    do: prepare_parse_string(String.codepoints(string), delimeter)
 
-  defp add_missing_leading_digit(<< "-." >> <> tail),
-       do: "-0." <> tail
-  defp add_missing_leading_digit(<< "." >> <> tail),
-       do: "0." <> tail
+  defp add_missing_leading_digit(<<"-.">> <> tail),
+    do: "-0." <> tail
+
+  defp add_missing_leading_digit(<<".">> <> tail),
+    do: "0." <> tail
+
   defp add_missing_leading_digit(str), do: str
 
-  @spec parse(String.t | float, atom | String.t, Keyword.t) :: t
+  @spec parse(String.t() | float, atom | String.t(), Keyword.t()) :: t
   @doc ~S"""
   Parse a value into a `SoftBank.Note` type.
   Similar to `parse/3` but returns a `%SoftBank.Note{}` or raises an error if parsing fails.
@@ -200,11 +226,12 @@ defmodule SoftBank.Note do
   """
   def compare(%SoftBank.Note{currency: cur} = a, %SoftBank.Note{currency: cur} = b) do
     case a.amount - b.amount do
-      x when x >  0 -> 1
-      x when x <  0 -> -1
+      x when x > 0 -> 1
+      x when x < 0 -> -1
       x when x == 0 -> 0
     end
   end
+
   def compare(a, b), do: fail_currencies_must_be_equal(a, b)
 
   @spec zero?(t) :: boolean
@@ -267,7 +294,12 @@ defmodule SoftBank.Note do
       iex> SoftBank.Note.equals?(SoftBank.Note.new(101, :USD), SoftBank.Note.new(100, :USD))
       false
   """
-  def equals?(%SoftBank.Note{amount: amount, currency: cur}, %SoftBank.Note{amount: amount, currency: cur}), do: true
+  def equals?(%SoftBank.Note{amount: amount, currency: cur}, %SoftBank.Note{
+        amount: amount,
+        currency: cur
+      }),
+      do: true
+
   def equals?(%SoftBank.Note{currency: cur}, %SoftBank.Note{currency: cur}), do: false
   def equals?(a, b), do: fail_currencies_must_be_equal(a, b)
 
@@ -283,7 +315,7 @@ defmodule SoftBank.Note do
       %SoftBank.Note{amount: 100, currency: :USD}
   """
   def neg(%SoftBank.Note{amount: amount, currency: cur}),
-      do: %SoftBank.Note{amount: -amount, currency: cur}
+    do: %SoftBank.Note{amount: -amount, currency: cur}
 
   @spec abs(t) :: t
   @doc ~S"""
@@ -297,7 +329,7 @@ defmodule SoftBank.Note do
       %SoftBank.Note{amount: 100, currency: :USD}
   """
   def abs(%SoftBank.Note{amount: amount, currency: cur}),
-      do: %SoftBank.Note{amount: Kernel.abs(amount), currency: cur}
+    do: %SoftBank.Note{amount: Kernel.abs(amount), currency: cur}
 
   @spec add(t, t | integer | float) :: t
   @doc ~S"""
@@ -313,11 +345,14 @@ defmodule SoftBank.Note do
       %SoftBank.Note{amount: 655, currency: :USD}
   """
   def add(%SoftBank.Note{amount: a, currency: cur}, %SoftBank.Note{amount: b, currency: cur}),
-      do: SoftBank.Note.new(a + b, cur)
+    do: SoftBank.Note.new(a + b, cur)
+
   def add(%SoftBank.Note{amount: amount, currency: cur}, addend) when is_integer(addend),
-      do: SoftBank.Note.new(amount + addend, cur)
+    do: SoftBank.Note.new(amount + addend, cur)
+
   def add(%SoftBank.Note{} = m, addend) when is_float(addend),
-      do: add(m, round(addend * 100))
+    do: add(m, round(addend * 100))
+
   def add(a, b), do: fail_currencies_must_be_equal(a, b)
 
   @spec subtract(t, t | integer | float) :: t
@@ -334,11 +369,15 @@ defmodule SoftBank.Note do
       %SoftBank.Note{amount: 25, currency: :USD}
   """
   def subtract(%SoftBank.Note{amount: a, currency: cur}, %SoftBank.Note{amount: b, currency: cur}),
-      do: SoftBank.Note.new(a - b, cur)
-  def subtract(%SoftBank.Note{amount: a, currency: cur}, subtractend) when is_integer(subtractend),
+    do: SoftBank.Note.new(a - b, cur)
+
+  def subtract(%SoftBank.Note{amount: a, currency: cur}, subtractend)
+      when is_integer(subtractend),
       do: SoftBank.Note.new(a - subtractend, cur)
+
   def subtract(%SoftBank.Note{} = m, subtractend) when is_float(subtractend),
-      do: subtract(m, round(subtractend * 100))
+    do: subtract(m, round(subtractend * 100))
+
   def subtract(a, b), do: fail_currencies_must_be_equal(a, b)
 
   @spec multiply(t, integer | float) :: t
@@ -351,9 +390,12 @@ defmodule SoftBank.Note do
       iex> SoftBank.Note.multiply(SoftBank.Note.new(100, :USD), 1.5)
       %SoftBank.Note{amount: 150, currency: :USD}
   """
-  def multiply(%SoftBank.Note{amount: amount, currency: cur}, multiplier) when is_integer(multiplier),
+  def multiply(%SoftBank.Note{amount: amount, currency: cur}, multiplier)
+      when is_integer(multiplier),
       do: SoftBank.Note.new(amount * multiplier, cur)
-  def multiply(%SoftBank.Note{amount: amount, currency: cur}, multiplier) when is_float(multiplier),
+
+  def multiply(%SoftBank.Note{amount: amount, currency: cur}, multiplier)
+      when is_float(multiplier),
       do: SoftBank.Note.new(round(amount * multiplier), cur)
 
   @spec divide(t, integer) :: [t]
@@ -366,22 +408,25 @@ defmodule SoftBank.Note do
       iex> SoftBank.Note.divide(SoftBank.Note.new(101, :USD), 2)
       [%SoftBank.Note{amount: 51, currency: :USD}, %SoftBank.Note{amount: 50, currency: :USD}]
   """
-  def divide(%SoftBank.Note{amount: amount, currency: cur}, denominator) when is_integer(denominator) do
+  def divide(%SoftBank.Note{amount: amount, currency: cur}, denominator)
+      when is_integer(denominator) do
     value = div(amount, denominator)
-    rem   = rem(amount, denominator)
+    rem = rem(amount, denominator)
     do_divide(cur, value, rem, denominator, [])
   end
 
-  defp do_divide(_currency, _value, _rem, 0, acc), do: acc |> Enum.reverse
+  defp do_divide(_currency, _value, _rem, 0, acc), do: acc |> Enum.reverse()
+
   defp do_divide(currency, value, 0, count, acc) do
     count = decrement_abs(count)
-    acc   = [new(value, currency) | acc]
+    acc = [new(value, currency) | acc]
     do_divide(currency, value, 0, count, acc)
   end
+
   defp do_divide(currency, value, rem, count, acc) do
-    rem   = decrement_abs(rem)
+    rem = decrement_abs(rem)
     count = decrement_abs(count)
-    acc   = [new(increment_abs(value), currency) | acc]
+    acc = [new(increment_abs(value), currency) | acc]
     do_divide(currency, value, rem, count, acc)
   end
 
@@ -390,7 +435,7 @@ defmodule SoftBank.Note do
   defp decrement_abs(n) when n >= 0, do: n - 1
   defp decrement_abs(n) when n < 0, do: n + 1
 
-  @spec to_string(t, Keyword.t) :: String.t
+  @spec to_string(t, Keyword.t()) :: String.t()
   @doc ~S"""
   Converts a `SoftBank.Note` struct to a string representation
 
@@ -427,24 +472,33 @@ defmodule SoftBank.Note do
       iex> "Total: #{SoftBank.Note.new(100_00, :USD)}"
       "Total: $100.00"
   """
-  def to_string(%SoftBank.Note{}=note, opts \\ []) do
-    {separator, delimeter, symbol, symbol_on_right, symbol_space, fractional_unit} = get_display_options(note, opts)
+  def to_string(%SoftBank.Note{} = note, opts \\ []) do
+    {separator, delimeter, symbol, symbol_on_right, symbol_space, fractional_unit} =
+      get_display_options(note, opts)
 
     number = format_number(note, separator, delimeter, fractional_unit)
     sign = if negative?(note), do: "-"
     space = if symbol_space, do: " "
 
-    parts = if symbol_on_right do
-      [sign, number, space, symbol]
-    else
-      [symbol, space, sign, number]
-    end
-    parts |> Enum.join |> String.lstrip
+    parts =
+      if symbol_on_right do
+        [sign, number, space, symbol]
+      else
+        [symbol, space, sign, number]
+      end
+
+    parts |> Enum.join() |> String.lstrip()
   end
 
   defp format_number(%SoftBank.Note{amount: amount}, separator, delimeter, fractional_unit) do
-    super_unit = div(Kernel.abs(amount), 100) |> Integer.to_string |> reverse_group(3) |> Enum.join(separator)
-    sub_unit = rem(Kernel.abs(amount), 100) |> Integer.to_string |> String.rjust(2, ?0)
+    super_unit =
+      div(Kernel.abs(amount), 100)
+      |> Integer.to_string()
+      |> reverse_group(3)
+      |> Enum.join(separator)
+
+    sub_unit = rem(Kernel.abs(amount), 100) |> Integer.to_string() |> String.rjust(2, ?0)
+
     if fractional_unit do
       [super_unit, sub_unit] |> Enum.join(delimeter)
     else
@@ -483,9 +537,11 @@ defmodule SoftBank.Note do
   defp reverse_group(str, count) when is_binary(str) do
     reverse_group(str, Kernel.abs(count), [])
   end
+
   defp reverse_group("", _count, list) do
     list
   end
+
   defp reverse_group(str, count, list) do
     {first, last} = String.split_at(str, -count)
     reverse_group(first, count, [last | list])

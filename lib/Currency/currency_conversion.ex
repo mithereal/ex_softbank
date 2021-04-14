@@ -32,16 +32,25 @@ defmodule SoftBank.Currency.Conversion do
       %SoftBank.Note{amount: 7_20, currency: :CHF}
 
   """
-  @spec convert(SoftBank.Note.t, atom, Rates.t) :: SoftBank.Note.t
+  @spec convert(SoftBank.Note.t(), atom, Rates.t()) :: SoftBank.Note.t()
   def convert(amount, to_currency, rates \\ UpdateWorker.get_rates())
   def convert(%SoftBank.Note{amount: 0}, to_currency, _), do: SoftBank.Note.new(0, to_currency)
   def convert(amount = %SoftBank.Note{currency: currency}, currency, _), do: amount
-  def convert(%SoftBank.Note{amount: amount, currency: currency}, to_currency, %Rates{base: currency, rates: rates}) do
+
+  def convert(%SoftBank.Note{amount: amount, currency: currency}, to_currency, %Rates{
+        base: currency,
+        rates: rates
+      }) do
     SoftBank.Note.new(round(amount * Map.fetch!(rates, to_currency)), to_currency)
   end
-  def convert(%SoftBank.Note{amount: amount, currency: currency}, to_currency, %Rates{base: to_currency, rates: rates}) do
+
+  def convert(%SoftBank.Note{amount: amount, currency: currency}, to_currency, %Rates{
+        base: to_currency,
+        rates: rates
+      }) do
     SoftBank.Note.new(round(amount / Map.fetch!(rates, currency)), to_currency)
   end
+
   def convert(amount, to_currency, rates) do
     convert(convert(amount, rates.base, rates), to_currency, rates)
   end
@@ -56,7 +65,7 @@ defmodule SoftBank.Currency.Conversion do
       [:EUR, :CHF, :USD]
 
   """
-  @spec get_currencies(Rates.t) :: [atom]
+  @spec get_currencies(Rates.t()) :: [atom]
   def get_currencies(rates \\ UpdateWorker.get_rates())
   def get_currencies(%Rates{base: base, rates: rates}), do: [base | Map.keys(rates)]
 end

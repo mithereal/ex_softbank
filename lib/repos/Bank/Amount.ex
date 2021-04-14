@@ -8,18 +8,17 @@ defmodule SoftBank.Amount do
 
   import Ecto.Changeset
   import Ecto.Query, only: [from: 1, from: 2]
-  
+
   alias SoftBank.Entry
   alias SoftBank.Account
 
-
   schema "softbank_amounts" do
-    field :amount, Money.Ecto.Composite.Type
-    field :type, :string
-    field :currency, :string
+    field(:amount, Money.Ecto.Composite.Type)
+    field(:type, :string)
+    field(:currency, :string)
 
-    belongs_to :entry, Entry
-    belongs_to :account, Account
+    belongs_to(:entry, Entry)
+    belongs_to(:account, Account)
 
     timestamps
   end
@@ -44,62 +43,68 @@ defmodule SoftBank.Amount do
 
   @doc false
   def for_entry(query, entry) do
-    from c in query,
-    join: p in assoc(c, :entry),
-    where: p.id == ^entry.id
+    from(c in query,
+      join: p in assoc(c, :entry),
+      where: p.id == ^entry.id
+    )
   end
 
   @doc false
   def for_account(query, account) do
-    from c in query,
-    join: p in assoc(c, :account),
-    where: p.id == ^account.id
+    from(c in query,
+      join: p in assoc(c, :account),
+      where: p.id == ^account.id
+    )
   end
 
   @doc false
   def sum_type(query, type) do
-    from c in query,
-    where: c.type == ^type,
-    select: sum(c.amount)
+    from(c in query,
+      where: c.type == ^type,
+      select: sum(c.amount)
+    )
   end
 
   @doc false
   def dated(query, %{from_date: from_date, to_date: to_date}) do
-    from c in query,
-    join: p in assoc(c, :entry),
-    where: p.date >= ^from_date,
-    where: p.date <= ^to_date
+    from(c in query,
+      join: p in assoc(c, :entry),
+      where: p.date >= ^from_date,
+      where: p.date <= ^to_date
+    )
   end
 
   @doc false
   def dated(query, %{from_date: from_date}) do
-    from c in query,
-    join: p in assoc(c, :entry),
-    where: p.date >= ^from_date
+    from(c in query,
+      join: p in assoc(c, :entry),
+      where: p.date >= ^from_date
+    )
   end
 
   @doc false
   def dated(query, %{to_date: to_date}) do
-    from c in query,
-    join: p in assoc(c, :entry),
-    where: p.date <= ^to_date
+    from(c in query,
+      join: p in assoc(c, :entry),
+      where: p.date <= ^to_date
+    )
   end
 
   def note(amount) do
     currency = Application.get_env(:soft_bank, :default_currency)
+
     if currency do
       new(amount, currency)
     else
-      raise ArgumentError, "to use Amount.new/1 you must set a default currency in your application config."
+      raise ArgumentError,
+            "to use Amount.new/1 you must set a default currency in your application config."
     end
   end
 
   def new(int, currency) do
-
   end
 
-#  def note(int, currency) when is_integer(int),
-#      do: %SoftBank.Note{amount: int, currency: Currency.to_atom(currency)}
-# end
-
+  #  def note(int, currency) when is_integer(int),
+  #      do: %SoftBank.Note{amount: int, currency: Currency.to_atom(currency)}
+  # end
 end

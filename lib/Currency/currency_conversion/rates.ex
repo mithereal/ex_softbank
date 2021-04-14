@@ -4,9 +4,9 @@ defmodule SoftBank.Currency.Conversion.Rates do
   """
 
   @type t :: %SoftBank.Currency.Conversion.Rates{
-    base: atom,
-    rates: %{atom => float}
-  }
+          base: atom,
+          rates: %{atom => float}
+        }
 
   @doc """
   Defines a Currency DataSet

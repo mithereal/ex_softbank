@@ -5,9 +5,9 @@ defmodule SoftBank.Entry do
   """
 
   @type t :: %__MODULE__{
-    description: String.t,
-    date: Ecto.Date.t
-  }
+          description: String.t(),
+          date: Ecto.Date.t()
+        }
 
   use Ecto.Schema
 
@@ -18,13 +18,11 @@ defmodule SoftBank.Entry do
   alias SoftBank.Amount
   alias SoftBank.Entry
 
-
-
   schema "softbank_entries" do
-    field :description, :string
-    field :date, Ecto.Date
+    field(:description, :string)
+    field(:date, Ecto.Date)
 
-    has_many :amounts, SoftBank.Amount, on_delete: :delete_all
+    has_many(:amounts, SoftBank.Amount, on_delete: :delete_all)
 
     timestamps()
   end
@@ -50,10 +48,13 @@ defmodule SoftBank.Entry do
   """
   def validate_debits_and_credits_balance(changeset) do
     amounts = Ecto.Changeset.get_field(changeset, :amounts)
-    amounts = Enum.group_by(amounts, fn(i) -> i.type end)
+    amounts = Enum.group_by(amounts, fn i -> i.type end)
 
-    credit_sum = Enum.reduce(amounts["credit"], Decimal.new(0.0), fn(i, acc) -> Decimal.add(i.amount,acc) end )
-    debit_sum = Enum.reduce(amounts["debit"], Decimal.new(0.0), fn(i, acc) -> Decimal.add(i.amount,acc) end )
+    credit_sum =
+      Enum.reduce(amounts["credit"], Decimal.new(0.0), fn i, acc -> Decimal.add(i.amount, acc) end)
+
+    debit_sum =
+      Enum.reduce(amounts["debit"], Decimal.new(0.0), fn i, acc -> Decimal.add(i.amount, acc) end)
 
     if credit_sum == debit_sum do
       changeset
@@ -66,24 +67,24 @@ defmodule SoftBank.Entry do
   Accepts an `SoftBank.Entry` and `Ecto.Repo` and returns true/false based on whether
   the associated amounts for that entry sum to zero.
   """
-  @spec balanced?(Ecto.Repo.t, SoftBank.Entry.t) :: Boolean.t
+  @spec balanced?(Ecto.Repo.t(), SoftBank.Entry.t()) :: Boolean.t()
   def balanced?(repo \\ Repo, entry = %Entry{}) do
-    credits = Amount
-    |> Amount.for_entry(entry)
-    |> Amount.sum_type("credit")
-    |> repo.all
+    credits =
+      Amount
+      |> Amount.for_entry(entry)
+      |> Amount.sum_type("credit")
+      |> repo.all
 
-    debits = Amount
-    |> Amount.for_entry(entry)
-    |> Amount.sum_type("debit")
-    |> repo.all
+    debits =
+      Amount
+      |> Amount.for_entry(entry)
+      |> Amount.sum_type("debit")
+      |> repo.all
 
-    if (debits - credits) == 0 do
+    if debits - credits == 0 do
       true
     else
       false
     end
-
   end
-
 end
