@@ -42,7 +42,7 @@ defmodule SoftBank.Teller do
   def handle_call({:withdrawl, amount}, _from, state) do
     entry_changeset = %Entry{
       description: "Withdraw : " <> amount.amount <> " from " <> state.account.account_number,
-      date: Ecto.Date.utc(),
+      date: DateTime.utc_now(),
       amounts: [
         %Amount{amount: Note.neg(amount), type: "debit", account_id: state.account.id}
       ]
@@ -55,7 +55,7 @@ defmodule SoftBank.Teller do
   def handle_call({:deposit, amount}, _from, state) do
     entry_changeset = %Entry{
       description: "deposit : " <> amount.amount <> " into " <> state.account.account_number,
-      date: Ecto.Date.utc(),
+      date: DateTime.utc_now(),
       amounts: [
         %Amount{amount: amount, type: "debit", account_id: state.account.id}
       ]

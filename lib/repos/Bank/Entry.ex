@@ -20,7 +20,7 @@ defmodule SoftBank.Entry do
 
   schema "softbank_entries" do
     field(:description, :string)
-    field(:date, Ecto.Date)
+    field(:date, :utc_datetime)
 
     has_many(:amounts, SoftBank.Amount, on_delete: :delete_all)
 

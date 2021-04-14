@@ -1,5 +1,5 @@
 defmodule SoftBank.Note.Currency do
-  import Money.Currency
+  #import Money.Currency, except: [try: 1, to_atom: 1, symbol: 1, name: 1, get!: 1, get: 1, exists?: 1, ]
 
   @moduledoc """
   Provides currency support to `SoftBank.Note`

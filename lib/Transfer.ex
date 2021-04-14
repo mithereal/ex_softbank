@@ -15,7 +15,7 @@ defmodule SoftBank.Transfer do
 
   embedded_schema do
     field(:message, :integer)
-    field(:amount, SoftBank.Note.Ecto.Type)
+    field(:amount, Money.Ecto.Composite.Type)
     field(:description, :string)
 
     embeds_one(:sender, Account)
@@ -68,7 +68,7 @@ defmodule SoftBank.Transfer do
       transfer_request =
         create_request(source_account, destination_account, transfer.description, amount)
 
-      case account.balance() - amount > 0 do
+      case account.balance - amount > 0 do
         true ->
           entry_changeset = %Entry{
             description:
