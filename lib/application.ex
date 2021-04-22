@@ -5,15 +5,15 @@ defmodule SoftBank.Application do
 
   use Application
 
-  def start(_type, _args) do
+  def start(_type, args) do
     import Supervisor.Spec
 
     # List all child processes to be supervised
     children = [
-      supervisor(SoftBank.Repo, [])
+      supervisor(SoftBank.Repo, []),
       # Starts a worker by calling: SoftBank.Worker.start_link(arg)
-      # {SoftBank.Worker, arg},
-      # worker(SoftBank.Currency.Conversion.UpdateWorker, [], restart: :permanent)
+       {SoftBank.Teller, args},
+       worker(SoftBank.Currency.Conversion.UpdateWorker, [], restart: :permanent)
       # worker(Task, [&load/0], restart: :transient)
     ]
 

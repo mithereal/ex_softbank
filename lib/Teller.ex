@@ -19,7 +19,7 @@ defmodule SoftBank.Teller do
             account: nil,
             balance: 0
 
-  def start_link() do
+  def start_link([]) do
     state = %{account: 0, balance: 0, account_number: nil}
 
     GenServer.start_link(__MODULE__, [state])
