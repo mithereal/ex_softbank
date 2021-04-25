@@ -111,20 +111,11 @@ defmodule SoftBank.Accountant do
         {:reply, :error, state}
 
       true ->
-        account = List.first(accounts)
-        balance = account.balance()
-
-        new_account = {account_number,%{
-        account_number: account_number,
-              account: account,
-              balance: balance
-        }}
 
        accounts = Enum.map(accounts,fn(x) ->
                                     {x.account_number,x}
        end)
 
-        accounts = accounts ++ new_account
 
         updated_state =
           updated_state = %__MODULE__{
