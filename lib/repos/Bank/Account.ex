@@ -11,7 +11,9 @@ defmodule SoftBank.Account do
   alias SoftBank.Account
   alias SoftBank.Entry
 
-  @moduledoc false
+    @moduledoc """
+  An Account represents the individual account.
+  """
 
   schema "softbank_accounts" do
     field(:name, :string)
