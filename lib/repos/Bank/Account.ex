@@ -208,7 +208,7 @@ defmodule SoftBank.Account do
       |> repo.all()
   end
 
-  def trial_balance(repo \\ Config.repo_from_config()) do
+  def starting_balance(repo \\ Config.repo_from_config()) do
     accounts = repo.all(Account)
     accounts_by_type = Enum.group_by(accounts, fn i -> String.to_atom(i.type) end)
 

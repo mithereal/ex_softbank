@@ -8,8 +8,8 @@ defmodule SoftBank.EntryTest do
   @invalid_attrs %{}
 
   @valid_with_amount_attrs %{
-    description: "Purchased a Lamborghini",
-    date: %Ecto.Date{year: 2016, month: 1, day: 16},
+    description: "Spending Money",
+    date: DateTime.utc_now(),
     amounts: [
       %Amount{amount: Decimal.new(125_000.00), type: "credit", account_id: 1},
       %Amount{amount: Decimal.new(125_000.00), type: "debit", account_id: 2}
@@ -19,8 +19,8 @@ defmodule SoftBank.EntryTest do
   test "entry casts associated amounts" do
     changeset =
       Entry.changeset(%Entry{
-        description: "Buying first Porsche",
-        date: %Ecto.Date{year: 2016, month: 1, day: 16},
+        description: "Spending Money Again",
+        date: DateTime.utc_now(),
         amounts: [
           %Amount{amount: Decimal.new(125_000.00), type: "credit", account_id: 2},
           %Amount{amount: Decimal.new(50000.00), type: "debit", account_id: 1},
@@ -34,8 +34,8 @@ defmodule SoftBank.EntryTest do
   test "entry debits and credits must cancel" do
     changeset =
       Entry.changeset(%Entry{
-        description: "Buying first Porsche",
-        date: %Ecto.Date{year: 2016, month: 1, day: 16},
+        description: "Spending Lots More Money",
+        date: DateTime.utc_now(),
         amounts: [
           %Amount{amount: Decimal.new(125_000.00), type: "credit", account_id: 2},
           %Amount{amount: Decimal.new(50000.00), type: "debit", account_id: 1},
