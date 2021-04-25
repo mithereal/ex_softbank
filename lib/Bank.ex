@@ -26,9 +26,21 @@ defmodule SoftBank do
 
   def login(account_number) do
   params = %{account: 0, balance: 0, account_number: account_number}
-  {_, pid} = Supervisor.start_child(params)
-  GenServer.call pid, :show_state
+  {status, pid} = Supervisor.start_child(params, true)
+
+  case status do
+    :ok ->
+    case Supervisor.exists? account_number do
+      nil -> {:error, "INVALID ACCOUNT NUMBER"}
+      _ ->  SoftBank.Accountant.show_state account_number
+    end
+
+    :error -> {status, "AN ERROR OCCURRED"}
   end
+
+  end
+
+
 
   def show(account_number) do
      Supervisor.show(account_number)

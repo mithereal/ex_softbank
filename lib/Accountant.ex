@@ -38,8 +38,14 @@ defmodule SoftBank.Accountant do
 case args == nil  do
    false ->
    args = case status  do
-    :ok -> GenServer.call pid,{:login, args.account_number}
-    {status, pid}
+    :ok ->
+      {status,reply} = GenServer.call pid,{:login, args.account_number}
+
+      case reply do
+        nil ->{:stop, :normal, nil, nil}
+               _ -> {status,reply}
+      end
+
     :error -> {status, pid}
   end
   true -> {status, pid}
@@ -96,8 +102,13 @@ case args == nil  do
   end
 
   def handle_call({:login, account_number}, _from, state) do
-    account = Account.fetch(%{account_number: account_number, type: "asset"})
-    balance = account.balance()
+    accounts = Account.fetch(%{account_number: account_number, type: "asset"})
+
+    case Enum.count(accounts) do
+      0 -> {:reply, nil, state}
+      _ ->
+      account = List.first(accounts)
+      balance = account.balance()
 
     updated_state =
       updated_state = %__MODULE__{
@@ -108,6 +119,7 @@ case args == nil  do
       }
 
     {:reply, :ok, updated_state}
+    end
   end
 
   def handle_call(:show_state, _from, state) do
@@ -117,5 +129,11 @@ case args == nil  do
     @doc false
   def via_tuple(hash, registry \\ @registry_name) do
     {:via, Registry, {registry, hash}}
+  end
+
+  def show_state(data) do
+      name = via_tuple(data.hash)
+
+    GenServer.start_link(__MODULE__, [data], name: name)
   end
 end
