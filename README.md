@@ -45,9 +45,9 @@ to_account_number = "demo-acct-number"
 SoftBank.login(my_account_number)
 
 amount = 20.00
-Bank.deposit(amount,my_account_number)
-Bank.withdrawl(amount,my_account_number)
-Bank.transfer(amount,my_account_number,to_account_number)
+SoftBank.deposit(amount,my_account_number)
+SoftBank.withdrawl(amount,my_account_number)
+SoftBank.transfer(amount,my_account_number,to_account_number)
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
