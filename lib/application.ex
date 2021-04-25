@@ -10,7 +10,7 @@ defmodule SoftBank.Application do
 
     # List all child processes to be supervised
     children = [
-      supervisor(SoftBank.Repo, args),
+       {SoftBank.Repo, args},
       {Registry, keys: :unique, name: :soft_bank_accountants},
       # Starts a worker by calling: SoftBank.Worker.start_link(arg)
        #{SoftBank.Worker, args},

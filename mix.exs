@@ -67,7 +67,7 @@ defmodule SoftBank.MixProject do
     [
       c: "compile",
       test: ["test"],
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/migrations/tables.exs"],
+      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       install: ["ecto.setup"]
     ]

@@ -27,7 +27,7 @@ defmodule SoftBank.Repo.Migrations.Tables do
       create table(:softbank_amounts) do
         add :amount, :decimal, precision: 20, scale: 10, null: false
         add :account_id, references(:softbank_accounts, on_delete: :delete_all), null: false
-        add :entry_id, references(:entries, on_delete: :delete_all), null: false
+        add :entry_id, references(:softbank_entries, on_delete: :delete_all), null: false
   
         timestamps
       end

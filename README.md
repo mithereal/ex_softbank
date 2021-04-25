@@ -41,12 +41,12 @@ mix install
 ```elixir
 # login to your account and return the balance
 account_number = "demo-acct-number"
-Bank.login(account_number)
+SoftBank.login(account_number)
 
-amount = 20.00
-Bank.deposit(amount)
-Bank.withdrawl(amount)
-Bank.transfer(amount)
+#amount = 20.00
+#Bank.deposit(amount)
+#Bank.withdrawl(amount)
+#Bank.transfer(amount)
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
