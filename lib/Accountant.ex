@@ -4,7 +4,8 @@ defmodule SoftBank.Accountant do
 
   @registry_name :soft_bank_accountants
   @name __MODULE__
-
+  @timeout 120
+  @ten_seconds 10000
   @moduledoc """
   A Bank Accountant.
   """
@@ -16,10 +17,10 @@ defmodule SoftBank.Accountant do
   alias SoftBank.Note
   alias SoftBank.Repo
 
-  defstruct accounts: []
-  #  account_number: nil,
-  #            account: nil, %{id:x}
-  #            balance: 0
+  defstruct account_number: nil,
+            account: nil,
+            balance: 0,
+            last_action_ts: nil
 
   @doc false
   def child_spec(args) do
@@ -31,7 +32,7 @@ defmodule SoftBank.Accountant do
   end
 
   def start_link(args) do
-    params = [%{accounts: []}]
+    params = %SoftBank.Accountant{account: 0, balance: 0, account_number: nil}
     GenServer.start_link(__MODULE__, params)
   end
 
@@ -58,7 +59,8 @@ defmodule SoftBank.Accountant do
   end
 
   def convert(account, amount, to) do
-    GenServer.call(account, {:convert, amount, to})
+    name = via_tuple(account)
+    GenServer.call(name, {:convert, amount, to})
   end
 
   def balance(account) do
@@ -68,7 +70,19 @@ defmodule SoftBank.Accountant do
 
   def transfer(amount, from, to) do
     name = via_tuple(from)
-    GenServer.call(name, {:transfer, amount, from, to})
+    GenServer.call(name, {:transfer, amount, to})
+  end
+
+  def handle_info(:timeout, state) do
+    time = DateTime.utc_now()
+    cmp = DateTime.add(state.last_action_ts, @timeout, :second)
+
+    case DateTime.compare(time, cmp) do
+      :gt -> Process.send_after(self(), :shutdown, @ten_seconds)
+      _ -> Process.send_after(self(), :timeout, @ten_seconds)
+    end
+
+    {:noreply, state}
   end
 
   def handle_cast(:shutdown, state) do
@@ -79,72 +93,83 @@ defmodule SoftBank.Accountant do
     {:stop, :normal, nil, nil}
   end
 
-  def handle_cast({:transfer, from_account_number, to_account_number}, state) do
-    dest = Account.fetch(%{account_number: to_account_number, type: "asset"})
-    Transfer.send(from_account_number, dest)
+  def handle_cast({:transfer, account_number}, state) do
+    dest = Account.fetch(%{account_number: account_number, type: "asset"})
+    Transfer.send(state.account, dest)
+    state = %{state | last_action_ts: DateTime.utc_now()}
     {:noreply, state}
   end
 
-  def handle_call({:withdrawl, amount, from}, _from, state) do
+  def handle_call({:withdrawl, amount}, _from, state) do
     entry_changeset = %Entry{
-      description: "Withdraw : " <> amount.amount <> " from " <> from,
+      description: "Withdraw : " <> amount.amount <> " from " <> state.account.account_number,
       date: DateTime.utc_now(),
       amounts: [
-        %Amount{amount: Note.neg(amount), type: "debit", account_id: from}
+        %Amount{amount: Note.neg(amount), type: "debit", account_id: state.account.id}
       ]
     }
 
     Repo.insert(entry_changeset)
+
+    state = %{state | last_action_ts: DateTime.utc_now()}
     {:reply, state, state}
   end
 
-  def handle_call({:deposit, amount, to}, _from, state) do
+  def handle_call({:deposit, amount}, _from, state) do
     entry_changeset = %Entry{
-      description: "deposit : " <> amount.amount <> " into " <> to,
+      description: "deposit : " <> amount.amount <> " into " <> state.account.account_number,
       date: DateTime.utc_now(),
       amounts: [
-        %Amount{amount: amount, type: "debit", account_id: to}
+        %Amount{amount: amount, type: "debit", account_id: state.account.id}
       ]
     }
 
     Repo.insert(entry_changeset)
+    state = %{state | last_action_ts: DateTime.utc_now()}
     {:reply, state, state}
   end
 
   def handle_call({:convert, amount, dest_currency}, _from, state) do
     amount = SoftBank.Currency.Conversion.convert(amount, dest_currency)
+    state = %{state | last_action_ts: DateTime.utc_now()}
     {:reply, amount, state}
   end
 
-  def handle_call({:balance, account_number}, _from, state) do
-    result = SoftBank.Account.balance(SoftBank.Repo, account_number)
-    {:reply, result, state}
+  def handle_call(:balance, _from, state) do
+    state = %{state | last_action_ts: DateTime.utc_now()}
+    {:reply, state.balance, state}
   end
 
   def handle_call({:login, account_number}, _from, state) do
     accounts = Account.fetch(%{account_number: account_number})
 
-    case Enum.count(accounts) > 0 do
-      false ->
-        {:reply, :error, state}
+{status,state} =
+      case Enum.count(accounts) > 0 do
+        false ->
+          {:error, state}
 
-      true ->
-        accounts =
-          Enum.map(accounts, fn x ->
-            {x.account_number, x}
-          end)
+        true ->
+          account = List.first(accounts)
 
-        updated_state =
-          updated_state = %__MODULE__{
+          ### get the balance
+       ##   balance = Account.balance(account)
+
+          updated_state = %SoftBank.Accountant{
             state
-            | accounts: accounts
+            | account_number: account_number,
+              account: account,
+              balance: 0,
+              last_action_ts: DateTime.utc_now()
           }
+{:ok,updated_state}
+      end
 
-        {:reply, :ok, updated_state}
-    end
+   # Process.send_after(self(), :timeout, @ten_seconds)
+    {:reply, status, state}
   end
 
   def handle_call(:show_state, _from, state) do
+    state = %{state | last_action_ts: DateTime.utc_now()}
     {:reply, state, state}
   end
 
@@ -156,8 +181,7 @@ defmodule SoftBank.Accountant do
 
   def show_state(account) do
     name = via_tuple(account)
-
-    GenServer.start_link(__MODULE__, [account], name: name)
+    GenServer.call(name, :show_state)
   end
 
   def reload(account_number) do

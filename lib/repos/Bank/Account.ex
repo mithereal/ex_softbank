@@ -43,6 +43,11 @@ defmodule SoftBank.Account do
     |> validate_required(@required_fields)
   end
 
+  def to_changeset(struct, params \\ %{}) do
+    struct
+    |> cast(params, @params)
+  end
+
   def new(currency \\ "USD", name \\ nil) do
     hash = hash_id()
 
@@ -58,10 +63,11 @@ defmodule SoftBank.Account do
 
     {_, debit_account} =
       %Account{}
-      |> Account.changeset(asset_struct)
+      |> Account.to_changeset(asset_struct)
       |> put_change(:account_number, account_number)
       |> put_change(:hash, hash)
       |> put_change(:currency, currency)
+      |> validate_required(@required_fields)
       |> Repo.insert()
 
     liablilty_struct = %{name: name <> "Liabilities", type: "liability"}
@@ -70,10 +76,11 @@ defmodule SoftBank.Account do
 
     {_, credit_account} =
       %Account{}
-      |> Account.changeset(liablilty_struct)
+      |> Account.to_changeset(liablilty_struct)
       |> put_change(:account_number, account_number)
       |> put_change(:hash, hash)
       |> put_change(:currency, currency)
+      |> validate_required(@required_fields)
       |> Repo.insert()
 
     equity_struct = %{name: name <> "Equity", type: "equity"}
@@ -82,10 +89,11 @@ defmodule SoftBank.Account do
 
     {_, equity_account} =
       %Account{}
-      |> Account.changeset(equity_struct)
+      |> Account.to_changeset(equity_struct)
       |> put_change(:account_number, account_number)
       |> put_change(:hash, hash)
       |> put_change(:currency, currency)
+      |> validate_required(@required_fields)
       |> Repo.insert()
 
     %{
@@ -100,27 +108,22 @@ defmodule SoftBank.Account do
     from(q in query, preload: [:amounts])
   end
 
-  def amount_sum(account, type) do
-    [sum] =
-      Amount
+
+
+
+  def amount_sum(account, type, dates \\ nil, repo \\ Repo) do
+    [sum] = case dates do
+      nil ->  Amount
       |> Amount.for_account(account)
       |> Amount.sum_type(type)
-      |> Repo.all()
-
-    if sum do
-      sum
-    else
-      Decimal.new(0)
-    end
-  end
-
-  def amount_sum(account, type, dates) do
-    [sum] =
-      Amount
+      |> repo.all()
+      _->  Amount
       |> Amount.for_account(account)
       |> Amount.dated(dates)
       |> Amount.sum_type(type)
       |> Repo.all()
+    end
+
 
     if sum do
       sum
@@ -129,11 +132,13 @@ defmodule SoftBank.Account do
     end
   end
 
-  def balance(repo \\ Repo, account_or_account_list, dates \\ nil)
+    def balance(account_or_account_list, dates \\ nil)do
+      balance(account_or_account_list, dates)
+  end
 
-  def balance(repo, account = %Account{type: type, contra: contra}, dates) when is_nil(dates) do
-    credits = Account.amount_sum(repo, account, "credit")
-    debits = Account.amount_sum(repo, account, "debit")
+  def balance(account = %Account{account_number: account_number, type: type, contra: contra, currency: currency}, dates) when is_nil(dates) do
+    credits = Account.amount_sum(account, "credit")
+    debits = Account.amount_sum(account, "debit")
 
     if type in @credit_types && !contra do
       balance = Decimal.sub(debits, credits)
@@ -142,7 +147,7 @@ defmodule SoftBank.Account do
     end
   end
 
-  def balance(repo, account = %Account{type: type, contra: contra}, dates) do
+  def balance(account = %Account{account_number: account_number, type: type, contra: contra, currency: currency}, dates) do
     credits = Account.amount_sum(account, "credit", dates)
     debits = Account.amount_sum(account, "debit", dates)
 
@@ -153,11 +158,12 @@ defmodule SoftBank.Account do
     end
   end
 
-  def balance(repo, accounts, dates) when is_list(accounts) do
+  def balance(accounts, dates) when is_list(accounts) do
     Enum.reduce(accounts, Decimal.new(0.0), fn account, acc ->
-      Decimal.add(Account.balance(repo, account, dates), acc)
+      Decimal.add(Account.balance(account, dates), acc)
     end)
   end
+
 
   defp hash_id(number \\ 20) do
     Base.encode64(:crypto.strong_rand_bytes(number))
@@ -167,14 +173,8 @@ defmodule SoftBank.Account do
     Nanoid.generate(number, "0123456789")
   end
 
-  def fetch(%{account_number: account_number, type: type}) do
-    query =
-      Account
-      |> where([a], a.type == ^type and a.account_number == ^account_number)
-      |> Repo.all()
-  end
 
-  def fetch(%{account_number: account_number}) do
+  def fetch(%{account_number: account_number}, repo \\ Repo) do
     query =
       Account
       |> where([a], a.account_number == ^account_number)

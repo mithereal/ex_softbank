@@ -2,6 +2,11 @@ defmodule SoftbankTest do
   use ExUnit.Case
   alias SoftBank.Account
 
+  test "Create a new Account" do
+    data = SoftBank.create()
+    assert data !== nil
+  end
+
   test "Login to the bank account (success)" do
     query = from(Account)
     accounts = Repo.all(query)

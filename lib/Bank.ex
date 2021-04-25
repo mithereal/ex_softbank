@@ -17,7 +17,7 @@ defmodule SoftBank do
   end
 
   def convert(account_number, amount, dest_currency) do
-    ACCOUNTANT.convert(account_number,amount, dest_currency)
+    ACCOUNTANT.convert(account_number, amount, dest_currency)
   end
 
   def balance(account_number) do
@@ -52,5 +52,9 @@ defmodule SoftBank do
 
   def show(account_number) do
     ACCOUNTANT.show_state(account_number)
+  end
+
+  def create() do
+    SoftBank.Account.new()
   end
 end
