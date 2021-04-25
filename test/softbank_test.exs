@@ -2,6 +2,7 @@ defmodule SoftBankTest do
   use ExUnit.Case
   use SoftBank.EctoCase
   alias SoftBank.Account
+  alias SoftBank.TestRepo, as: REPO
 
   #    doctest SoftBank
   #  doctest SoftBank.Account
@@ -13,7 +14,7 @@ defmodule SoftBankTest do
 
   test "Login to the bank account (success)" do
     query = from(Account)
-    accounts = Repo.all(query)
+    accounts = REPO.all(query)
     account = List.first(accounts)
 
     data = SoftBank.login(account.bank_account_number)

@@ -7,7 +7,15 @@ config :soft_bank, SoftBank.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
   password: "postgres",
-  database: "softbank_test",
+  database: "softbank_dev",
+  hostname: "localhost",
+  pool_size: 10
+
+config :soft_bank, SoftBank.TestRepo,
+  adapter: Ecto.Adapters.Postgres,
+  username: "postgres",
+  password: "postgres",
+  database: "softbank_dev",
   hostname: "localhost",
   pool_size: 10
 
