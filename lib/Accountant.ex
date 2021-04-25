@@ -1,11 +1,12 @@
-defmodule SoftBank.Teller do
+defmodule SoftBank.Accountant do
+  use GenServer
   require Logger
 
-  use GenServer
-
+  @registry_name :soft_bank_accountants
   @name __MODULE__
+
   @moduledoc """
-  A Bank Teller.
+  A Bank Accountant.
   """
 
   alias SoftBank.Transfer
@@ -19,10 +20,30 @@ defmodule SoftBank.Teller do
             account: nil,
             balance: 0
 
-  def start_link([]) do
-    state = %{account: 0, balance: 0, account_number: nil}
+  @doc false
+  def child_spec(args) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, [args]},
+      type: :worker
+    }
+  end
 
-    GenServer.start_link(__MODULE__, [state])
+  def start_link(args) do
+
+    params = [%{account: 0, balance: 0, account_number: nil}]
+
+    {status, pid} = GenServer.start_link(__MODULE__, params)
+
+case args == nil  do
+   false ->
+   args = case status  do
+    :ok -> GenServer.call pid,{:login, args.account_number}
+    {status, pid}
+    :error -> {status, pid}
+  end
+  true -> {status, pid}
+  end
   end
 
   def init(args) do
@@ -70,7 +91,7 @@ defmodule SoftBank.Teller do
     {:reply, amount, state}
   end
 
-  def handle_call({:balance, account_number}, _from, state) do
+  def handle_call(:balance, _from, state) do
     {:reply, state.balance, state}
   end
 
@@ -91,5 +112,10 @@ defmodule SoftBank.Teller do
 
   def handle_call(:show_state, _from, state) do
     {:reply, state, state}
+  end
+
+    @doc false
+  def via_tuple(hash, registry \\ @registry_name) do
+    {:via, Registry, {registry, hash}}
   end
 end

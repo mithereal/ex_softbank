@@ -10,4 +10,10 @@ defmodule SoftBank.Repo do
   def init(_, opts) do
     {:ok, Keyword.put(opts, :url, System.get_env("DATABASE_URL"))}
   end
+
+    def truncate(schema) do
+    table_name = schema.__schema__(:source)
+
+    query("TRUNCATE #{table_name}", [])
+  end
 end

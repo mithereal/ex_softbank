@@ -3,6 +3,6 @@ defmodule SoftBank.Config do
   Return value by key from config.exs file.
   """
   def get(name, default \\ nil) do
-    Application.get_env(:SoftBank, name, default)
+    Application.get_env(:soft_bank, name, default)
   end
 end

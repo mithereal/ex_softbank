@@ -24,7 +24,7 @@ by adding `soft_bank` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:soft_bank, "~> 0.1.2"}
+    {:soft_bank, "~> 0.1.3"}
   ]
 end
 ```
@@ -34,6 +34,19 @@ The Database Tables can be created by running the mix alias.
 
 ```elixir
 mix install
+```
+
+## Usage
+
+```elixir
+# login to your account and return the balance
+account_number = "demo-acct-number"
+Bank.login(account_number)
+
+amount = 20.00
+Bank.deposit(amount)
+Bank.withdrawl(amount)
+Bank.transfer(amount)
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)

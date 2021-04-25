@@ -11,7 +11,6 @@ config :soft_bank, SoftBank.Repo,
   hostname: "localhost",
   pool_size: 10
 
-config :soft_bank, app_mode: "test"
 
 config :soft_bank,
   default_currency: :USD,
@@ -21,10 +20,6 @@ config :soft_bank,
   symbol_on_right: false,
   symbol_space: false,
   fractional_unit: false
-
-config :soft_bank,
-  pool_size: 10,
-  pool_max_overflow: 1
 
 config :soft_bank,
   # source: CurrencyConversion.Source.Fixer,
