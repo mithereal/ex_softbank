@@ -42,7 +42,6 @@ defmodule SoftBank.MixProject do
       {:jason, "~> 1.2"},
       {:money, "~> 1.8"},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
-      {:poolboy, "~> 1.5"},
       {:nanoid, "~> 2.0.1"},
       {:inch_ex, ">= 0.0.0", only: :docs},
       {:faker, "~> 0.16"}

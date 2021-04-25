@@ -17,9 +17,9 @@ defmodule SoftBank.Accountant do
   alias SoftBank.Repo
 
   defstruct accounts: []
-#  account_number: nil,
-#            account: nil,
-#            balance: 0
+  #  account_number: nil,
+  #            account: nil, %{id:x}
+  #            balance: 0
 
   @doc false
   def child_spec(args) do
@@ -35,27 +35,44 @@ defmodule SoftBank.Accountant do
     GenServer.start_link(__MODULE__, params)
   end
 
-  def try_login(pid, args ) do
-
-  GenServer.call(pid, {:login, args.account_number})
-
+  def try_login(pid, args) do
+    GenServer.call(pid, {:login, args.account_number})
   end
 
   def init(args) do
-
     {:ok, args}
   end
 
   def shutdown(pid) do
-      GenServer.call(pid, :shutdown)
+    GenServer.call(pid, :shutdown)
   end
 
-  def handle_cast({:deposit}, state) do
-    {:noreply, state}
+  def deposit(amount, to) do
+    name = via_tuple(to)
+    GenServer.call(name, {:deposit, amount, to})
+  end
+
+  def withdrawl(amount, from) do
+    name = via_tuple(from)
+    GenServer.call(name, {:withdrawl, amount, from})
+  end
+
+  def convert(account, amount, to) do
+    GenServer.call(account, {:convert, amount, to})
+  end
+
+  def balance(account) do
+    name = via_tuple(account)
+    GenServer.call(name, {:balance, account})
+  end
+
+  def transfer(amount, from, to) do
+    name = via_tuple(from)
+    GenServer.call(name, {:transfer, amount, from, to})
   end
 
   def handle_cast(:shutdown, state) do
-   {:stop, :normal, state}
+    {:stop, :normal, state}
   end
 
   def handle_call(:shutdown, _, state) do
@@ -68,12 +85,12 @@ defmodule SoftBank.Accountant do
     {:noreply, state}
   end
 
-  def handle_call({:withdrawl, amount}, _from, state) do
+  def handle_call({:withdrawl, amount, from}, _from, state) do
     entry_changeset = %Entry{
-      description: "Withdraw : " <> amount.amount <> " from " <> state.account.account_number,
+      description: "Withdraw : " <> amount.amount <> " from " <> from,
       date: DateTime.utc_now(),
       amounts: [
-        %Amount{amount: Note.neg(amount), type: "debit", account_id: state.account.id}
+        %Amount{amount: Note.neg(amount), type: "debit", account_id: from}
       ]
     }
 
@@ -81,12 +98,12 @@ defmodule SoftBank.Accountant do
     {:reply, state, state}
   end
 
-  def handle_call({:deposit, amount}, _from, state) do
+  def handle_call({:deposit, amount, to}, _from, state) do
     entry_changeset = %Entry{
-      description: "deposit : " <> amount.amount <> " into " <> state.account.account_number,
+      description: "deposit : " <> amount.amount <> " into " <> to,
       date: DateTime.utc_now(),
       amounts: [
-        %Amount{amount: amount, type: "debit", account_id: state.account.id}
+        %Amount{amount: amount, type: "debit", account_id: to}
       ]
     }
 
@@ -99,8 +116,9 @@ defmodule SoftBank.Accountant do
     {:reply, amount, state}
   end
 
-  def handle_call(:balance, _from, state) do
-    {:reply, state.balance, state}
+  def handle_call({:balance, account_number}, _from, state) do
+    result = SoftBank.Account.balance(SoftBank.Repo, account_number)
+    {:reply, result, state}
   end
 
   def handle_call({:login, account_number}, _from, state) do
@@ -111,11 +129,10 @@ defmodule SoftBank.Accountant do
         {:reply, :error, state}
 
       true ->
-
-       accounts = Enum.map(accounts,fn(x) ->
-                                    {x.account_number,x}
-       end)
-
+        accounts =
+          Enum.map(accounts, fn x ->
+            {x.account_number, x}
+          end)
 
         updated_state =
           updated_state = %__MODULE__{
@@ -133,12 +150,17 @@ defmodule SoftBank.Accountant do
 
   @doc false
   def via_tuple(hash, registry \\ @registry_name) do
+    reload(hash)
     {:via, Registry, {registry, hash}}
   end
 
-  def show_state(data) do
-    name = via_tuple(data.hash)
+  def show_state(account) do
+    name = via_tuple(account)
 
-    GenServer.start_link(__MODULE__, [data], name: name)
+    GenServer.start_link(__MODULE__, [account], name: name)
+  end
+
+  def reload(account_number) do
+    Process.send_after(self(), 1000, {:login, account_number})
   end
 end
