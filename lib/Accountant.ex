@@ -143,7 +143,7 @@ defmodule SoftBank.Accountant do
   def handle_call({:login, account_number}, _from, state) do
     accounts = Account.fetch(%{account_number: account_number})
 
-{status,state} =
+    {status, state} =
       case Enum.count(accounts) > 0 do
         false ->
           {:error, state}
@@ -152,19 +152,23 @@ defmodule SoftBank.Accountant do
           account = List.first(accounts)
 
           ### get the balance
-       ##   balance = Account.balance(account)
+          changeset = SoftBank.Account.to_changeset(%SoftBank.Account{}, account)
+          changes = Ecto.Changeset.apply_changes(changeset)
 
-          updated_state = %SoftBank.Accountant{
+          balance = Account.account_balance(Softbank.Repo, changes)
+
+          updated_state = %{
             state
             | account_number: account_number,
               account: account,
-              balance: 0,
+              balance: balance,
               last_action_ts: DateTime.utc_now()
           }
-{:ok,updated_state}
+
+          {:ok, updated_state}
       end
 
-   # Process.send_after(self(), :timeout, @ten_seconds)
+    # Process.send_after(self(), :timeout, @ten_seconds)
     {:reply, status, state}
   end
 

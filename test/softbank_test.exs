@@ -1,6 +1,10 @@
-defmodule SoftbankTest do
+defmodule SoftBankTest do
   use ExUnit.Case
+  use SoftBank.EctoCase
   alias SoftBank.Account
+
+  #    doctest SoftBank
+  #  doctest SoftBank.Account
 
   test "Create a new Account" do
     data = SoftBank.create()
@@ -17,7 +21,7 @@ defmodule SoftbankTest do
   end
 
   test "Login to the bank account(failure)" do
-    bank_account_number = "12345"
+    bank_account_number = "339571873745"
     data = SoftBank.login(bank_account_number)
     assert data == nil
   end

@@ -68,7 +68,7 @@ defmodule SoftBank.Entry do
   the associated amounts for that entry sum to zero.
   """
   @spec balanced?(Ecto.Repo.t(), SoftBank.Entry.t()) :: Boolean.t()
-  def balanced?(repo \\ Repo, entry = %Entry{}) do
+  def balanced?(repo \\ Config.repo(), entry = %Entry{}) do
     credits =
       Amount
       |> Amount.for_entry(entry)

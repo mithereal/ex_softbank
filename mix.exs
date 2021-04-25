@@ -9,6 +9,7 @@ defmodule SoftBank.MixProject do
       app: :soft_bank,
       version: @version,
       elixir: "~> 1.10",
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       build_embedded: Mix.env() == :prod,
@@ -44,7 +45,8 @@ defmodule SoftBank.MixProject do
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
       {:nanoid, "~> 2.0.1"},
       {:inch_ex, ">= 0.0.0", only: :docs},
-      {:faker, "~> 0.16"}
+      {:faker, "~> 0.16"},
+      {:ex_machina, "~> 2.7.0", only: :test}
     ]
   end
 
@@ -81,4 +83,10 @@ defmodule SoftBank.MixProject do
       extras: ["README.md"]
     ]
   end
+
+  # This makes sure your factory and any other modules in test/support are compiled
+  # when in the test environment.
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
+  defp elixirc_paths, do: ["lib"]
 end

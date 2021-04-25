@@ -28,7 +28,7 @@ defmodule SoftBank.Account do
     timestamps
   end
 
-  @params ~w(account_number type contra currency name hash)a
+  @params ~w(account_number type contra currency name hash id)a
   @required_fields ~w(account_number)a
 
   @credit_types ["asset"]
@@ -108,22 +108,24 @@ defmodule SoftBank.Account do
     from(q in query, preload: [:amounts])
   end
 
+  def amount_sum(repo \\ Repo, account, type, dates \\ []) do
+    dc = Enum.count(dates)
 
+    [sum] =
+      case dc == 0 do
+        true ->
+          Amount
+          |> Amount.for_account(account)
+          |> Amount.sum_type(type)
+          |> repo.all()
 
-
-  def amount_sum(account, type, dates \\ nil, repo \\ Repo) do
-    [sum] = case dates do
-      nil ->  Amount
-      |> Amount.for_account(account)
-      |> Amount.sum_type(type)
-      |> repo.all()
-      _->  Amount
-      |> Amount.for_account(account)
-      |> Amount.dated(dates)
-      |> Amount.sum_type(type)
-      |> Repo.all()
-    end
-
+        false ->
+          Amount
+          |> Amount.for_account(account)
+          |> Amount.dated(dates)
+          |> Amount.sum_type(type)
+          |> repo.all()
+      end
 
     if sum do
       sum
@@ -132,13 +134,24 @@ defmodule SoftBank.Account do
     end
   end
 
-    def balance(account_or_account_list, dates \\ nil)do
-      balance(account_or_account_list, dates)
+  def account_balance(repo \\ Config.repo(), account_or_account_list, dates \\ nil) do
+    IO.inspect(account_or_account_list)
+    balance(repo, account_or_account_list, dates)
   end
 
-  def balance(account = %Account{account_number: account_number, type: type, contra: contra, currency: currency}, dates) when is_nil(dates) do
-    credits = Account.amount_sum(account, "credit")
-    debits = Account.amount_sum(account, "debit")
+  def balance(
+        repo,
+        account = %Account{
+          account_number: account_number,
+          type: type,
+          contra: contra,
+          currency: currency
+        },
+        dates
+      )
+      when is_nil(dates) do
+    credits = Account.amount_sum(repo, account, "credit")
+    debits = Account.amount_sum(repo, account, "debit")
 
     if type in @credit_types && !contra do
       balance = Decimal.sub(debits, credits)
@@ -147,9 +160,18 @@ defmodule SoftBank.Account do
     end
   end
 
-  def balance(account = %Account{account_number: account_number, type: type, contra: contra, currency: currency}, dates) do
-    credits = Account.amount_sum(account, "credit", dates)
-    debits = Account.amount_sum(account, "debit", dates)
+  def balance(
+        repo,
+        account = %Account{
+          account_number: account_number,
+          type: type,
+          contra: contra,
+          currency: currency
+        },
+        dates
+      ) do
+    credits = Account.amount_sum(repo, account, "credit", dates)
+    debits = Account.amount_sum(repo, account, "debit", dates)
 
     if type in @credit_types && !contra do
       balance = Decimal.sub(debits, credits)
@@ -158,21 +180,19 @@ defmodule SoftBank.Account do
     end
   end
 
-  def balance(accounts, dates) when is_list(accounts) do
+  def balance(repo, accounts, dates) when is_list(accounts) do
     Enum.reduce(accounts, Decimal.new(0.0), fn account, acc ->
       Decimal.add(Account.balance(account, dates), acc)
     end)
   end
 
-
   defp hash_id(number \\ 20) do
-    Base.encode64(:crypto.strong_rand_bytes(number))
+    Nanoid.generate(number, "0123456789")
   end
 
   defp bank_account_number(number \\ 12) do
     Nanoid.generate(number, "0123456789")
   end
-
 
   def fetch(%{account_number: account_number}, repo \\ Repo) do
     query =
@@ -182,8 +202,23 @@ defmodule SoftBank.Account do
         account_number: a.account_number,
         type: a.type,
         contra: a.contra,
-        currency: a.currency
+        currency: a.currency,
+        id: a.id
       })
-      |> Repo.all()
+      |> repo.all()
+  end
+
+  def trial_balance(repo \\ Config.repo_from_config()) do
+    accounts = repo.all(Account)
+    accounts_by_type = Enum.group_by(accounts, fn i -> String.to_atom(i.type) end)
+
+    accounts_by_type =
+      Enum.map(accounts_by_type, fn {account_type, accounts} ->
+        {account_type, Account.balance(repo, accounts)}
+      end)
+
+    accounts_by_type[:asset]
+    |> Decimal.sub(accounts_by_type[:liability])
+    |> Decimal.sub(accounts_by_type[:equity])
   end
 end
