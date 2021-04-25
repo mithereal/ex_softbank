@@ -1,5 +1,5 @@
 defmodule SoftBank.Repo do
-    use Ecto.Repo,
+  use Ecto.Repo,
     otp_app: :soft_bank,
     adapter: Ecto.Adapters.Postgres
 
@@ -11,7 +11,7 @@ defmodule SoftBank.Repo do
     {:ok, Keyword.put(opts, :url, System.get_env("DATABASE_URL"))}
   end
 
-    def truncate(schema) do
+  def truncate(schema) do
     table_name = schema.__schema__(:source)
 
     query("TRUNCATE #{table_name}", [])

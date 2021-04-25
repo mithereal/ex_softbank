@@ -16,9 +16,10 @@ defmodule SoftBank.Accountant do
   alias SoftBank.Note
   alias SoftBank.Repo
 
-  defstruct account_number: nil,
-            account: nil,
-            balance: 0
+  defstruct accounts: []
+#  account_number: nil,
+#            account: nil,
+#            balance: 0
 
   @doc false
   def child_spec(args) do
@@ -30,39 +31,40 @@ defmodule SoftBank.Accountant do
   end
 
   def start_link(args) do
-
-    params = [%{account: 0, balance: 0, account_number: nil}]
-
-    {status, pid} = GenServer.start_link(__MODULE__, params)
-
-case args == nil  do
-   false ->
-   args = case status  do
-    :ok ->
-      {status,reply} = GenServer.call pid,{:login, args.account_number}
-
-      case reply do
-        nil ->{:stop, :normal, nil, nil}
-               _ -> {status,reply}
-      end
-
-    :error -> {status, pid}
+    params = [%{accounts: []}]
+    GenServer.start_link(__MODULE__, params)
   end
-  true -> {status, pid}
-  end
+
+  def try_login(pid, args ) do
+
+  GenServer.call(pid, {:login, args.account_number})
+
   end
 
   def init(args) do
+
     {:ok, args}
+  end
+
+  def shutdown(pid) do
+      GenServer.call(pid, :shutdown)
   end
 
   def handle_cast({:deposit}, state) do
     {:noreply, state}
   end
 
-  def handle_cast({:transfer, account_number}, state) do
-    dest = Account.fetch(%{account_number: account_number, type: "asset"})
-    Transfer.send(state.account, dest)
+  def handle_cast(:shutdown, state) do
+   {:stop, :normal, state}
+  end
+
+  def handle_call(:shutdown, _, state) do
+    {:stop, :normal, nil, nil}
+  end
+
+  def handle_cast({:transfer, from_account_number, to_account_number}, state) do
+    dest = Account.fetch(%{account_number: to_account_number, type: "asset"})
+    Transfer.send(from_account_number, dest)
     {:noreply, state}
   end
 
@@ -102,23 +104,35 @@ case args == nil  do
   end
 
   def handle_call({:login, account_number}, _from, state) do
-    accounts = Account.fetch(%{account_number: account_number, type: "asset"})
+    accounts = Account.fetch(%{account_number: account_number})
 
-    case Enum.count(accounts) do
-      0 -> {:reply, nil, state}
-      _ ->
-      account = List.first(accounts)
-      balance = account.balance()
+    case Enum.count(accounts) > 0 do
+      false ->
+        {:reply, :error, state}
 
-    updated_state =
-      updated_state = %__MODULE__{
-        state
-        | account_number: account_number,
-          account: account,
-          balance: balance
-      }
+      true ->
+        account = List.first(accounts)
+        balance = account.balance()
 
-    {:reply, :ok, updated_state}
+        new_account = {account_number,%{
+        account_number: account_number,
+              account: account,
+              balance: balance
+        }}
+
+       accounts = Enum.map(accounts,fn(x) ->
+                                    {x.account_number,x}
+       end)
+
+        accounts = accounts ++ new_account
+
+        updated_state =
+          updated_state = %__MODULE__{
+            state
+            | accounts: accounts
+          }
+
+        {:reply, :ok, updated_state}
     end
   end
 
@@ -126,13 +140,13 @@ case args == nil  do
     {:reply, state, state}
   end
 
-    @doc false
+  @doc false
   def via_tuple(hash, registry \\ @registry_name) do
     {:via, Registry, {registry, hash}}
   end
 
   def show_state(data) do
-      name = via_tuple(data.hash)
+    name = via_tuple(data.hash)
 
     GenServer.start_link(__MODULE__, [data], name: name)
   end

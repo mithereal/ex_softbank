@@ -11,7 +11,6 @@ config :soft_bank, SoftBank.Repo,
   hostname: "localhost",
   pool_size: 10
 
-
 config :soft_bank,
   default_currency: :USD,
   separator: ".",

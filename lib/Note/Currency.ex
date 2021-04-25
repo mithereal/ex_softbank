@@ -1,5 +1,4 @@
 defmodule SoftBank.Note.Currency do
-
   @moduledoc """
   Provides currency support to `SoftBank.Note`
 
