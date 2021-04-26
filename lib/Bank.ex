@@ -25,9 +25,7 @@ defmodule SoftBank do
   end
 
   def login(account_number) do
-    ## start a new accountant
     {status, pid} = SUPERVISOR.start_child()
-    ### login to the account
 
     case status do
       :ok ->
@@ -57,4 +55,9 @@ defmodule SoftBank do
   def create() do
     SoftBank.Account.new()
   end
+
+    def add_currency(params) do
+    SoftBank.Currencies.new(params)
+  end
+
 end
