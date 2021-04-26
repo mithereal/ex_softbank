@@ -15,7 +15,6 @@ defmodule SoftBank.Amount do
   schema "softbank_amounts" do
     field(:amount, Money.Ecto.Composite.Type)
     field(:type, :string)
-    field(:currency, :string)
 
     belongs_to(:entry, Entry)
     belongs_to(:account, Account)
@@ -32,13 +31,25 @@ defmodule SoftBank.Amount do
   Creates an amount changeset associated with a `SoftBank.Entry` and `SoftBank.Account`.
   A type ("credit" or "debit"), as well as, an amount greater than 0 must be specified.
   """
+
   def changeset(model, params \\ %{}) do
     model
     |> cast(params, @params)
     |> Ecto.Changeset.assoc_constraint([:entry, :account])
     |> validate_required([:amount, :type])
-    |> validate_number(:amount, greater_than_or_equal_to: 0)
+    |> validate_amount_type()
     |> validate_inclusion(:type, @amount_types)
+  end
+
+  def validate_amount_type(model) do
+    type = model.amount.type
+    IO.inspect(type, label: "type in repo.bank.amount.validate_amount_type")
+    valid = Enum.member?(Money.Currency.known_current_currencies(), type)
+
+    case valid do
+      true -> model
+      false -> add_error(model, :type, "invalid", additional: "invalid currency type")
+    end
   end
 
   @doc false
@@ -62,6 +73,13 @@ defmodule SoftBank.Amount do
     from(c in query,
       where: c.type == ^type,
       select: sum(c.amount)
+    )
+  end
+
+  def select_type(query, type) do
+    from(c in query,
+      where: c.type == ^type,
+      select: c.amount
     )
   end
 
@@ -103,8 +121,4 @@ defmodule SoftBank.Amount do
 
   def new(int, currency) do
   end
-
-  #  def note(int, currency) when is_integer(int),
-  #      do: %SoftBank.Note{amount: int, currency: Currency.to_atom(currency)}
-  # end
 end

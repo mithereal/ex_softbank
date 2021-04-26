@@ -1,7 +1,7 @@
 defmodule SoftBank.MixProject do
   use Mix.Project
 
-  @version "0.1.4"
+  @version "0.2.0"
   @source_url "https://github.com/mithereal/elixir-softbank"
 
   def project do
@@ -35,13 +35,12 @@ defmodule SoftBank.MixProject do
     [
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
+      {:postgrex, ">= 0.0.0"},
       {:ecto, "~> 3.5"},
       {:ecto_sql, "~> 3.5"},
-      {:postgrex, ">= 0.0.0"},
-      {:tesla, "~> 1.4.0"},
-      {:hackney, "~> 1.17.0"},
-      {:jason, "~> 1.2"},
-      {:money, "~> 1.8"},
+      {:jason, "~> 1.0"},
+      {:ex_money, "5.5.2"},
+      {:ex_money_sql, "~> 1.0"},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
       {:nanoid, "~> 2.0.1"},
       {:inch_ex, ">= 0.0.0", only: :docs},

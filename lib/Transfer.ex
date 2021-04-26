@@ -59,8 +59,12 @@ defmodule SoftBank.Transfer do
 
       amount =
         case source_account.currency == destination_account.currency do
-          true -> transfer.amount
-          _ -> SoftBank.Currency.Conversion.convert(transfer.amount, destination_account.currency)
+          true ->
+            transfer.amount
+
+          # SoftBank.Currency.Conversion.convert(transfer.amount, destination_account.currency)
+          _ ->
+            0
         end
 
       transfer = %{transfer | amount: amount}
@@ -76,7 +80,7 @@ defmodule SoftBank.Transfer do
                 transfer_request.debit.amount <>
                 " from " <>
                 transfer_request.debit.account <> " to " <> transfer_request.debit.account,
-            date: Ecto.Date.utc(),
+            date: DateTime.utc_now(),
             amounts: [
               %Amount{
                 amount: transfer_request.sender.amount,

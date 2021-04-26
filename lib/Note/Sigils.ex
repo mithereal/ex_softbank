@@ -5,5 +5,5 @@ defmodule SoftBank.Note.Sigils do
     do: Macro.escape(SoftBank.Note.new(amount))
 
   defmacro sigil_N({:<<>>, _meta, [amount]}, [_ | _] = currency),
-    do: Macro.escape(SoftBank.Note.new(amount, List.to_atom(currency)))
+    do: Macro.escape(SoftBank.Note.new(List.to_atom(currency), amount))
 end

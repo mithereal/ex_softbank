@@ -3,9 +3,11 @@ defmodule SoftBank.Accountant do
   require Logger
 
   @registry_name :soft_bank_accountants
-  @name __MODULE__
+
   @timeout 120
   @ten_seconds 10000
+  @fourty_seconds 400_000
+
   @moduledoc """
   A Bank Accountant.
   """
@@ -14,7 +16,7 @@ defmodule SoftBank.Accountant do
   alias SoftBank.Account
   alias SoftBank.Amount
   alias SoftBank.Entry
-  alias SoftBank.Note
+
   alias SoftBank.Repo
 
   defstruct account_number: nil,
@@ -31,7 +33,7 @@ defmodule SoftBank.Accountant do
     }
   end
 
-  def start_link(args) do
+  def start_link(_) do
     params = %SoftBank.Accountant{account: 0, balance: 0, account_number: nil}
     GenServer.start_link(__MODULE__, params)
   end
@@ -51,11 +53,13 @@ defmodule SoftBank.Accountant do
   def deposit(amount, to) do
     name = via_tuple(to)
     GenServer.call(name, {:deposit, amount, to})
+    reload(to)
   end
 
   def withdrawl(amount, from) do
     name = via_tuple(from)
     GenServer.call(name, {:withdrawl, amount, from})
+    reload(from)
   end
 
   def convert(account, amount, to) do
@@ -71,6 +75,7 @@ defmodule SoftBank.Accountant do
   def transfer(amount, from, to) do
     name = via_tuple(from)
     GenServer.call(name, {:transfer, amount, to})
+    reload(from)
   end
 
   def handle_info(:timeout, state) do
@@ -79,18 +84,18 @@ defmodule SoftBank.Accountant do
 
     case DateTime.compare(time, cmp) do
       :gt -> Process.send_after(self(), :shutdown, @ten_seconds)
-      _ -> Process.send_after(self(), :timeout, @ten_seconds)
+      _ -> Process.send_after(self(), :timeout, @fourty_seconds)
     end
 
     {:noreply, state}
   end
 
-  def handle_cast(:shutdown, state) do
-    {:stop, :normal, state}
+  def handle_call(:shutdown, _, _) do
+    {:stop, :normal, nil, nil}
   end
 
-  def handle_call(:shutdown, _, state) do
-    {:stop, :normal, nil, nil}
+    def handle_cast(:shutdown, state) do
+    {:stop, :normal, state}
   end
 
   def handle_cast({:transfer, account_number}, state) do
@@ -101,11 +106,16 @@ defmodule SoftBank.Accountant do
   end
 
   def handle_call({:withdrawl, amount}, _from, state) do
+    decimal = Decimal.negative?(amount.amount)
+    new_amount = Money.new(amount.type, decimal)
+
+    IO.inspect(decimal, label: "SoftBank.Accountant.withdrawl")
+
     entry_changeset = %Entry{
-      description: "Withdraw : " <> amount.amount <> " from " <> state.account.account_number,
+      description: "Withdraw : " <> decimal <> " from " <> state.account.account_number,
       date: DateTime.utc_now(),
       amounts: [
-        %Amount{amount: Note.neg(amount), type: "debit", account_id: state.account.id}
+        %Amount{amount: new_amount, type: "debit", account_id: state.account.id}
       ]
     }
 
@@ -116,6 +126,9 @@ defmodule SoftBank.Accountant do
   end
 
   def handle_call({:deposit, amount}, _from, state) do
+
+    IO.inspect(amount.amount, label: "SoftBank.Accountant.deposit")
+
     entry_changeset = %Entry{
       description: "deposit : " <> amount.amount <> " into " <> state.account.account_number,
       date: DateTime.utc_now(),
@@ -130,9 +143,10 @@ defmodule SoftBank.Accountant do
   end
 
   def handle_call({:convert, amount, dest_currency}, _from, state) do
-    amount = SoftBank.Currency.Conversion.convert(amount, dest_currency)
+    IO.inspect(amount.amount, label: "SoftBank.Accountant.convert")
+    Money.to_currency(amount.amount, dest_currency, Money.ExchangeRates.latest_rates())
     state = %{state | last_action_ts: DateTime.utc_now()}
-    {:reply, amount, state}
+    {:reply, amount.amount, state}
   end
 
   def handle_call(:balance, _from, state) do
@@ -153,9 +167,9 @@ defmodule SoftBank.Accountant do
 
           ### get the balance
           changeset = SoftBank.Account.to_changeset(%SoftBank.Account{}, account)
-          changes = Ecto.Changeset.apply_changes(changeset)
+          changestruct = Ecto.Changeset.apply_changes(changeset)
 
-          balance = Account.account_balance(Softbank.Repo, changes)
+          balance = Account.account_balance(Softbank.Repo, changestruct)
 
           updated_state = %{
             state
@@ -168,7 +182,37 @@ defmodule SoftBank.Accountant do
           {:ok, updated_state}
       end
 
-    # Process.send_after(self(), :timeout, @ten_seconds)
+    Process.send_after(self(), :timeout, @fourty_seconds)
+    {:reply, status, state}
+  end
+
+  def handle_call({:relogin, account_number}, _from, state) do
+    accounts = Account.fetch(%{account_number: account_number})
+
+    {status, state} =
+      case Enum.count(accounts) > 0 do
+        false ->
+          {:error, state}
+
+        true ->
+          account = List.first(accounts)
+
+          changeset = SoftBank.Account.to_changeset(%SoftBank.Account{}, account)
+          changestruct = Ecto.Changeset.apply_changes(changeset)
+
+          balance = Account.account_balance(Softbank.Repo, changestruct)
+
+          updated_state = %{
+            state
+            | account_number: account_number,
+              account: account,
+              balance: balance,
+              last_action_ts: DateTime.utc_now()
+          }
+
+          {:ok, updated_state}
+      end
+
     {:reply, status, state}
   end
 
@@ -179,7 +223,6 @@ defmodule SoftBank.Accountant do
 
   @doc false
   def via_tuple(hash, registry \\ @registry_name) do
-    reload(hash)
     {:via, Registry, {registry, hash}}
   end
 
@@ -189,6 +232,6 @@ defmodule SoftBank.Accountant do
   end
 
   def reload(account_number) do
-    Process.send_after(self(), 1000, {:login, account_number})
+    Process.send_after(self(), 5000, {:relogin, account_number})
   end
 end

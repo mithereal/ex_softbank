@@ -11,7 +11,7 @@ defmodule SoftBank.Account do
   alias SoftBank.Account
   alias SoftBank.Entry
 
-    @moduledoc """
+  @moduledoc """
   An Account represents the individual account.
   """
 
@@ -21,7 +21,7 @@ defmodule SoftBank.Account do
     field(:hash, :string)
     field(:type, :string)
     field(:contra, :boolean)
-    field(:currency, :string)
+
     field(:balance, Money.Ecto.Composite.Type, virtual: true)
 
     has_many(:amounts, Amount, on_delete: :delete_all)
@@ -30,7 +30,7 @@ defmodule SoftBank.Account do
     timestamps
   end
 
-  @params ~w(account_number type contra currency name hash id)a
+  @params ~w(account_number type contra  name hash id)a
   @required_fields ~w(account_number)a
 
   @credit_types ["asset"]
@@ -50,7 +50,7 @@ defmodule SoftBank.Account do
     |> cast(params, @params)
   end
 
-  def new(currency \\ "USD", name \\ nil) do
+  def new(name \\ nil) do
     hash = hash_id()
 
     name =
@@ -68,7 +68,6 @@ defmodule SoftBank.Account do
       |> Account.to_changeset(asset_struct)
       |> put_change(:account_number, account_number)
       |> put_change(:hash, hash)
-      |> put_change(:currency, currency)
       |> validate_required(@required_fields)
       |> Repo.insert()
 
@@ -81,7 +80,6 @@ defmodule SoftBank.Account do
       |> Account.to_changeset(liablilty_struct)
       |> put_change(:account_number, account_number)
       |> put_change(:hash, hash)
-      |> put_change(:currency, currency)
       |> validate_required(@required_fields)
       |> Repo.insert()
 
@@ -94,7 +92,6 @@ defmodule SoftBank.Account do
       |> Account.to_changeset(equity_struct)
       |> put_change(:account_number, account_number)
       |> put_change(:hash, hash)
-      |> put_change(:currency, currency)
       |> validate_required(@required_fields)
       |> Repo.insert()
 
@@ -113,31 +110,41 @@ defmodule SoftBank.Account do
   def amount_sum(repo \\ Repo, account, type, dates \\ []) do
     dc = Enum.count(dates)
 
-    [sum] =
+    records =
       case dc == 0 do
         true ->
           Amount
           |> Amount.for_account(account)
-          |> Amount.sum_type(type)
+          |> Amount.select_type(type)
           |> repo.all()
 
         false ->
           Amount
           |> Amount.for_account(account)
           |> Amount.dated(dates)
-          |> Amount.sum_type(type)
+          |> Amount.select_type(type)
           |> repo.all()
       end
 
-    if sum do
-      sum
-    else
-      Decimal.new(0)
-    end
+    reply =
+      if Enum.count(records) > 0 do
+        default_currency = account.default_currency
+
+        default_records =
+          Enum.map(records, fn x ->
+            Money.to_currency(x.amount, default_currency, Money.ExchangeRates.latest_rates())
+          end)
+
+        Money.add(default_records)
+      else
+        Money.new(0)
+      end
+
+    IO.inspect(reply, label: "reply in repo.bank.acount.amount_sum ")
+    reply
   end
 
   def account_balance(repo \\ Config.repo(), account_or_account_list, dates \\ nil) do
-    IO.inspect(account_or_account_list)
     balance(repo, account_or_account_list, dates)
   end
 
@@ -146,8 +153,7 @@ defmodule SoftBank.Account do
         account = %Account{
           account_number: account_number,
           type: type,
-          contra: contra,
-          currency: currency
+          contra: contra
         },
         dates
       )
@@ -156,9 +162,9 @@ defmodule SoftBank.Account do
     debits = Account.amount_sum(repo, account, "debit")
 
     if type in @credit_types && !contra do
-      balance = Decimal.sub(debits, credits)
+      balance = Money.sub(debits, credits)
     else
-      balance = Decimal.sub(credits, debits)
+      balance = Money.sub(credits, debits)
     end
   end
 
@@ -167,8 +173,7 @@ defmodule SoftBank.Account do
         account = %Account{
           account_number: account_number,
           type: type,
-          contra: contra,
-          currency: currency
+          contra: contra
         },
         dates
       ) do
@@ -176,16 +181,20 @@ defmodule SoftBank.Account do
     debits = Account.amount_sum(repo, account, "debit", dates)
 
     if type in @credit_types && !contra do
-      balance = Decimal.sub(debits, credits)
+      balance = Money.sub(debits, credits)
     else
-      balance = Decimal.sub(credits, debits)
+      balance = Money.sub(credits, debits)
     end
   end
 
   def balance(repo, accounts, dates) when is_list(accounts) do
-    Enum.reduce(accounts, Decimal.new(0.0), fn account, acc ->
-      Decimal.add(Account.balance(account, dates), acc)
-    end)
+    balance =
+      Enum.reduce(accounts, Decimal.new(0.0), fn account, acc ->
+        Decimal.add(Account.balance(repo, account, dates), acc)
+      end)
+
+    IO.inspect(balance, label: "balance in repo.bank.acount.balance ")
+    balance
   end
 
   defp hash_id(number \\ 20) do
@@ -204,7 +213,6 @@ defmodule SoftBank.Account do
         account_number: a.account_number,
         type: a.type,
         contra: a.contra,
-        currency: a.currency,
         id: a.id
       })
       |> repo.all()
@@ -219,8 +227,10 @@ defmodule SoftBank.Account do
         {account_type, Account.balance(repo, accounts)}
       end)
 
+    IO.inspect(accounts_by_type, label: "accounts_by_type in repo.bank.acount.starting_balance ")
+
     accounts_by_type[:asset]
-    |> Decimal.sub(accounts_by_type[:liability])
-    |> Decimal.sub(accounts_by_type[:equity])
+    |> Money.sub(accounts_by_type[:liability])
+    |> Money.sub(accounts_by_type[:equity])
   end
 end

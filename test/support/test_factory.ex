@@ -4,21 +4,19 @@ defmodule SoftBank.TestFactory do
   alias SoftBank.{Account, Amount, Entry}
 
   @chars "ABCDEFGHIJKLMNOPQRSTUVWXYZ" |> String.split("")
-  @default_currency "USD"
 
   def account_factory do
     %Account{
       name: "My Assets",
       type: "asset",
       contra: false,
-      hash: generate_rand_string(),
-      currency: @default_currency
+      hash: generate_rand_string()
     }
   end
 
   def entry_factory do
     %Entry{
-      description: "Investing in Koenigsegg",
+      description: "Test1",
       date: DateTime.utc_now(),
       amounts: [build(:credit), build(:debit)]
     }

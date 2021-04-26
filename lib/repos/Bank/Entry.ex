@@ -46,15 +46,26 @@ defmodule SoftBank.Entry do
   Accepts and returns a changeset, appending an error if "credit" and "debit" amounts
   are not equivalent
   """
+
   def validate_debits_and_credits_balance(changeset) do
     amounts = Ecto.Changeset.get_field(changeset, :amounts)
-    amounts = Enum.group_by(amounts, fn i -> i.type end)
+    types = Enum.group_by(amounts, fn i -> i.type end)
+
+    credits = Enum.group_by(types["credit"], fn i -> i.amount.amount end)
+    debits = Enum.group_by(types["debit"], fn i -> i.amount.amount end)
 
     credit_sum =
-      Enum.reduce(amounts["credit"], Decimal.new(0.0), fn i, acc -> Decimal.add(i.amount, acc) end)
+      Enum.reduce(credits, Decimal.new(0.0), fn i, acc -> Decimal.add(i.amount, acc) end)
 
-    debit_sum =
-      Enum.reduce(amounts["debit"], Decimal.new(0.0), fn i, acc -> Decimal.add(i.amount, acc) end)
+    debit_sum = Enum.reduce(debits, Decimal.new(0.0), fn i, acc -> Decimal.add(i.amount, acc) end)
+
+    IO.inspect(credit_sum,
+      label: "credit sum in repo.bankk.amount.validate_debits_and_credits_balance "
+    )
+
+    IO.inspect(debit_sum,
+      label: "debit_sum  in repo.bankk.amount.validate_debits_and_credits_balance "
+    )
 
     if credit_sum == debit_sum do
       changeset
@@ -72,16 +83,25 @@ defmodule SoftBank.Entry do
     credits =
       Amount
       |> Amount.for_entry(entry)
-      |> Amount.sum_type("credit")
+      |> Amount.select_type("credit")
       |> repo.all
 
     debits =
       Amount
       |> Amount.for_entry(entry)
-      |> Amount.sum_type("debit")
+      |> Amount.select_type("debit")
       |> repo.all
 
-    if debits - credits == 0 do
+    credit_sum =
+      Enum.reduce(credits, Decimal.new(0.0), fn i, acc -> Decimal.add(i.amount.amount, acc) end)
+
+    debit_sum =
+      Enum.reduce(debits, Decimal.new(0.0), fn i, acc -> Decimal.add(i.amount.amount, acc) end)
+
+    IO.inspect(credit_sum, label: "credit sum in repo.bankk.amount.balanced ")
+    IO.inspect(debit_sum, label: "debit_sum  in repo.bankk.amount.balanced ")
+
+    if credit_sum - debit_sum == 0 do
       true
     else
       false

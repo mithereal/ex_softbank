@@ -4,12 +4,13 @@
 
 ***This Module has the following banking functions available***
 
-Tellers( a pool of tellers so multiple processes can access. )
+Account Management ( a genserver that acts as the gateway between you and your accounts backed by a double entry accounting system )
 
-Currency Conversion (with auto update on conversion rates)
+Currency Conversion ( with auto update on conversion rates )
 
-Transfers(send amount will be converted to match the recievers account currency type)
+Custom Currencies ( added to the accounting system automatically)
 
+Transfers(the producers send amount will be converted to match the recievers account currency type)
 
 
 [![Build Status](https://travis-ci.org/mithereal/elixir-softbank.svg?branch=master)](https://travis-ci.org/mithereal/elixir-softbank)
@@ -24,7 +25,7 @@ by adding `soft_bank` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:soft_bank, "~> 0.1.4"}
+    {:soft_bank, "~> 0.2.0"}
   ]
 end
 ```
@@ -44,7 +45,7 @@ my_account_number = "demo-acct-number"
 to_account_number = "demo-acct-number"
 SoftBank.login(my_account_number)
 
-amount = 20.00
+amount = 20
 SoftBank.deposit(amount,my_account_number)
 SoftBank.withdrawl(amount,my_account_number)
 SoftBank.transfer(amount,my_account_number,to_account_number)

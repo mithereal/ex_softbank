@@ -7,7 +7,6 @@ defmodule SoftBank.Repo.Migrations.Tables do
         add :type, :string, null: false
         add :account_number, :string, null: false
         add :hash, :string, null: false
-        add :currency, :string, null: false
         add :contra, :boolean, default: false
   
         timestamps
@@ -25,7 +24,7 @@ defmodule SoftBank.Repo.Migrations.Tables do
       create index(:softbank_entries, [:date])
   
       create table(:softbank_amounts) do
-        add :amount, :decimal, precision: 20, scale: 10, null: false
+        add :amount, :money_with_currency
         add :account_id, references(:softbank_accounts, on_delete: :delete_all), null: false
         add :entry_id, references(:softbank_entries, on_delete: :delete_all), null: false
   
@@ -33,7 +32,26 @@ defmodule SoftBank.Repo.Migrations.Tables do
       end
       
       create index(:softbank_amounts, [:account_id, :entry_id])
-  
-  
+
+        create table(:softbank_currencies) do
+        add :name, :string, null: false
+        add :digits, :integer, default: 0
+        add :symbol, :string, null: false
+        add :alt_code, :string, null: false
+        add :cash_digits, :integer, default: 0
+        add :cash_rounding, :string, null: true
+        add :code, :string, null: false
+        add :from, :string, null: true
+        add :to, :string, null: true
+        add :iso_digits, :integer, default: 0
+        add :narrow_symbol, :string, null: true
+        add :rounding, default: 0
+        add :tender, :boolean, default: false
+
+      end
+
+
+        create index(:softbank_currencies, [:symbol])
+
     end
   end

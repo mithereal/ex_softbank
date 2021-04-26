@@ -28,11 +28,26 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env()}.exs"
-config :tesla, adapter: Tesla.Adapter.Hackney
 
 config :soft_bank, :ecto_repos, [SoftBank.Repo]
 
 config :soft_bank,
   soft_bank: [SoftBank.Repo]
+
+config :ex_money,
+  exchange_rates_retrieve_every: 300_000,
+  api_module: Money.ExchangeRates.OpenExchangeRates,
+  callback_module: Money.ExchangeRates.Callback,
+  exchange_rates_cache_module: Money.ExchangeRates.Cache.Ets,
+  preload_historic_rates: nil,
+  retriever_options: nil,
+  log_failure: :warn,
+  log_info: :info,
+  log_success: nil,
+  json_library: Jason,
+  default_cldr_backend: SoftBank.Cldr
+
+config :ex_cldr,
+  json_library: Jason
 
 import_config "#{Mix.env()}.exs"

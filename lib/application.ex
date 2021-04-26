@@ -11,10 +11,12 @@ defmodule SoftBank.Application do
     # List all child processes to be supervised
     children = [
       {SoftBank.Repo, args},
+      # Cldr.Currency,
+      {Cldr.Currency, [callback: {SoftBank.Currencies, :init, []}]},
       {Registry, keys: :unique, name: :soft_bank_accountants},
       # Starts a worker by calling: SoftBank.Worker.start_link(arg)
       # {SoftBank.Worker, args},
-      worker(SoftBank.Currency.Conversion.UpdateWorker, [], restart: :permanent),
+      supervisor(Money.ExchangeRates.Supervisor, [[restart: true, start_retriever: true]]),
       {DynamicSupervisor, strategy: :one_for_one, name: SoftBank.Accountant.Supervisor}
     ]
 
