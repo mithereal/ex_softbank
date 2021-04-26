@@ -24,7 +24,7 @@ defmodule SoftBank.TestFactory do
 
   def credit_factory do
     %Amount{
-      amount: Decimal.new(125_000.00),
+      amount: Money.new(:USD, "125,000.00"),
       type: "credit",
       account_id: 1
     }
@@ -32,7 +32,7 @@ defmodule SoftBank.TestFactory do
 
   def debit_factory do
     %Amount{
-      amount: Decimal.new(125_000.00),
+      amount: Money.new(:USD, "125,000.00"),
       type: "debit",
       account_id: 2
     }

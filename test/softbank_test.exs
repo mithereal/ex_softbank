@@ -4,6 +4,8 @@ defmodule SoftBankTest do
   alias SoftBank.Account
   alias SoftBank.TestRepo, as: REPO
 
+  import Ecto.Query
+
   #    doctest SoftBank
   #  doctest SoftBank.Account
 

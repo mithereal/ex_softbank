@@ -45,7 +45,7 @@ defmodule SoftBank.Repo.Migrations.Tables do
         add :to, :string, null: true
         add :iso_digits, :integer, default: 0
         add :narrow_symbol, :string, null: true
-        add :rounding, default: 0
+        add :rounding, :integer, default: 0
         add :tender, :boolean, default: false
 
       end
