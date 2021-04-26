@@ -202,7 +202,7 @@ defmodule SoftBank.Account do
   end
 
   defp bank_account_number(number \\ 12) do
-    Nanoid.generate(number, "0123456789")
+    base_acct_number = Nanoid.generate(number, "0123456789")
   end
 
   def fetch(%{account_number: account_number}, repo \\ Repo) do

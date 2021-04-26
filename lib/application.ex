@@ -17,6 +17,7 @@ defmodule SoftBank.Application do
       # Starts a worker by calling: SoftBank.Worker.start_link(arg)
       # {SoftBank.Worker, args},
       supervisor(Money.ExchangeRates.Supervisor, [[restart: true, start_retriever: true]]),
+      {SoftBank.Currency.Reload, name: SoftBank.Currency.Reload},
       {DynamicSupervisor, strategy: :one_for_one, name: SoftBank.Accountant.Supervisor}
     ]
 
