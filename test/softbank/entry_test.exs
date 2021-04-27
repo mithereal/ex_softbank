@@ -23,7 +23,7 @@ defmodule SoftBank.EntryTest do
         date: DateTime.utc_now(),
         amounts: [
           %Amount{amount: Money.new(:USD, "125,000.00"), type: "credit", account_id: 2},
-          %Amount{amount: Money.new(:USD, "125,_000.00"), type: "debit", account_id: 1},
+          %Amount{amount: Money.new(:USD, "125,000.00"), type: "debit", account_id: 1},
           %Amount{amount: Money.new(:USD, "125,000.00"), type: "debit", account_id: 1}
         ]
       })

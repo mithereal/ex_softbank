@@ -7,7 +7,6 @@ defmodule SoftBank.Currencies do
   def init(pid, table) do
     currencies = Repo.all(Currency)
 
-
     Enum.map(currencies, fn x ->
       Cldr.Currency.new(x.symbol,
         cash_digits: x.cash_digits,
@@ -30,7 +29,7 @@ defmodule SoftBank.Currencies do
     changeset = SoftBank.Currency.changeset(%SoftBank.Currency{}, params)
     {status, x} = Repo.insert(changeset)
 
-    Logger.info "Loading New Currency: " <> x.name
+    Logger.info("Loading New Currency: " <> x.name)
 
     if status == :ok do
       Cldr.Currency.new(x.symbol,
@@ -53,7 +52,7 @@ defmodule SoftBank.Currencies do
   def reload() do
     currencies = Repo.all(Currency)
 
-Logger.info "Reloading Custom Currencies"
+    Logger.info("Reloading Custom Currencies")
 
     Enum.map(currencies, fn x ->
       Cldr.Currency.new(x.symbol,

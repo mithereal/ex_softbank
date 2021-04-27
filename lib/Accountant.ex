@@ -8,9 +8,7 @@ defmodule SoftBank.Accountant do
   @ten_seconds 10000
   @fourty_seconds 400_000
 
-  @moduledoc """
-  A Bank Accountant.
-  """
+  @moduledoc false
 
   alias SoftBank.Transfer
   alias SoftBank.Account
@@ -24,7 +22,6 @@ defmodule SoftBank.Accountant do
             balance: 0,
             last_action_ts: nil
 
-  @doc false
   def child_spec(args) do
     %{
       id: __MODULE__,
@@ -94,7 +91,7 @@ defmodule SoftBank.Accountant do
     {:stop, :normal, nil, nil}
   end
 
-    def handle_cast(:shutdown, state) do
+  def handle_cast(:shutdown, state) do
     {:stop, :normal, state}
   end
 
@@ -126,7 +123,6 @@ defmodule SoftBank.Accountant do
   end
 
   def handle_call({:deposit, amount}, _from, state) do
-
     IO.inspect(amount.amount, label: "SoftBank.Accountant.deposit")
 
     entry_changeset = %Entry{

@@ -1,4 +1,34 @@
 defmodule SoftBank.Account do
+  @moduledoc """
+  An Account represents accounts in the system which are of _asset_,
+  _liability_, or _equity_ types, in accordance with the "accounting equation".
+
+  Each account must be set to one of the following types:
+
+     | TYPE      | NORMAL BALANCE | DESCRIPTION                            |
+     | :-------- | :-------------:| :--------------------------------------|
+     | asset     | Debit          | Resources owned by the Business Entity |
+     | liability | Credit         | Debts owed to outsiders                |
+     | equity    | Credit         | Owners rights to the Assets            |
+
+   Each account can also be marked as a _Contra Account_. A contra account will have it's
+   normal balance swapped. For example, to remove equity, a "Drawing" account may be created
+   as a contra equity account as follows:
+
+     `account = %Fuentes.Account{name: "Drawing", type: "asset", contra: true}`
+
+   At all times the balance of all accounts should conform to the "accounting equation"
+
+     *Assets = Liabilities + Owner's Equity*
+
+   Each account type acts as it's own ledger.
+
+  For more details see:
+
+  [Wikipedia - Accounting Equation](http://en.wikipedia.org/wiki/Accounting_equation)
+  [Wikipedia - Debits, Credits, and Contra Accounts](http://en.wikipedia.org/wiki/Debits_and_credits)
+  """
+
   import Kernel, except: [abs: 1]
 
   use Ecto.Schema
@@ -11,9 +41,15 @@ defmodule SoftBank.Account do
   alias SoftBank.Account
   alias SoftBank.Entry
 
-  @moduledoc """
-  An Account represents the individual account.
-  """
+  @typedoc "An Account type."
+  @type t :: %__MODULE__{
+          name: String.t(),
+          account_number: String.t(),
+          type: String.t(),
+          contra: Boolean.t(),
+          hash: String.t(),
+          amounts: [SoftBank.Amount]
+        }
 
   schema "softbank_accounts" do
     field(:name, :string)
@@ -45,11 +81,15 @@ defmodule SoftBank.Account do
     |> validate_required(@required_fields)
   end
 
+  @doc false
   def to_changeset(struct, params \\ %{}) do
     struct
     |> cast(params, @params)
   end
 
+  @doc """
+  Create new account with default ledgers
+  """
   def new(name \\ nil) do
     hash = hash_id()
 
@@ -103,10 +143,13 @@ defmodule SoftBank.Account do
     }
   end
 
+  @doc false
   defp with_amounts(query) do
     from(q in query, preload: [:amounts])
   end
 
+  @doc false
+  @spec amount_sum(Ecto.Repo.t(), SoftBank.Account.t(), String.t(), map) :: Decimal.t()
   def amount_sum(repo \\ Repo, account, type, dates \\ []) do
     dc = Enum.count(dates)
 
@@ -144,10 +187,25 @@ defmodule SoftBank.Account do
     reply
   end
 
+  @doc """
+  Computes the account balance for a given `SoftBank.Account` in a given
+  Ecto.Repo when provided with a map of dates in the format
+  `%{from_date: from_date, to_date: to_date}`.
+  Returns Decimal type.
+  """
+
+  @spec balance(Ecto.Repo.t(), [SoftBank.Account.t()], Ecto.Date.t()) :: Decimal.t()
   def account_balance(repo \\ Config.repo(), account_or_account_list, dates \\ nil) do
     balance(repo, account_or_account_list, dates)
   end
 
+  @doc """
+  Computes the account balance for a list of `SoftBank.Account` in a given
+  Ecto.Repo inclusive of all entries. This function is intended to be used with a
+  list of `SoftBank.Account`s of the same type.
+  Returns Decimal type.
+  """
+  # Balance for individual account with dates
   def balance(
         repo,
         account = %Account{
@@ -168,6 +226,7 @@ defmodule SoftBank.Account do
     end
   end
 
+  @doc false
   def balance(
         repo,
         account = %Account{
@@ -187,6 +246,7 @@ defmodule SoftBank.Account do
     end
   end
 
+  @doc falses
   def balance(repo, accounts, dates) when is_list(accounts) do
     balance =
       Enum.reduce(accounts, Decimal.new(0.0), fn account, acc ->
@@ -205,6 +265,9 @@ defmodule SoftBank.Account do
     base_acct_number = Nanoid.generate(number, "0123456789")
   end
 
+  @doc """
+  Fetch the Account from the Repo.
+  """
   def fetch(%{account_number: account_number}, repo \\ Repo) do
     query =
       Account
@@ -218,6 +281,10 @@ defmodule SoftBank.Account do
       |> repo.all()
   end
 
+  @doc """
+  Computes the starting balance for all accounts in the provided Ecto.Repo.
+  Returns Decimal type.
+  """
   def starting_balance(repo \\ Config.repo_from_config()) do
     accounts = repo.all(Account)
     accounts_by_type = Enum.group_by(accounts, fn i -> String.to_atom(i.type) end)

@@ -17,8 +17,8 @@ config :soft_bank, SoftBank.TestRepo,
   password: "postgres",
   database: "softbank_test",
   hostname: "localhost",
-    pool: Ecto.Adapters.SQL.Sandbox,
-      pool_size: 10
+  pool: Ecto.Adapters.SQL.Sandbox,
+  pool_size: 10
 
 config :soft_bank,
   default_currency: :USD,

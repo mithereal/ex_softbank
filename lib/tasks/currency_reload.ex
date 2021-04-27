@@ -1,15 +1,15 @@
 defmodule SoftBank.Currency.Reload do
-use Task
-require Logger
+  use Task
+  require Logger
+
+  @moduledoc false
 
   def start_link(force \\ false) do
-   Logger.info("Custom Currencies will be retrieved now and then every 300 seconds.")
+    Logger.info("Custom Currencies will be retrieved now and then every 300 seconds.")
     Task.start_link(&poll/0)
-
   end
 
-
-    defp poll() do
+  defp poll() do
     receive do
     after
       300_000 ->
@@ -17,5 +17,4 @@ require Logger
         poll()
     end
   end
-
 end
