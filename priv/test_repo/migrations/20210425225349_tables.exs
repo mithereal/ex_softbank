@@ -7,6 +7,7 @@ defmodule SoftBank.Repo.Migrations.Tables do
         add :type, :string, null: false
         add :account_number, :string, null: false
         add :hash, :string, null: false
+        add :default_currency, :string, null: false
         add :contra, :boolean, default: false
   
         timestamps
@@ -16,8 +17,8 @@ defmodule SoftBank.Repo.Migrations.Tables do
   
       create table(:softbank_entries) do
         add :description, :string, null: false
-        add :date, :date, null: false
-  
+        add :date, :utc_datetime_usec, null: false
+
         timestamps
       end
 

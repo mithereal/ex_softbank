@@ -40,6 +40,7 @@ defmodule SoftBank.Account do
   alias SoftBank.Amount
   alias SoftBank.Account
   alias SoftBank.Entry
+  alias SoftBank.Config
 
   @typedoc "An Account type."
   @type t :: %__MODULE__{
@@ -48,6 +49,7 @@ defmodule SoftBank.Account do
           type: String.t(),
           contra: Boolean.t(),
           hash: String.t(),
+          default_currency: String.t(),
           amounts: [SoftBank.Amount]
         }
 
@@ -57,6 +59,7 @@ defmodule SoftBank.Account do
     field(:hash, :string)
     field(:type, :string)
     field(:contra, :boolean)
+    field(:default_currency, :string)
 
     field(:balance, Money.Ecto.Composite.Type, virtual: true)
 
@@ -66,7 +69,7 @@ defmodule SoftBank.Account do
     timestamps
   end
 
-  @params ~w(account_number type contra  name hash id)a
+  @params ~w(account_number type contra  name hash id default_currency)a
   @required_fields ~w(account_number)a
 
   @credit_types ["asset"]
@@ -90,16 +93,19 @@ defmodule SoftBank.Account do
   @doc """
   Create new account with default ledgers
   """
-  def new(name \\ nil) do
-    hash = hash_id()
+  def new(name \\ " ") do
 
-    name =
-      case name do
-        nil -> ""
-        _ -> name <> " "
-      end
+    default_currency = Config.get(:default_currency, :USD)
 
-    asset_struct = %{name: name <> "Assets", type: "asset"}
+    new(name, default_currency)
+
+  end
+
+  def new(name, currency, hash \\ hash_id()) do
+
+  ## check if curreccy is valid?
+
+    asset_struct = %{name: name <> "Assets", type: "asset", default_currency: currency}
 
     account_number = bank_account_number()
 
@@ -111,7 +117,11 @@ defmodule SoftBank.Account do
       |> validate_required(@required_fields)
       |> Repo.insert()
 
-    liablilty_struct = %{name: name <> "Liabilities", type: "liability"}
+    liablilty_struct = %{
+      name: name <> "Liabilities",
+      type: "liability",
+      default_currency: currency
+    }
 
     account_number = bank_account_number()
 
@@ -123,7 +133,7 @@ defmodule SoftBank.Account do
       |> validate_required(@required_fields)
       |> Repo.insert()
 
-    equity_struct = %{name: name <> "Equity", type: "equity"}
+    equity_struct = %{name: name <> "Equity", type: "equity", default_currency: currency}
 
     account_number = bank_account_number()
 
@@ -149,30 +159,18 @@ defmodule SoftBank.Account do
   end
 
   @doc false
-  @spec amount_sum(Ecto.Repo.t(), SoftBank.Account.t(), String.t(), map) :: Decimal.t()
-  def amount_sum(repo \\ Repo, account, type, dates \\ []) do
-    dc = Enum.count(dates)
-
+  @spec amount_sum(Ecto.Repo.t(), SoftBank.Account.t(), String.t()) :: Decimal.t()
+  def amount_sum(repo, account, type) do
     records =
-      case dc == 0 do
-        true ->
-          Amount
-          |> Amount.for_account(account)
-          |> Amount.select_type(type)
-          |> repo.all()
+      Amount
+      |> Amount.for_account(account)
+      |> Amount.select_type(type)
+      |> repo.all()
 
-        false ->
-          Amount
-          |> Amount.for_account(account)
-          |> Amount.dated(dates)
-          |> Amount.select_type(type)
-          |> repo.all()
-      end
+    default_currency = account.default_currency
 
     reply =
       if Enum.count(records) > 0 do
-        default_currency = account.default_currency
-
         default_records =
           Enum.map(records, fn x ->
             Money.to_currency(x.amount, default_currency, Money.ExchangeRates.latest_rates())
@@ -180,7 +178,35 @@ defmodule SoftBank.Account do
 
         Money.add(default_records)
       else
-        Money.new(0)
+        Money.new(default_currency, 0)
+      end
+
+    IO.inspect(reply, label: "reply in repo.bank.acount.amount_sum ")
+    reply
+  end
+
+  @doc false
+  @spec amount_sum(Ecto.Repo.t(), SoftBank.Account.t(), String.t(), map) :: Decimal.t()
+  def amount_sum(repo, account, type, dates) do
+    records =
+      Amount
+      |> Amount.for_account(account)
+      |> Amount.dated(dates)
+      |> Amount.select_type(type)
+      |> repo.all()
+
+    default_currency = account.default_currency
+
+    reply =
+      if Enum.count(records) > 0 do
+        default_records =
+          Enum.map(records, fn x ->
+            Money.to_currency(x.amount, default_currency, Money.ExchangeRates.latest_rates())
+          end)
+
+        Money.add(default_records)
+      else
+        Money.new(default_currency, 0)
       end
 
     IO.inspect(reply, label: "reply in repo.bank.acount.amount_sum ")
@@ -246,11 +272,14 @@ defmodule SoftBank.Account do
     end
   end
 
-  @doc falses
+  @doc false
   def balance(repo, accounts, dates) when is_list(accounts) do
+    {_, new_amt} = Money.new(:USD, 0)
+
     balance =
-      Enum.reduce(accounts, Decimal.new(0.0), fn account, acc ->
-        Decimal.add(Account.balance(repo, account, dates), acc)
+      Enum.reduce(accounts, new_amt, fn account, acc ->
+        {_, new_amt} = Money.add(Account.balance(repo, account, dates), acc)
+        new_amt
       end)
 
     IO.inspect(balance, label: "balance in repo.bank.acount.balance ")
@@ -285,13 +314,13 @@ defmodule SoftBank.Account do
   Computes the starting balance for all accounts in the provided Ecto.Repo.
   Returns Decimal type.
   """
-  def starting_balance(repo \\ Config.repo_from_config()) do
+  def starting_balance(repo \\ Config.repo()) do
     accounts = repo.all(Account)
     accounts_by_type = Enum.group_by(accounts, fn i -> String.to_atom(i.type) end)
 
     accounts_by_type =
       Enum.map(accounts_by_type, fn {account_type, accounts} ->
-        {account_type, Account.balance(repo, accounts)}
+        {account_type, Account.account_balance(repo, accounts)}
       end)
 
     IO.inspect(accounts_by_type, label: "accounts_by_type in repo.bank.acount.starting_balance ")

@@ -78,7 +78,8 @@ defmodule SoftBank.Amount do
 
   def select_type(query, type) do
     from(c in query,
-      where: c.type == ^type,
+      join: p in assoc(c, :account),
+      where: p.type == ^type,
       select: c.amount
     )
   end

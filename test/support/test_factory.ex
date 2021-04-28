@@ -10,7 +10,9 @@ defmodule SoftBank.TestFactory do
       name: "My Assets",
       type: "asset",
       contra: false,
-      hash: generate_rand_string()
+      hash: generate_rand_string(),
+      account_number: generate_rand_string(),
+      default_currency: "USD"
     }
   end
 

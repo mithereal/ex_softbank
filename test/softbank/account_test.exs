@@ -27,7 +27,7 @@ defmodule SoftBank.AccountTest do
     equity = insert(:account, name: "Equity", type: "equity")
     drawing = insert(:account, name: "Drawing", type: "equity", contra: true)
 
-    assert Account.starting_balance(TestRepo) == Decimal.new(0.0)
+    assert Account.starting_balance(TestRepo) == Money.new(:USD, 0)
 
     insert(:entry,
       amounts: [build(:credit, account_id: asset.id), build(:debit, account_id: equity.id)]
@@ -58,7 +58,7 @@ defmodule SoftBank.AccountTest do
       amounts: [build(:credit, account_id: equity.id), build(:debit, account_id: drawing.id)]
     )
 
-    assert Account.balance(TestRepo, equity) ==
+    assert Account.account_balance(TestRepo, equity) ==
              Account.balance(TestRepo, equity, %{
                to_date: DateTime.utc_now()
              })
@@ -69,17 +69,17 @@ defmodule SoftBank.AccountTest do
     )
 
     refute Account.balance(TestRepo, equity) ==
-             Account.balance(TestRepo, equity, %{
+             Account.account_balance(TestRepo, equity, %{
                to_date: DateTime.utc_now()
              })
 
     assert Account.balance(TestRepo, equity) ==
-             Account.balance(TestRepo, equity, %{
+             Account.account_balance(TestRepo, equity, %{
                to_date: DateTime.utc_now()
              })
 
     refute Account.balance(TestRepo, equity) ==
-             Account.balance(TestRepo, equity, %{
+             Account.account_balance(TestRepo, equity, %{
                to_date: DateTime.utc_now()
              })
   end

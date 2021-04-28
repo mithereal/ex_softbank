@@ -26,6 +26,7 @@ defmodule SoftBankTest do
   test "Login to the bank account(failure)" do
     bank_account_number = "339571873745"
     data = SoftBank.login(bank_account_number)
-    assert data == nil
+    {status, _} = data
+    assert status == :error
   end
 end
