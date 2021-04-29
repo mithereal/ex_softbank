@@ -27,7 +27,7 @@ defmodule SoftBank.Entry do
     timestamps()
   end
 
-  @fields ~w(description date)
+  @fields ~w(description date)a
 
   @doc """
   Creates a changeset for `SoftBank.Entry`, validating a required `:description` and `:date`,
@@ -54,21 +54,26 @@ defmodule SoftBank.Entry do
     credits = Enum.group_by(types["credit"], fn i -> i.amount.amount end)
     debits = Enum.group_by(types["debit"], fn i -> i.amount.amount end)
 
+    default_currency = :USD
+     default_amount = Money.new!(default_currency, 0)
+
     credit_sum =
-      Enum.reduce(credits, Decimal.new(0.0), fn i, acc -> Decimal.add(i.amount, acc) end)
+      Enum.reduce(credits, default_amount, fn {_,i}, acc ->
+        amt = List.first(i)
+        {_,amt} = Money.add(amt.amount, acc)
+        amt
+      end)
 
-    debit_sum = Enum.reduce(debits, Decimal.new(0.0), fn i, acc -> Decimal.add(i.amount, acc) end)
 
-    IO.inspect(credit_sum,
-      label: "credit sum in repo.bankk.amount.validate_debits_and_credits_balance "
-    )
-
-    IO.inspect(debit_sum,
-      label: "debit_sum  in repo.bankk.amount.validate_debits_and_credits_balance "
-    )
+    debit_sum =
+      Enum.reduce(debits, default_amount, fn {_,i}, acc ->
+        amt = List.first(i)
+        {_,amt} = Money.add(amt.amount, acc)
+        amt
+      end)
 
     if credit_sum == debit_sum do
-      changeset
+          changeset
     else
       add_error(changeset, :amounts, "Credit and Debit amounts must be equal")
     end
@@ -80,6 +85,7 @@ defmodule SoftBank.Entry do
   """
   @spec balanced?(Ecto.Repo.t(), SoftBank.Entry.t()) :: Boolean.t()
   def balanced?(repo \\ Config.repo(), entry = %Entry{}) do
+
     credits =
       Amount
       |> Amount.for_entry(entry)
@@ -92,11 +98,18 @@ defmodule SoftBank.Entry do
       |> Amount.select_type("debit")
       |> repo.all
 
-    credit_sum =
-      Enum.reduce(credits, Decimal.new(0.0), fn i, acc -> Decimal.add(i.amount.amount, acc) end)
+    default_currency = :USD
+    default_amount = Money.new(default_currency, 0)
 
-    debit_sum =
-      Enum.reduce(debits, Decimal.new(0.0), fn i, acc -> Decimal.add(i.amount.amount, acc) end)
+    {_, credit_sum} =
+      Enum.reduce(credits, default_amount, fn i, acc ->
+       Money.add(i.amount.amount, acc)
+      end)
+
+    {_, debit_sum} =
+      Enum.reduce(debits, default_amount, fn i, acc ->
+        Money.add(i.amount.amount, acc)
+      end)
 
     IO.inspect(credit_sum, label: "credit sum in repo.bankk.amount.balanced ")
     IO.inspect(debit_sum, label: "debit_sum  in repo.bankk.amount.balanced ")

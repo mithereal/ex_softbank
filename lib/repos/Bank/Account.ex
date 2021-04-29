@@ -271,7 +271,7 @@ defmodule SoftBank.Account do
 
   @doc false
   def balance(repo, accounts, dates) when is_list(accounts) do
-    {_, new_amt} = Money.new(:USD, 0)
+    new_amt = Money.new(:USD, 0)
 
     balance =
       Enum.reduce(accounts, new_amt, fn account, acc ->
@@ -313,17 +313,22 @@ defmodule SoftBank.Account do
   """
   def test_balance(repo \\ Config.repo()) do
     accounts = repo.all(Account)
-    accounts_by_type = Enum.group_by(accounts, fn i -> String.to_atom(i.type) end)
 
-    accounts_by_type =
-      Enum.map(accounts_by_type, fn {account_type, accounts} ->
-        {account_type, Account.account_balance(repo, accounts)}
-      end)
+    case Enum.count(accounts) > 0 do
+      true ->
+        accounts_by_type = Enum.group_by(accounts, fn i -> String.to_atom(i.type) end)
 
-    IO.inspect(accounts_by_type, label: "accounts_by_type in repo.bank.acount.starting_balance ")
+        accounts_by_type =
+          Enum.map(accounts_by_type, fn {account_type, accounts} ->
+            {account_type, Account.account_balance(repo, accounts)}
+          end)
 
-    accounts_by_type[:asset]
-    |> Money.sub(accounts_by_type[:liability])
-    |> Money.sub(accounts_by_type[:equity])
+        accounts_by_type[:asset]
+        |> Money.sub(accounts_by_type[:liability])
+        |> Money.sub(accounts_by_type[:equity])
+
+      false ->
+        Money.new(:USD, 0)
+    end
   end
 end
