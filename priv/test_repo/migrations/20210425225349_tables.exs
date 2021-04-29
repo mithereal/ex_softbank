@@ -25,6 +25,7 @@ defmodule SoftBank.Repo.Migrations.Tables do
       create index(:softbank_entries, [:date])
   
       create table(:softbank_amounts) do
+         add :type, :string, null: false
         add :amount, :money_with_currency
         add :account_id, references(:softbank_accounts, on_delete: :delete_all), null: false
         add :entry_id, references(:softbank_entries, on_delete: :delete_all), null: false

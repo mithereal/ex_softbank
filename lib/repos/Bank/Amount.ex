@@ -76,10 +76,17 @@ defmodule SoftBank.Amount do
     )
   end
 
-  def select_type(query, type) do
-    from(c in query,
-      join: p in assoc(c, :account),
-      where: p.type == ^type,
+#  def select_type(query, type) do
+#    from(c in query,
+#      join: p in assoc(c, :account),
+#      where: p.type == ^type,
+#      select: c.amount
+#    )
+#  end
+
+   def select_type(query, type) do
+     from(c in query,
+      where: c.type == ^type,
       select: c.amount
     )
   end

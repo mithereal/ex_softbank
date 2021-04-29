@@ -93,17 +93,14 @@ defmodule SoftBank.Account do
   @doc """
   Create new account with default ledgers
   """
-  def new(name \\ " ") do
-
+  def new(name) do
     default_currency = Config.get(:default_currency, :USD)
 
     new(name, default_currency)
-
   end
 
-  def new(name, currency, hash \\ hash_id()) do
-
-  ## check if curreccy is valid?
+  def new(name, currency \\ :USD, hash \\ hash_id()) do
+    ## check if curreccy is valid?
 
     asset_struct = %{name: name <> "Assets", type: "asset", default_currency: currency}
 
@@ -311,10 +308,10 @@ defmodule SoftBank.Account do
   end
 
   @doc """
-  Computes the starting balance for all accounts in the provided Ecto.Repo.
-  Returns Decimal type.
+  Computes a test balance for all accounts in the provided Ecto.Repo.
+  Returns Money type.
   """
-  def starting_balance(repo \\ Config.repo()) do
+  def test_balance(repo \\ Config.repo()) do
     accounts = repo.all(Account)
     accounts_by_type = Enum.group_by(accounts, fn i -> String.to_atom(i.type) end)
 

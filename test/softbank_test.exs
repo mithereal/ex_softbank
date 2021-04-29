@@ -10,7 +10,7 @@ defmodule SoftBankTest do
   #  doctest SoftBank.Account
 
   test "Create a new Account" do
-    data = SoftBank.create()
+    data = SoftBank.create("test")
     assert data !== nil
   end
 

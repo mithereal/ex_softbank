@@ -76,8 +76,8 @@ defmodule SoftBank do
   @doc """
   Create a new account
   """
-  def create() do
-    SoftBank.Account.new()
+  def create(name) do
+    SoftBank.Account.new(name)
   end
 
   @doc """
