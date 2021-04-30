@@ -1,10 +1,10 @@
 language: elixir
 
 elixir:
-  - 1.9
+  - 1.11
 
 otp_release:
-  - 20.3
+  - 21
 
 env:
   global:
