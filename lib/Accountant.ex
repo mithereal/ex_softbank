@@ -165,7 +165,7 @@ defmodule SoftBank.Accountant do
           changeset = SoftBank.Account.to_changeset(%SoftBank.Account{}, account)
           changestruct = Ecto.Changeset.apply_changes(changeset)
 
-          balance = Account.account_balance(Softbank.Repo, changestruct)
+          balance = Account.account_balance(SoftBank.Repo, changestruct)
 
           updated_state = %{
             state

@@ -102,7 +102,13 @@ defmodule SoftBank.Account do
   def new(name, currency \\ :USD, hash \\ hash_id()) do
     ## check if curreccy is valid?
 
-    asset_struct = %{name: name <> "Assets", type: "asset", default_currency: currency}
+known? = Cldr.Currency.known_currency? currency
+
+case known? do
+true ->
+  currency = to_string(currency)
+
+    asset_struct = %{name: name <> " Assets", type: "asset", default_currency: currency}
 
     account_number = bank_account_number()
 
@@ -115,7 +121,7 @@ defmodule SoftBank.Account do
       |> Repo.insert()
 
     liablilty_struct = %{
-      name: name <> "Liabilities",
+      name: name <> " Liabilities",
       type: "liability",
       default_currency: currency
     }
@@ -130,7 +136,7 @@ defmodule SoftBank.Account do
       |> validate_required(@required_fields)
       |> Repo.insert()
 
-    equity_struct = %{name: name <> "Equity", type: "equity", default_currency: currency}
+    equity_struct = %{name: name <> " Equity", type: "equity", default_currency: currency}
 
     account_number = bank_account_number()
 
@@ -148,6 +154,10 @@ defmodule SoftBank.Account do
       credit_account: credit_account,
       equity_account: equity_account
     }
+false -> {:error, "unknown currency"}
+end
+
+
   end
 
   @doc false
@@ -313,6 +323,7 @@ defmodule SoftBank.Account do
   """
   def test_balance(repo \\ Config.repo()) do
     accounts = repo.all(Account)
+    default_currency = repo.get(:default_currency, :USD)
 
     case Enum.count(accounts) > 0 do
       true ->
@@ -328,7 +339,7 @@ defmodule SoftBank.Account do
         |> Money.sub(accounts_by_type[:equity])
 
       false ->
-        Money.new(:USD, 0)
+        Money.new(default_currency, 0)
     end
   end
 end
