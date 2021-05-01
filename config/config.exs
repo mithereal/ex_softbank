@@ -47,6 +47,21 @@ config :ex_money,
   json_library: Jason,
   default_cldr_backend: SoftBank.Cldr
 
+### Ecample using coinmarketcap for cryptocurrency rates
+#  config :ex_money,
+#  exchange_rates_retrieve_every: 300_000,
+#  api_module: Money.ExchangeRates.CoinMarketCap,
+#  callback_module: Money.ExchangeRates.CoinMarketCap.Callback,
+#  exchange_rates_cache_module: Money.ExchangeRates.Cache.Ets,
+#  exchange_rates_api_key: "your_api_key",
+#  preload_historic_rates: nil,
+#  retriever_options: nil,
+#  log_failure: :warn,
+#  log_info: :info,
+#  log_success: nil,
+#  json_library: Jason,
+#  default_cldr_backend: SoftBank.Cldr
+
 config :ex_cldr,
   json_library: Jason
 
