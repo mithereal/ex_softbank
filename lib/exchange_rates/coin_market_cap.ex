@@ -27,7 +27,7 @@ defmodule SoftBank.ExchangeRates.CoinMarketCap do
   require Logger
   alias SoftBank.ExchangeRates.CoinMarketCap.Retriever
 
-  alias   SoftBank.Config
+  alias SoftBank.Config
 
   @behaviour Money.ExchangeRates
 
@@ -46,56 +46,53 @@ defmodule SoftBank.ExchangeRates.CoinMarketCap do
   rates retrieval module.
   """
 
-
   def init(default_config) do
-    url = Application.get_env(:ex_money, :rate_url,  @rate_url)
-    api_key = Application.get_env(:ex_money, :exchange_rates_api_key,  nil)
+    url = Application.get_env(:ex_money, :rate_url, @rate_url)
+    api_key = Application.get_env(:ex_money, :exchange_rates_api_key, nil)
     Map.put(default_config, :retriever_options, %{url: url, api_key: api_key})
   end
 
   def decode_rates(body) do
+    %{"data" => data} = Money.json_library().decode!(body)
 
-   %{"data" => data } = Money.json_library().decode!(body)
+    add_currencies_to_bank(data)
 
-   add_currencies_to_bank(data)
+    rates = marshall_rates(data)
 
-rates = marshall_rates(data)
+    r =
+      rates
+      |> Cldr.Map.atomize_keys()
+      |> Enum.map(fn
+        {k, v} when is_float(v) -> {k, Decimal.from_float(v)}
+        {k, v} when is_integer(v) -> {k, Decimal.new(v)}
+      end)
+      |> Enum.into(%{})
+  end
 
-    r = rates
-    |> Cldr.Map.atomize_keys()
-    |> Enum.map(fn
-      {k, v} when is_float(v) -> {k, Decimal.from_float(v)}
-      {k, v} when is_integer(v) -> {k, Decimal.new(v)}
+  defp marshall_rates(data) do
+    Enum.map(data, fn x ->
+      key = "X" <> String.slice(x["symbol"], 0..1)
+      value = x["quote"]["USD"]["price"]
+
+      {key, value}
     end)
-    |> Enum.into(%{})
   end
 
-defp marshall_rates(data) do
-Enum.map(data, fn(x) ->
+  defp add_currencies_to_bank(data) do
+    Enum.each(data, fn x ->
+      key = "X" <> String.slice(x["symbol"], 0..1)
 
-key = "X" <> String.slice(x["symbol"], 0..1)
-value = x["quote"]["USD"]["price"]
+      currency = %{
+        name: x["name"],
+        digits: 16,
+        symbol: key,
+        alt_code: x["slug"],
+        code: x["symbol"]
+      }
 
-{key, value}
-end)
-
+      SoftBank.Currencies.new(currency)
+    end)
   end
-
-defp add_currencies_to_bank(data)do
-
-Enum.each(data, fn(x) ->
-key = "X" <> String.slice(x["symbol"], 0..1)
-currency = %{
-name: x["name"],
- digits: 16,
-  symbol: key,
-  alt_code: x["slug"],
-  code: x["symbol"]
-}
-SoftBank.Currencies.new(currency)
-end)
-  end
-
 
   @doc """
   Retrieves the latest exchange rates from CoinMarketCap site.
@@ -128,7 +125,7 @@ end)
 
   @latest_rates "/cryptocurrency/listings/latest"
   defp retrieve_latest_rates(url, api_key, config) do
-  endpoint = url <> @latest_rates <> "?CMC_PRO_API_KEY=" <> api_key
+    endpoint = url <> @latest_rates <> "?CMC_PRO_API_KEY=" <> api_key
 
     Retriever.retrieve_rates(endpoint, config)
   end
@@ -168,7 +165,7 @@ end)
     date_string = Date.to_string(date)
 
     Retriever.retrieve_rates(
-      url <> @historic_rates <>  "?CMC_PRO_API_KEY=" <> api_key ,
+      url <> @historic_rates <> "?CMC_PRO_API_KEY=" <> api_key,
       config
     )
   end

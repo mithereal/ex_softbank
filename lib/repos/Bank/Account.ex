@@ -346,16 +346,37 @@ defmodule SoftBank.Account do
   @doc """
   Fetch the Account from the Repo.
   """
-  def fetch(%{account_number: account_number}, repo \\ Repo) do
+
+  def fetch(account, repo \\ Repo)
+
+
+  def fetch(%{account_number: account_number}, repo) do
+
     query =
       Account
       |> where([a], a.account_number == ^account_number)
       |> select([a], %{
         account_number: a.account_number,
+        hash: a.hash,
         type: a.type,
         contra: a.contra,
         id: a.id,
-          default_currency: a.default_currency
+        default_currency: a.default_currency
+      })
+      |> repo.one()
+  end
+
+  def fetch(%{hash: hash}, repo) do
+    query =
+      Account
+      |> where([a], a.hash == ^hash)
+      |> select([a], %{
+        account_number: a.account_number,
+        hash: a.hash,
+        type: a.type,
+        contra: a.contra,
+        id: a.id,
+        default_currency: a.default_currency
       })
       |> repo.all()
   end

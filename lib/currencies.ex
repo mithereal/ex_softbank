@@ -5,7 +5,7 @@ defmodule SoftBank.Currencies do
   require Logger
 
   def init(pid, table) do
-    currencies = Config.repo.all(Currency)
+    currencies = Config.repo().all(Currency)
 
     Enum.map(currencies, fn x ->
       Cldr.Currency.new(x.symbol,

@@ -31,15 +31,16 @@ defmodule SoftBank.Accountant do
   end
 
   def start_link(account_number) do
-   name = via_tuple(account_number)
+    name = via_tuple(account_number)
     params = %SoftBank.Accountant{account: 0, balance: 0, account_number: account_number}
     GenServer.start_link(__MODULE__, params, name: name)
   end
 
-@impl true
+  @impl true
   def init(args) do
     name = via_tuple(args.account_number)
-     Task.start(fn -> GenServer.cast(name, :login) end)
+
+    GenServer.cast(name, :login)
 
     {:ok, args}
   end
@@ -110,7 +111,7 @@ defmodule SoftBank.Accountant do
     IO.inspect(decimal, label: "SoftBank.Accountant.withdrawl")
 
     entry_changeset = %Entry{
-      description: "Withdraw : " <> decimal <> " from " <> state.account.account_number,
+      description: "Withdraw : " <> to_string(decimal) <> " from " <> to_string(state.account.account_number),
       date: DateTime.utc_now(),
       amounts: [
         %Amount{amount: new_amount, type: "debit", account_id: state.account.id}
@@ -127,8 +128,10 @@ defmodule SoftBank.Accountant do
     IO.inspect(amount, label: "SoftBank.Accountant.deposit")
 
     entry_changeset = %Entry{
-      description: "deposit : " <> to_string(amount) <> " into " <> to_string(state.account_number),
-      date: DateTime.utc_now(), ## remove microseconds
+      description:
+        "deposit : " <> to_string(amount) <> " into " <> to_string(state.account_number),
+      ## remove microseconds
+      date: DateTime.utc_now(),
       amounts: [
         %Amount{amount: amount, type: "debit", account_id: state.account.id}
       ]
@@ -166,7 +169,7 @@ defmodule SoftBank.Accountant do
           changeset = SoftBank.Account.to_changeset(%SoftBank.Account{}, account)
           changestruct = Ecto.Changeset.apply_changes(changeset)
 
-          {_,balance} = Account.account_balance(SoftBank.Repo, changestruct)
+          {_, balance} = Account.account_balance(SoftBank.Repo, changestruct)
 
           updated_state = %{
             state
@@ -183,36 +186,26 @@ defmodule SoftBank.Accountant do
     {:reply, status, state}
   end
 
-  def handle_cast(:login,  state) do
-    accounts = Account.fetch(%{account_number: state.account_number})
+  def handle_cast(:login, state) do
+    account = Account.fetch(%{account_number: state.account_number})
 
-    {status, state} =
-      case Enum.count(accounts) > 0 do
-        false ->
-          {:error, state}
+    changeset = SoftBank.Account.to_changeset(%SoftBank.Account{}, account)
 
-        true ->
-          account = List.first(accounts)
+    changestruct = Ecto.Changeset.apply_changes(changeset)
 
-          ### get the balance
-          changeset = SoftBank.Account.to_changeset(%SoftBank.Account{}, account)
-          changestruct = Ecto.Changeset.apply_changes(changeset)
+    {_, balance} = Account.account_balance(SoftBank.Repo, changestruct)
 
-          {_,balance}   = Account.account_balance(SoftBank.Repo, changestruct)
-
-          updated_state = %{
-            state
-            | account_number: state.account_number,
-              account: account,
-              balance: balance,
-              last_action_ts: DateTime.utc_now()
-          }
-
-          {:ok, updated_state}
-      end
+    updated_state = %{
+      state
+      | account_number: state.account_number,
+        account: account,
+        balance: balance,
+        last_action_ts: DateTime.utc_now()
+    }
 
     Process.send_after(self(), :timeout, @fourty_seconds)
-    {:noreply,  state}
+
+    {:noreply, updated_state}
   end
 
   def handle_call({:relogin, account_number}, _from, state) do

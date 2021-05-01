@@ -1,5 +1,4 @@
 defmodule SoftBank do
-
   @moduledoc """
   The Main Interface for the Application
   """
@@ -11,7 +10,7 @@ defmodule SoftBank do
 
   defdelegate withdrawl(amount, from_account_number), to: ACCOUNTANT
 
-  defdelegate deposit(amount, to_account_number) , to: ACCOUNTANT
+  defdelegate deposit(amount, to_account_number), to: ACCOUNTANT
 
   defdelegate convert(account_number, amount, dest_currency), to: ACCOUNTANT
 
@@ -22,9 +21,7 @@ defmodule SoftBank do
   This will start a genserver to act as an accountant to abstract transactions, accountants auto shutdown after a ttl.
   """
   def login(account_number) do
-
-      SUPERVISOR.start_child(account_number)
-
+    SUPERVISOR.start_child(account_number)
   end
 
   def show(account_number) do
@@ -44,5 +41,4 @@ defmodule SoftBank do
   def add_currency(params) do
     SoftBank.Currencies.new(params)
   end
-
 end

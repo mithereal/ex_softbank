@@ -16,8 +16,7 @@ config :soft_bank, SoftBank.Repo,
   hostname: "localhost",
   pool_size: 10
 
-
-  ### Example using coinmarketcap for cryptocurrency rates
+### Example using coinmarketcap for cryptocurrency rates
 #  config :ex_money,
 #  exchange_rates_retrieve_every: 300_000,
 #  api_module: SoftBank.ExchangeRates.CoinMarketCap,
@@ -31,5 +30,3 @@ config :soft_bank, SoftBank.Repo,
 #  log_success: nil,
 #  json_library: Jason,
 #  default_cldr_backend: SoftBank.Cldr
-
-

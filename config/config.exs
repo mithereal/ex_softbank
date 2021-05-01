@@ -47,8 +47,6 @@ config :ex_money,
   json_library: Jason,
   default_cldr_backend: SoftBank.Cldr
 
-
-
 config :ex_cldr,
   json_library: Jason
 

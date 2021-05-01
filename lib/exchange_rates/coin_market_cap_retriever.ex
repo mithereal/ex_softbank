@@ -192,7 +192,6 @@ defmodule SoftBank.ExchangeRates.CoinMarketCap.Retriever do
     |> retrieve_rates(config)
   end
 
-
   def retrieve_rates(url, config) when is_list(url) do
     headers = if_none_match_header(url)
 
@@ -278,7 +277,12 @@ defmodule SoftBank.ExchangeRates.CoinMarketCap.Retriever do
     end
 
     if config.preload_historic_rates do
-      log(config, :info, "Preloading historic rates for #{inspect(config.preload_historic_rates)}")
+      log(
+        config,
+        :info,
+        "Preloading historic rates for #{inspect(config.preload_historic_rates)}"
+      )
+
       schedule_work(config.preload_historic_rates, config.cache_module)
     end
 

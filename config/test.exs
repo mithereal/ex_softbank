@@ -3,7 +3,6 @@ use Mix.Config
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
 
-
 config :soft_bank, SoftBank.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
@@ -20,5 +19,3 @@ config :soft_bank, SoftBank.TestRepo,
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10
-
-
