@@ -354,7 +354,8 @@ defmodule SoftBank.Account do
         account_number: a.account_number,
         type: a.type,
         contra: a.contra,
-        id: a.id
+        id: a.id,
+          default_currency: a.default_currency
       })
       |> repo.all()
   end

@@ -1,45 +1,22 @@
 defmodule SoftBank do
+  use GenServer
   @moduledoc """
   The Main Interface for the Application
   """
+  @registry_name :soft_bank_accountants
 
   alias SoftBank.Accountant.Supervisor, as: SUPERVISOR
   alias SoftBank.Accountant, as: ACCOUNTANT
 
-  @doc """
-  Transfer an amount from an account number to another account number
-  """
-  def transfer(amount, from_account_number, to_account_number) do
-    ACCOUNTANT.transfer(amount, from_account_number, to_account_number)
-  end
+  defdelegate transfer(amount, from_account_number, to_account_number), to: ACCOUNTANT
 
-  @doc """
-  Withdrawl an amount from an account number
-  """
-  def withdrawl(amount, from_account_number) do
-    ACCOUNTANT.withdrawl(amount, from_account_number)
-  end
+  defdelegate withdrawl(amount, from_account_number), to: ACCOUNTANT
 
-  @doc """
-  Deposit an amount to an account number
-  """
-  def deposit(amount, to_account_number) do
-    ACCOUNTANT.deposit(amount, to_account_number)
-  end
+  defdelegate deposit(amount, to_account_number) , to: ACCOUNTANT
 
-  @doc """
-  Convert an amount between currencies
-  """
-  def convert(account_number, amount, dest_currency) do
-    ACCOUNTANT.convert(account_number, amount, dest_currency)
-  end
+  defdelegate convert(account_number, amount, dest_currency), to: ACCOUNTANT
 
-  @doc """
-  Return the account balance
-  """
-  def balance(account_number) do
-    ACCOUNTANT.balance(account_number)
-  end
+  defdelegate balance(account_number), to: ACCOUNTANT
 
   @doc """
   Login to the account
@@ -85,5 +62,10 @@ defmodule SoftBank do
   """
   def add_currency(params) do
     SoftBank.Currencies.new(params)
+  end
+
+  @doc false
+  def via_tuple(hash, registry \\ @registry_name) do
+    {:via, Registry, {registry, hash}}
   end
 end
