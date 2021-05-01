@@ -3,7 +3,6 @@ defmodule SoftBank do
   @moduledoc """
   The Main Interface for the Application
   """
-  @registry_name :soft_bank_accountants
 
   alias SoftBank.Accountant.Supervisor, as: SUPERVISOR
   alias SoftBank.Accountant, as: ACCOUNTANT
@@ -64,8 +63,4 @@ defmodule SoftBank do
     SoftBank.Currencies.new(params)
   end
 
-  @doc false
-  def via_tuple(hash, registry \\ @registry_name) do
-    {:via, Registry, {registry, hash}}
-  end
 end
