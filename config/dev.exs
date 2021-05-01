@@ -3,6 +3,11 @@ use Mix.Config
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
 
+config :soft_bank, :ecto_repos, [SoftBank.Repo]
+
+config :soft_bank,
+  soft_bank: [SoftBank.Repo]
+
 config :soft_bank, SoftBank.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
@@ -11,20 +16,20 @@ config :soft_bank, SoftBank.Repo,
   hostname: "localhost",
   pool_size: 10
 
-config :soft_bank,
-  default_currency: :USD,
-  separator: ".",
-  delimiter: ",",
-  symbol: false,
-  symbol_on_right: false,
-  symbol_space: false,
-  fractional_unit: false
 
-config :soft_bank,
-  # source: CurrencyConversion.Source.Fixer,
-  source: SoftBank.Currency.Conversion.Source.Test,
-  # source_api_key: "FIXER_ACCESS_KEY",
-  # defaults to http since free access key only supports http
+  ### Example using coinmarketcap for cryptocurrency rates
+#  config :ex_money,
+#  exchange_rates_retrieve_every: 300_000,
+#  api_module: SoftBank.ExchangeRates.CoinMarketCap,
+#  callback_module: SoftBank.ExchangeRates.CoinMarketCap.Callback,
+#  exchange_rates_cache_module: Money.ExchangeRates.Cache.Ets,
+#  exchange_rates_api_key: "your_api_key",
+#  preload_historic_rates: nil,
+#  retriever_options: nil,
+#  log_failure: :warn,
+#  log_info: :info,
+#  log_success: nil,
+#  json_library: Jason,
+#  default_cldr_backend: SoftBank.Cldr
 
-  source_protocol: "https",
-  refresh_interval: 86_400_000
+

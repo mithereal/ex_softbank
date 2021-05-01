@@ -17,7 +17,7 @@ defmodule SoftBank.Currency do
     field(:cash_rounding, :integer)
     field(:code, :string)
     field(:from, :string)
-    field(:iso_digits, :string)
+    field(:iso_digits, :integer)
     field(:narrow_symbol, :string)
     field(:rounding, :integer)
     field(:tender, :boolean)

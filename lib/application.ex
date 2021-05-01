@@ -4,6 +4,7 @@ defmodule SoftBank.Application do
   @moduledoc false
 
   use Application
+    alias SoftBank.Config
 
   def start(_type, args) do
     import Supervisor.Spec

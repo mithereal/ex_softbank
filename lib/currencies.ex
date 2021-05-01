@@ -1,11 +1,11 @@
 defmodule SoftBank.Currencies do
   alias SoftBank.Currency
-  alias SoftBank.Repo
+  alias SoftBank.Config
 
   require Logger
 
   def init(pid, table) do
-    currencies = Repo.all(Currency)
+    currencies = Config.repo.all(Currency)
 
     Enum.map(currencies, fn x ->
       Cldr.Currency.new(x.symbol,
