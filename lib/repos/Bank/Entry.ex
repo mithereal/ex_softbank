@@ -55,25 +55,24 @@ defmodule SoftBank.Entry do
     debits = Enum.group_by(types["debit"], fn i -> i.amount.amount end)
 
     default_currency = :USD
-     default_amount = Money.new!(default_currency, 0)
+    default_amount = Money.new!(default_currency, 0)
 
     credit_sum =
-      Enum.reduce(credits, default_amount, fn {_,i}, acc ->
+      Enum.reduce(credits, default_amount, fn {_, i}, acc ->
         amt = List.first(i)
-        {_,amt} = Money.add(amt.amount, acc)
+        {_, amt} = Money.add(amt.amount, acc)
         amt
       end)
 
-
     debit_sum =
-      Enum.reduce(debits, default_amount, fn {_,i}, acc ->
+      Enum.reduce(debits, default_amount, fn {_, i}, acc ->
         amt = List.first(i)
-        {_,amt} = Money.add(amt.amount, acc)
+        {_, amt} = Money.add(amt.amount, acc)
         amt
       end)
 
     if credit_sum == debit_sum do
-          changeset
+      changeset
     else
       add_error(changeset, :amounts, "Credit and Debit amounts must be equal")
     end
@@ -85,7 +84,6 @@ defmodule SoftBank.Entry do
   """
   @spec balanced?(Ecto.Repo.t(), SoftBank.Entry.t()) :: Boolean.t()
   def balanced?(repo \\ Config.repo(), entry = %Entry{}) do
-
     credits =
       Amount
       |> Amount.for_entry(entry)
@@ -103,7 +101,7 @@ defmodule SoftBank.Entry do
 
     {_, credit_sum} =
       Enum.reduce(credits, default_amount, fn i, acc ->
-       Money.add(i.amount.amount, acc)
+        Money.add(i.amount.amount, acc)
       end)
 
     {_, debit_sum} =

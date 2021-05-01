@@ -6,8 +6,8 @@ defmodule SoftBank.EntryTest do
 
   @valid_attrs params_for(:entry)
   @invalid_attrs %{}
-  @test_amount  Money.new!(:USD, "125,000.00")
-  @test_amount_alt  Money.new!(:USD, "225,000.00")
+  @test_amount Money.new!(:USD, "125,000.00")
+  @test_amount_alt Money.new!(:USD, "225,000.00")
   @valid_with_amount_attrs %{
     description: "Spending Money",
     date: DateTime.utc_now(),
@@ -18,7 +18,6 @@ defmodule SoftBank.EntryTest do
   }
 
   test "entry casts associated amounts" do
-
     changeset =
       Entry.changeset(%Entry{
         description: "Spending Money Again",
@@ -34,7 +33,6 @@ defmodule SoftBank.EntryTest do
   end
 
   test "entry debits and credits must cancel" do
-
     changeset =
       Entry.changeset(%Entry{
         description: "Spending Lots More Money",

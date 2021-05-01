@@ -102,62 +102,62 @@ defmodule SoftBank.Account do
   def new(name, currency \\ :USD, hash \\ hash_id()) do
     ## check if curreccy is valid?
 
-known? = Cldr.Currency.known_currency? currency
+    known? = Cldr.Currency.known_currency?(currency)
 
-case known? do
-true ->
-  currency = to_string(currency)
+    case known? do
+      true ->
+        currency = to_string(currency)
 
-    asset_struct = %{name: name <> " Assets", type: "asset", default_currency: currency}
+        asset_struct = %{name: name <> " Assets", type: "asset", default_currency: currency}
 
-    account_number = bank_account_number()
+        account_number = bank_account_number()
 
-    {_, debit_account} =
-      %Account{}
-      |> Account.to_changeset(asset_struct)
-      |> put_change(:account_number, account_number)
-      |> put_change(:hash, hash)
-      |> validate_required(@required_fields)
-      |> Repo.insert()
+        {_, debit_account} =
+          %Account{}
+          |> Account.to_changeset(asset_struct)
+          |> put_change(:account_number, account_number)
+          |> put_change(:hash, hash)
+          |> validate_required(@required_fields)
+          |> Repo.insert()
 
-    liablilty_struct = %{
-      name: name <> " Liabilities",
-      type: "liability",
-      default_currency: currency
-    }
+        liablilty_struct = %{
+          name: name <> " Liabilities",
+          type: "liability",
+          default_currency: currency
+        }
 
-    account_number = bank_account_number()
+        account_number = bank_account_number()
 
-    {_, credit_account} =
-      %Account{}
-      |> Account.to_changeset(liablilty_struct)
-      |> put_change(:account_number, account_number)
-      |> put_change(:hash, hash)
-      |> validate_required(@required_fields)
-      |> Repo.insert()
+        {_, credit_account} =
+          %Account{}
+          |> Account.to_changeset(liablilty_struct)
+          |> put_change(:account_number, account_number)
+          |> put_change(:hash, hash)
+          |> validate_required(@required_fields)
+          |> Repo.insert()
 
-    equity_struct = %{name: name <> " Equity", type: "equity", default_currency: currency}
+        equity_struct = %{name: name <> " Equity", type: "equity", default_currency: currency}
 
-    account_number = bank_account_number()
+        account_number = bank_account_number()
 
-    {_, equity_account} =
-      %Account{}
-      |> Account.to_changeset(equity_struct)
-      |> put_change(:account_number, account_number)
-      |> put_change(:hash, hash)
-      |> validate_required(@required_fields)
-      |> Repo.insert()
+        {_, equity_account} =
+          %Account{}
+          |> Account.to_changeset(equity_struct)
+          |> put_change(:account_number, account_number)
+          |> put_change(:hash, hash)
+          |> validate_required(@required_fields)
+          |> Repo.insert()
 
-    %{
-      hash: hash,
-      debit_account: debit_account,
-      credit_account: credit_account,
-      equity_account: equity_account
-    }
-false -> {:error, "unknown currency"}
-end
+        %{
+          hash: hash,
+          debit_account: debit_account,
+          credit_account: credit_account,
+          equity_account: equity_account
+        }
 
-
+      false ->
+        {:error, "unknown currency"}
+    end
   end
 
   @doc false
@@ -244,13 +244,34 @@ end
         account = %Account{
           account_number: account_number,
           type: type,
-          contra: contra
+          contra: contra,
+          default_currency: default_currency
         },
         dates
       )
       when is_nil(dates) do
     credits = Account.amount_sum(repo, account, "credit")
     debits = Account.amount_sum(repo, account, "debit")
+
+    credits =
+      case is_nil(credits) do
+        true ->
+          {_, credit} = Money.new(:USD, 0)
+          [credit]
+
+        false ->
+          credits
+      end
+
+    debits =
+      case is_nil(debits) do
+        true ->
+          {_, debits} = Money.new(:USD, 0)
+          [debits]
+
+        false ->
+          debits
+      end
 
     if type in @credit_types && !contra do
       balance = Money.sub(debits, credits)
@@ -265,12 +286,33 @@ end
         account = %Account{
           account_number: account_number,
           type: type,
-          contra: contra
+          contra: contra,
+          default_currency: default_currency
         },
         dates
       ) do
     credits = Account.amount_sum(repo, account, "credit", dates)
     debits = Account.amount_sum(repo, account, "debit", dates)
+
+    credits =
+      case is_nil(credits) do
+        true ->
+          {_, credit} = Money.new(:USD, 0)
+          [credit]
+
+        false ->
+          credits
+      end
+
+    debits =
+      case is_nil(debits) do
+        true ->
+          {_, debits} = Money.new(:USD, 0)
+          [debits]
+
+        false ->
+          debits
+      end
 
     if type in @credit_types && !contra do
       balance = Money.sub(debits, credits)
