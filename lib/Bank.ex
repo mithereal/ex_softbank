@@ -1,5 +1,5 @@
 defmodule SoftBank do
-  use GenServer
+
   @moduledoc """
   The Main Interface for the Application
   """
@@ -22,27 +22,9 @@ defmodule SoftBank do
   This will start a genserver to act as an accountant to abstract transactions, accountants auto shutdown after a ttl.
   """
   def login(account_number) do
-    {status, pid} = SUPERVISOR.start_child()
 
-    case status do
-      :ok ->
-        params = %{account: 0, balance: 0, account_number: account_number}
-        reply = ACCOUNTANT.try_login(pid, params)
+      SUPERVISOR.start_child(account_number)
 
-        case reply do
-          :ok ->
-            Registry.register(:soft_bank_accountants, account_number, pid)
-            {:ok, account_number}
-
-          :error ->
-            ## stop the accountant
-            ACCOUNTANT.shutdown(pid)
-            {:error, account_number}
-        end
-
-      :error ->
-        {status, "AN ERROR OCCURRED"}
-    end
   end
 
   def show(account_number) do

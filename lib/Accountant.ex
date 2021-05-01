@@ -30,16 +30,17 @@ defmodule SoftBank.Accountant do
     }
   end
 
-  def start_link(_) do
-    params = %SoftBank.Accountant{account: 0, balance: 0, account_number: nil}
-    GenServer.start_link(__MODULE__, params)
+  def start_link(account_number) do
+   name = via_tuple(account_number)
+    params = %SoftBank.Accountant{account: 0, balance: 0, account_number: account_number}
+    GenServer.start_link(__MODULE__, params, name: name)
   end
 
-  def try_login(pid, args) do
-    GenServer.call(pid, {:login, args.account_number})
-  end
-
+@impl true
   def init(args) do
+    name = via_tuple(args.account_number)
+     Task.start(fn -> GenServer.cast(name, :login) end)
+
     {:ok, args}
   end
 
@@ -49,7 +50,7 @@ defmodule SoftBank.Accountant do
 
   def deposit(amount, to) do
     name = via_tuple(to)
-    GenServer.call(name, {:deposit, amount, to})
+    GenServer.call(name, {:deposit, amount})
     reload(to)
   end
 
@@ -123,11 +124,11 @@ defmodule SoftBank.Accountant do
   end
 
   def handle_call({:deposit, amount}, _from, state) do
-    IO.inspect(amount.amount, label: "SoftBank.Accountant.deposit")
+    IO.inspect(amount, label: "SoftBank.Accountant.deposit")
 
     entry_changeset = %Entry{
-      description: "deposit : " <> amount.amount <> " into " <> state.account.account_number,
-      date: DateTime.utc_now(),
+      description: "deposit : " <> to_string(amount) <> " into " <> to_string(state.account_number),
+      date: DateTime.utc_now(), ## remove microseconds
       amounts: [
         %Amount{amount: amount, type: "debit", account_id: state.account.id}
       ]
@@ -165,7 +166,7 @@ defmodule SoftBank.Accountant do
           changeset = SoftBank.Account.to_changeset(%SoftBank.Account{}, account)
           changestruct = Ecto.Changeset.apply_changes(changeset)
 
-          balance = Account.account_balance(SoftBank.Repo, changestruct)
+          {_,balance} = Account.account_balance(SoftBank.Repo, changestruct)
 
           updated_state = %{
             state
@@ -180,6 +181,38 @@ defmodule SoftBank.Accountant do
 
     Process.send_after(self(), :timeout, @fourty_seconds)
     {:reply, status, state}
+  end
+
+  def handle_cast(:login,  state) do
+    accounts = Account.fetch(%{account_number: state.account_number})
+
+    {status, state} =
+      case Enum.count(accounts) > 0 do
+        false ->
+          {:error, state}
+
+        true ->
+          account = List.first(accounts)
+
+          ### get the balance
+          changeset = SoftBank.Account.to_changeset(%SoftBank.Account{}, account)
+          changestruct = Ecto.Changeset.apply_changes(changeset)
+
+          {_,balance}   = Account.account_balance(SoftBank.Repo, changestruct)
+
+          updated_state = %{
+            state
+            | account_number: state.account_number,
+              account: account,
+              balance: balance,
+              last_action_ts: DateTime.utc_now()
+          }
+
+          {:ok, updated_state}
+      end
+
+    Process.send_after(self(), :timeout, @fourty_seconds)
+    {:noreply,  state}
   end
 
   def handle_call({:relogin, account_number}, _from, state) do

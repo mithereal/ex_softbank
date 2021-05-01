@@ -12,6 +12,9 @@ Custom Currencies ( added to the accounting system automatically)
 
 Transfers(the producers send amount will be converted to match the recievers account currency type)
 
+Typically the Account Management genserver would be considered an anti pattern, however I needed a way to persist the state of my users ledgers in order to decouple accounting from user management 
+this allows a users state to be persisted for a ttl, when another system process needs also to use the account data the ttl is reset and state persisted until timeout occurs. 
+
 
 [![Build Status](https://travis-ci.org/mithereal/elixir-softbank.svg?branch=master)](https://travis-ci.org/mithereal/elixir-softbank)
 

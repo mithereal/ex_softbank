@@ -17,7 +17,7 @@ defmodule SoftBank.Repo.Migrations.Tables do
   
       create table(:softbank_entries) do
         add :description, :string, null: false
-        add :date, :utc_datetime_usec, null: false
+        add :date, :utc_datetime, null: false
 
         timestamps
       end
