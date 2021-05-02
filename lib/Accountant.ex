@@ -52,15 +52,25 @@ defmodule SoftBank.Accountant do
   def deposit(amount, to, currency \\ :USD) do
     name = via_tuple(to)
     amount = Money.new!(currency, amount)
-    GenServer.call(name, {:deposit, amount})
-    reload(to)
+         try do
+           GenServer.call(name, {:deposit, amount})
+            GenServer.call(name, {:relogin, to})
+    catch
+      :exit, _ -> {:error, "invalid_account"}
+    end
+
   end
 
   def withdrawl(amount, from, currency \\ :USD) do
     name = via_tuple(from)
     amount = Money.new!(currency, amount)
-    GenServer.call(name, {:withdrawl, amount})
-    reload(from)
+     try do
+           GenServer.call(name, {:withdrawl, amount})
+           GenServer.call(name, {:relogin, from})
+    catch
+      :exit, _ -> {:error, "invalid_account"}
+    end
+
   end
 
   def convert(amount, dest_currency) do
@@ -77,13 +87,23 @@ defmodule SoftBank.Accountant do
 
   def balance(account) do
     name = via_tuple(account)
-    GenServer.call(name, :balance)
+      try do
+          GenServer.call(name, :balance)
+    catch
+      :exit, _ -> {:error, "invalid_account"}
+    end
+
   end
 
   def transfer(amount, from, to) do
     name = via_tuple(from)
-    GenServer.cast(name, {:transfer, to, amount})
-    reload(from)
+      try do
+          GenServer.call(name, {:transfer, to, amount})
+          GenServer.call(name, {:relogin, from})
+    catch
+      :exit, _ -> {:error, "invalid_account"}
+    end
+
   end
 
   def handle_info(:timeout, state) do
@@ -112,6 +132,14 @@ defmodule SoftBank.Accountant do
     Transfer.send(state.account, destination_account, params)
     state = %{state | last_action_ts: DateTime.utc_now()}
     {:noreply, state}
+  end
+
+  def handle_call({:transfer, account_number, amount},_, state) do
+    destination_account = Account.fetch(%{account_number: account_number, type: "asset"})
+    params = %{amount: amount}
+    Transfer.send(state.account, destination_account, params)
+    state = %{state | last_action_ts: DateTime.utc_now()}
+    {:reply, :ok, state}
   end
 
   def handle_call({:withdrawl, amount}, _from, state) do
@@ -223,21 +251,20 @@ defmodule SoftBank.Accountant do
     {:noreply, updated_state}
   end
 
-  def handle_call({:relogin, account_number}, _from, state) do
-    accounts = Account.fetch(%{account_number: account_number})
+  def handle_call({:relogin, account_number},  _, state) do
+    account = Account.fetch(%{account_number: account_number})
 
     {status, state} =
-      case Enum.count(accounts) > 0 do
+      case Enum.count(account) > 0 do
         false ->
           {:error, state}
 
         true ->
-          account = List.first(accounts)
 
           changeset = SoftBank.Account.to_changeset(%SoftBank.Account{}, account)
           changestruct = Ecto.Changeset.apply_changes(changeset)
 
-          balance = Account.account_balance(Softbank.Repo, changestruct)
+          balance = Account.account_balance(SoftBank.Repo, changestruct)
 
           updated_state = %{
             state
@@ -265,11 +292,12 @@ defmodule SoftBank.Accountant do
 
   def show_state(account) do
     name = via_tuple(account)
-    GenServer.call(name, :show_state)
+      try do
+          GenServer.call(name, :show_state)
+    catch
+      :exit, _ -> {:error, "invalid_account"}
+    end
+
   end
 
-  def reload(account_number) do
-    # Process.send_after(self(), 5000, {:relogin, account_number})
-    nil
-  end
 end
