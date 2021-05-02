@@ -10,16 +10,16 @@ defmodule SoftBank.Repo.Migrations.Tables do
         add :default_currency, :string, null: false
         add :contra, :boolean, default: false
   
-        timestamps
+         timestamps([type: :utc_datetime_usec])
       end
 
       create index(:softbank_accounts, [:name, :type])
   
       create table(:softbank_entries) do
         add :description, :string, null: false
-        add :date, :utc_datetime, null: false
+        add :date, :utc_datetime_usec, null: false
   
-        timestamps
+        timestamps([type: :utc_datetime_usec])
       end
 
       create index(:softbank_entries, [:date])
@@ -30,7 +30,7 @@ defmodule SoftBank.Repo.Migrations.Tables do
         add :account_id, references(:softbank_accounts, on_delete: :delete_all), null: false
         add :entry_id, references(:softbank_entries, on_delete: :delete_all), null: false
   
-        timestamps()
+         timestamps([type: :utc_datetime_usec])
       end
       
       create index(:softbank_amounts, [:account_id, :entry_id])

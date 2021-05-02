@@ -8,6 +8,7 @@ defmodule SoftBank.Transfer do
   alias SoftBank.Transfer
   alias SoftBank.Entry
   alias SoftBank.Repo
+  alias SoftBank.Config
 
   @moduledoc """
   Transfer from one account to another.
@@ -15,6 +16,7 @@ defmodule SoftBank.Transfer do
 
   embedded_schema do
     field(:message, :integer)
+    field(:account_number, :string)
     field(:amount, Money.Ecto.Composite.Type)
     field(:description, :string)
 
@@ -22,20 +24,21 @@ defmodule SoftBank.Transfer do
     embeds_one(:recipient, Account)
   end
 
-  def changeset(account, struct, params \\ %{}) do
+  def changeset(from_account, struct, to_account \\ %{}, params \\ %{}) do
     struct
-    |> cast(params, [:message, :description])
-    |> validate_required([:description])
-    |> put_embed(:sender, account)
-    |> put_destination_customer(account)
+    |> cast(params, [:message, :description, :account_number])
+    |> put_embed(:sender, from_account)
+    |> put_destination_customer(to_account)
   end
 
   defp put_destination_customer(%{valid?: false} = changeset, _), do: changeset
 
-  defp put_destination_customer(changeset, sender) do
-    account_number = get_change(changeset, :account_number)
+  defp put_destination_customer(changeset, to) do
+    account_number = to.account_number
 
-    if account_number == sender.account_number do
+    applied_changeset = apply_changes(changeset)
+
+    if account_number == applied_changeset.sender.account_number do
       add_error(changeset, :recipient, "cannot transfer to the same account")
     else
       case Repo.one(from(a in Account, where: a.account_number == ^account_number)) do
@@ -49,37 +52,29 @@ defmodule SoftBank.Transfer do
   end
 
   ## params must be of %Account{} type
-  def send(account, params) do
-    changeset = changeset(account, %Transfer{}, params)
+  def send(from_account, to_account, amount, params) do
+    changeset = changeset(from_account, %Transfer{}, to_account, params)
 
     if changeset.valid? do
       transfer = apply_changes(changeset)
-      source_account = account
+      source_account = from_account
       destination_account = transfer.recipient
-
-      amount =
-        case source_account.currency == destination_account.currency do
-          true ->
-            transfer.amount
-
-          # SoftBank.Currency.Conversion.convert(transfer.amount, destination_account.currency)
-          _ ->
-            0
-        end
 
       transfer = %{transfer | amount: amount}
 
       transfer_request =
-        create_request(source_account, destination_account, transfer.description, amount)
+        create_request(source_account, destination_account, amount)
 
-      case account.balance - amount > 0 do
+        account_balance = Account.balance(Config.repo, source_account, nil)
+
+      case Money.subtract(account_balance, amount)  > 0 do
         true ->
           entry_changeset = %Entry{
             description:
               "Transfer : " <>
-                transfer_request.debit.amount <>
+                transfer_request.reciever.amount <>
                 " from " <>
-                transfer_request.debit.account <> " to " <> transfer_request.debit.account,
+                transfer_request.reciever.account <> " to " <> transfer_request.reciever.account,
             date: DateTime.utc_now(),
             amounts: [
               %Amount{
@@ -108,17 +103,15 @@ defmodule SoftBank.Transfer do
     end
   end
 
-  defp create_request(source, destination, description, amount) do
+  defp create_request(source, destination,  amount) do
     %{
       sender: %{
         account: source.account_number,
-        description: source.description,
-        amount: source.amount
+        amount: amount
       },
       reciever: %{
         account: destination.account_number,
-        description: destination.description,
-        amount: destination.amount
+        amount: amount
       }
     }
   end

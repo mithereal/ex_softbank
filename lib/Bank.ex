@@ -12,7 +12,7 @@ defmodule SoftBank do
 
   defdelegate deposit(amount, to_account_number), to: ACCOUNTANT
 
-  defdelegate convert(account_number, amount, dest_currency), to: ACCOUNTANT
+  defdelegate convert( amount, dest_currency), to: ACCOUNTANT
 
   defdelegate balance(account_number), to: ACCOUNTANT
 

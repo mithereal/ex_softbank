@@ -176,17 +176,28 @@ defmodule SoftBank.Account do
 
     default_currency = account.default_currency
 
-    reply =
-      if Enum.count(records) > 0 do
-        default_records =
-          Enum.map(records, fn x ->
-            Money.to_currency(x.amount, default_currency, Money.ExchangeRates.latest_rates())
-          end)
+    default_currency = String.to_atom(default_currency)
 
-        Money.add(default_records)
-      else
-        Money.new(default_currency, 0)
+    latest_rates = Money.ExchangeRates.latest_rates()
+
+    rates =
+      case(latest_rates) do
+        {:error, rates} -> []
+        {:ok, rates} -> rates
       end
+
+    default_records =
+      Enum.map(records, fn x ->
+        Money.to_currency!(x, default_currency, rates)
+      end)
+
+    new_amt = Money.new(default_currency, 0)
+
+    reply =
+      Enum.reduce(default_records, new_amt, fn r, acc ->
+        {_, new_amt} = Money.add(r, acc)
+        new_amt
+      end)
 
     IO.inspect(reply, label: "reply in repo.bank.acount.amount_sum ")
     reply
@@ -204,17 +215,28 @@ defmodule SoftBank.Account do
 
     default_currency = account.default_currency
 
-    reply =
-      if Enum.count(records) > 0 do
-        default_records =
-          Enum.map(records, fn x ->
-            Money.to_currency(x.amount, default_currency, Money.ExchangeRates.latest_rates())
-          end)
+    default_currency = String.to_atom(default_currency)
 
-        Money.add(default_records)
-      else
-        Money.new(default_currency, 0)
+    latest_rates = Money.ExchangeRates.latest_rates()
+
+    rates =
+      case(latest_rates) do
+        {:error, rates} -> []
+        {:ok, rates} -> rates
       end
+
+    default_records =
+      Enum.map(records, fn x ->
+        Money.to_currency!(x, default_currency, rates)
+      end)
+
+    new_amt = Money.new(default_currency, 0)
+
+    reply =
+      Enum.reduce(default_records, new_amt, fn r, acc ->
+        {_, new_amt} = Money.add(r, acc)
+        new_amt
+      end)
 
     IO.inspect(reply, label: "reply in repo.bank.acount.amount_sum ")
     reply
@@ -349,9 +371,7 @@ defmodule SoftBank.Account do
 
   def fetch(account, repo \\ Repo)
 
-
   def fetch(%{account_number: account_number}, repo) do
-
     query =
       Account
       |> where([a], a.account_number == ^account_number)

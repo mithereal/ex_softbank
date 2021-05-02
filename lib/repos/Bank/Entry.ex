@@ -17,10 +17,11 @@ defmodule SoftBank.Entry do
   alias SoftBank.Account
   alias SoftBank.Amount
   alias SoftBank.Entry
+  SoftBank.Config
 
   schema "softbank_entries" do
     field(:description, :string)
-    field(:date, :utc_datetime)
+    field(:date, :utc_datetime_usec)
 
     has_many(:amounts, SoftBank.Amount, on_delete: :delete_all)
 
@@ -34,12 +35,12 @@ defmodule SoftBank.Entry do
   casting an provided "debit" and "credit" `SoftBank.Amount`s, and validating that
   those amounts balance.
   """
-  def changeset(model, params \\ %{}) do
+  def changeset(model, params \\ %{}, default_currency \\ :USD) do
     model
     |> cast(params, @fields)
     |> validate_required([:description, :date])
     |> cast_assoc(:amounts)
-    |> validate_debits_and_credits_balance
+    |> validate_debits_and_credits_balance(default_currency)
   end
 
   @doc """
@@ -47,14 +48,13 @@ defmodule SoftBank.Entry do
   are not equivalent
   """
 
-  def validate_debits_and_credits_balance(changeset) do
+  def validate_debits_and_credits_balance(changeset, default_currency \\ :USD) do
     amounts = Ecto.Changeset.get_field(changeset, :amounts)
     types = Enum.group_by(amounts, fn i -> i.type end)
 
     credits = Enum.group_by(types["credit"], fn i -> i.amount.amount end)
     debits = Enum.group_by(types["debit"], fn i -> i.amount.amount end)
 
-    default_currency = :USD
     default_amount = Money.new!(default_currency, 0)
 
     credit_sum =
@@ -82,8 +82,8 @@ defmodule SoftBank.Entry do
   Accepts an `SoftBank.Entry` and `Ecto.Repo` and returns true/false based on whether
   the associated amounts for that entry sum to zero.
   """
-  @spec balanced?(Ecto.Repo.t(), SoftBank.Entry.t()) :: Boolean.t()
-  def balanced?(repo \\ Config.repo(), entry = %Entry{}) do
+  @spec(balanced?(Ecto.Repo.t(), SoftBank.Entry.t()) :: Boolean.t(), String.t())
+  def balanced?(repo \\ Config.repo(), entry = %Entry{}, default_currency \\ :USD) do
     credits =
       Amount
       |> Amount.for_entry(entry)
@@ -96,7 +96,6 @@ defmodule SoftBank.Entry do
       |> Amount.select_type("debit")
       |> repo.all
 
-    default_currency = :USD
     default_amount = Money.new(default_currency, 0)
 
     {_, credit_sum} =

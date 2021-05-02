@@ -50,7 +50,7 @@ defmodule SoftBank.Currencies do
   end
 
   def reload() do
-    currencies = Repo.all(Currency)
+    currencies = Config.repo().all(Currency)
 
     Logger.info("Reloading Custom Currencies")
 

@@ -49,31 +49,40 @@ defmodule SoftBank.Accountant do
     GenServer.call(pid, :shutdown)
   end
 
-  def deposit(amount, to) do
+  def deposit(amount, to, currency \\ :USD) do
     name = via_tuple(to)
+    amount = Money.new!(currency, amount)
     GenServer.call(name, {:deposit, amount})
     reload(to)
   end
 
-  def withdrawl(amount, from) do
+  def withdrawl(amount, from, currency \\ :USD) do
     name = via_tuple(from)
-    GenServer.call(name, {:withdrawl, amount, from})
+    amount = Money.new!(currency, amount)
+    GenServer.call(name, {:withdrawl, amount})
     reload(from)
   end
 
-  def convert(account, amount, to) do
-    name = via_tuple(account)
-    GenServer.call(name, {:convert, amount, to})
+  def convert(amount, dest_currency) do
+    latest_rates = Money.ExchangeRates.latest_rates()
+
+    rates =
+      case(latest_rates) do
+        {:error, rates} -> []
+        {:ok, rates} -> rates
+      end
+
+    Money.to_currency(amount, dest_currency, rates)
   end
 
   def balance(account) do
     name = via_tuple(account)
-    GenServer.call(name, {:balance, account})
+    GenServer.call(name, :balance)
   end
 
   def transfer(amount, from, to) do
     name = via_tuple(from)
-    GenServer.call(name, {:transfer, amount, to})
+    GenServer.cast(name, {:transfer,  to, amount})
     reload(from)
   end
 
@@ -97,56 +106,62 @@ defmodule SoftBank.Accountant do
     {:stop, :normal, state}
   end
 
-  def handle_cast({:transfer, account_number}, state) do
+  def handle_cast({:transfer, account_number, amount}, state) do
     dest = Account.fetch(%{account_number: account_number, type: "asset"})
-    Transfer.send(state.account, dest)
+params = %{account_number: state.account_number}
+    Transfer.send(state.account, dest, amount, params)
     state = %{state | last_action_ts: DateTime.utc_now()}
     {:noreply, state}
   end
 
   def handle_call({:withdrawl, amount}, _from, state) do
-    decimal = Decimal.negative?(amount.amount)
-    new_amount = Money.new(amount.type, decimal)
+    type = amount.currency()
 
-    IO.inspect(decimal, label: "SoftBank.Accountant.withdrawl")
+    changeset =
+      Entry.changeset(%Entry{
+        description:
+          "Withdrawl : " <>
+            to_string(amount) <> " from " <> to_string(state.account.account_number),
+        date: DateTime.utc_now(),
+        amounts: [
+          %Amount{amount: amount, type: "credit", account_id: state.account.id},
+          %Amount{amount: amount, type: "debit", account_id: state.account.id}
+        ]
+      })
 
-    entry_changeset = %Entry{
-      description: "Withdraw : " <> to_string(decimal) <> " from " <> to_string(state.account.account_number),
-      date: DateTime.utc_now(),
-      amounts: [
-        %Amount{amount: new_amount, type: "debit", account_id: state.account.id}
-      ]
-    }
-
-    Repo.insert(entry_changeset)
+    Repo.insert(changeset)
 
     state = %{state | last_action_ts: DateTime.utc_now()}
     {:reply, state, state}
   end
 
   def handle_call({:deposit, amount}, _from, state) do
-    IO.inspect(amount, label: "SoftBank.Accountant.deposit")
+    type = amount.currency()
 
-    entry_changeset = %Entry{
-      description:
-        "deposit : " <> to_string(amount) <> " into " <> to_string(state.account_number),
-      ## remove microseconds
-      date: DateTime.utc_now(),
-      amounts: [
-        %Amount{amount: amount, type: "debit", account_id: state.account.id}
-      ]
-    }
+    changeset =
+      Entry.changeset(%Entry{
+        description:
+          "deposit : " <> to_string(amount) <> " into " <> to_string(state.account_number),
+        ## remove microseconds
+        date: DateTime.utc_now(),
+        amounts: [
+          %Amount{amount: amount, type: "debit", account_id: state.account.id},
+          %Amount{amount: amount, type: "credit", account_id: state.account.id}
+        ]
+      })
 
-    Repo.insert(entry_changeset)
+    Repo.insert(changeset)
     state = %{state | last_action_ts: DateTime.utc_now()}
     {:reply, state, state}
   end
 
   def handle_call({:convert, amount, dest_currency}, _from, state) do
     IO.inspect(amount.amount, label: "SoftBank.Accountant.convert")
-    Money.to_currency(amount.amount, dest_currency, Money.ExchangeRates.latest_rates())
+    rates = Money.ExchangeRates.latest_rates()
+    rates = []
+    new_amount = Money.to_currency(amount, dest_currency, rates)
     state = %{state | last_action_ts: DateTime.utc_now()}
-    {:reply, amount.amount, state}
+    {:reply, new_amount, state}
   end
 
   def handle_call(:balance, _from, state) do
@@ -254,6 +269,7 @@ defmodule SoftBank.Accountant do
   end
 
   def reload(account_number) do
-    Process.send_after(self(), 5000, {:relogin, account_number})
+    # Process.send_after(self(), 5000, {:relogin, account_number})
+    nil
   end
 end
