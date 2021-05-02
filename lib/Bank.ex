@@ -6,13 +6,13 @@ defmodule SoftBank do
   alias SoftBank.Accountant.Supervisor, as: SUPERVISOR
   alias SoftBank.Accountant, as: ACCOUNTANT
 
-  defdelegate transfer(amount, from_account_number, to_account_number), to: ACCOUNTANT
+  defdelegate transfer(amount, from_account_struct, to_account_struct), to: ACCOUNTANT
 
   defdelegate withdrawl(amount, from_account_number), to: ACCOUNTANT
 
   defdelegate deposit(amount, to_account_number), to: ACCOUNTANT
 
-  defdelegate convert( amount, dest_currency), to: ACCOUNTANT
+  defdelegate convert(amount, dest_currency), to: ACCOUNTANT
 
   defdelegate balance(account_number), to: ACCOUNTANT
 

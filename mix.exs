@@ -1,7 +1,7 @@
 defmodule SoftBank.MixProject do
   use Mix.Project
 
-  @version "0.2.0"
+  @version "2.0.0"
   @source_url "https://github.com/mithereal/elixir-softbank"
 
   def project do

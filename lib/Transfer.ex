@@ -15,9 +15,8 @@ defmodule SoftBank.Transfer do
   """
 
   embedded_schema do
-    field(:message, :integer)
-    field(:account_number, :string)
     field(:amount, Money.Ecto.Composite.Type)
+    field(:message, :integer)
     field(:description, :string)
 
     embeds_one(:sender, Account)
@@ -26,7 +25,7 @@ defmodule SoftBank.Transfer do
 
   def changeset(from_account, struct, to_account \\ %{}, params \\ %{}) do
     struct
-    |> cast(params, [:message, :description, :account_number])
+    |> cast(params, [:message, :description, :amount])
     |> put_embed(:sender, from_account)
     |> put_destination_customer(to_account)
   end
@@ -51,41 +50,40 @@ defmodule SoftBank.Transfer do
     end
   end
 
-  ## params must be of %Account{} type
-  def send(from_account, to_account, amount, params) do
-    changeset = changeset(from_account, %Transfer{}, to_account, params)
+  def send(from_account_struct, to_account_struct, params) do
+    changeset = changeset(from_account_struct, %Transfer{}, to_account_struct, params)
 
     if changeset.valid? do
       transfer = apply_changes(changeset)
-      source_account = from_account
+
+      source_account = transfer.sender
       destination_account = transfer.recipient
+      amount = transfer.amount
 
-      transfer = %{transfer | amount: amount}
+      {_, account_balance} = Account.balance(Config.repo(), source_account, nil)
 
-      transfer_request =
-        create_request(source_account, destination_account, amount)
+      sum_amt = Money.sub!(account_balance, amount)
+      zero_amt = Money.new(:USD, 0)
 
-        account_balance = Account.balance(Config.repo, source_account, nil)
-
-      case Money.subtract(account_balance, amount)  > 0 do
+      case Money.compare(sum_amt, zero_amt) == :gt do
         true ->
           entry_changeset = %Entry{
             description:
               "Transfer : " <>
-                transfer_request.reciever.amount <>
+                to_string(amount.amount) <>
                 " from " <>
-                transfer_request.reciever.account <> " to " <> transfer_request.reciever.account,
+                source_account.account_number <> " to " <> destination_account.account_number,
             date: DateTime.utc_now(),
             amounts: [
               %Amount{
-                amount: transfer_request.sender.amount,
+                amount: amount,
                 type: "credit",
-                account_id: transfer_request.reciever.account.id
+                account_id: destination_account.id
               },
               %Amount{
-                amount: transfer_request.sender.amount,
+                amount: amount,
                 type: "debit",
-                account_id: transfer_request.sender.account.id
+                account_id: source_account.id
               }
             ]
           }
@@ -101,18 +99,5 @@ defmodule SoftBank.Transfer do
     else
       {:error, changeset}
     end
-  end
-
-  defp create_request(source, destination,  amount) do
-    %{
-      sender: %{
-        account: source.account_number,
-        amount: amount
-      },
-      reciever: %{
-        account: destination.account_number,
-        amount: amount
-      }
-    }
   end
 end

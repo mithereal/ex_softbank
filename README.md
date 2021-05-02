@@ -29,7 +29,7 @@ by adding `soft_bank` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:soft_bank, "~> 0.2.0"}
+    {:soft_bank, "~> 2.0.0"}
   ]
 end
 ```
@@ -45,11 +45,11 @@ mix install
 
 ```elixir
 # login to your account and return the balance
-my_account_number = "demo-acct-number"
-to_account_number = "demo-acct-number"
+my_account_number = "from-acct-number"
+to_account_number = "to-acct-number"
 SoftBank.login(my_account_number)
 
-amount = 20
+amount = Money.new :USD, 10
 SoftBank.deposit(amount,my_account_number)
 SoftBank.withdrawl(amount,my_account_number)
 SoftBank.transfer(amount,my_account_number,to_account_number)
@@ -57,5 +57,5 @@ SoftBank.transfer(amount,my_account_number,to_account_number)
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/softbank](https://hexdocs.pm/soft_bank).
+be found at [https://hexdocs.pm/soft_bank](https://hexdocs.pm/soft_bank).
 

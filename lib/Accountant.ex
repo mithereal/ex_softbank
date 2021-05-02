@@ -82,7 +82,7 @@ defmodule SoftBank.Accountant do
 
   def transfer(amount, from, to) do
     name = via_tuple(from)
-    GenServer.cast(name, {:transfer,  to, amount})
+    GenServer.cast(name, {:transfer, to, amount})
     reload(from)
   end
 
@@ -107,9 +107,9 @@ defmodule SoftBank.Accountant do
   end
 
   def handle_cast({:transfer, account_number, amount}, state) do
-    dest = Account.fetch(%{account_number: account_number, type: "asset"})
-params = %{account_number: state.account_number}
-    Transfer.send(state.account, dest, amount, params)
+    destination_account = Account.fetch(%{account_number: account_number, type: "asset"})
+    params = %{amount: amount}
+    Transfer.send(state.account, destination_account, params)
     state = %{state | last_action_ts: DateTime.utc_now()}
     {:noreply, state}
   end
