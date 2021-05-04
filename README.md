@@ -17,8 +17,6 @@ Typically the Account Management genserver would be considered an anti pattern, 
 This allows an accounts ledger state to be persisted for a ttl, when some other system process needs also to use the account ledger data the ttl is reset and state persisted until timeout occurs. 
 
 
-[![Build Status](https://travis-ci.org/mithereal/elixir-softbank.svg?branch=master)](https://travis-ci.org/mithereal/elixir-softbank)
-
 [![Inline docs](http://inch-ci.org/github/mithereal/elixir-softbank.svg)](http://inch-ci.org/github/mithereal/elixir-softbank)
 
 ## Installation
