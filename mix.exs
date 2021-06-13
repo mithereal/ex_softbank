@@ -69,7 +69,7 @@ defmodule SoftBank.MixProject do
       test: ["test"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      install: ["ecto.setup"]
+      install: ["SoftBank.install","ecto.setup"]
     ]
   end
 

@@ -65,6 +65,7 @@ config :ex_cldr,
   json_library: Jason
 ```
 
+
 Add the following to your dev and/or prod config
 ```elixir
 config :soft_bank, :ecto_repos, [SoftBank.Repo]
@@ -79,6 +80,11 @@ config :soft_bank, SoftBank.Repo,
   database: "softbank_dev",
   hostname: "localhost",
   pool_size: 10
+```
+
+## (Optional) Generate a `setup_softbank_tables` migration
+```elixir
+mix SoftBank.install
 ```
 
 ## Usage
