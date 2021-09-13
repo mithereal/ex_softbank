@@ -1,5 +1,11 @@
 # Softbank
 
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/softbank/)
+[![Hex.pm](https://img.shields.io/hexpm/dt/softbank.svg)](https://hex.pm/packages/softbank)
+[![License](https://img.shields.io/hexpm/l/softbank.svg)](https://github.com/mithereal/ex_softbank/blob/master/LICENSE)
+[![Last Updated](https://img.shields.io/github/last-commit/mithereal/ex_softbank.svg)](https://github.com/mithereal/ex_softbank/commits/master)
+[![Build Status](https://circleci.com/gh/mithereal/ex_softbank.svg?style=svg)](https://github.com/mithereal/ex_softbank)
+
 **A Soft Bank To Handle your Financal Accounts**
 
 ***This Module has the following banking functions available***
@@ -15,9 +21,6 @@ Transfers(the producers send amount will be converted to match the recievers acc
 Typically the Account Management genserver would be considered an anti pattern, however I needed a way to persist the state of my accounts ledgers in order to decouple accounting from user management. 
 
 This allows an accounts ledger state to be persisted for a ttl, when some other system process needs also to use the account ledger data the ttl is reset and state persisted until timeout occurs. 
-
-
-[![Inline docs](http://inch-ci.org/github/mithereal/elixir-softbank.svg)](http://inch-ci.org/github/mithereal/elixir-softbank)
 
 ## Installation
 
@@ -64,7 +67,6 @@ config :ex_money,
 config :ex_cldr,
   json_library: Jason
 ```
-
 
 Add the following to your dev and/or prod config
 ```elixir

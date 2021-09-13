@@ -1,8 +1,8 @@
 defmodule SoftBank.MixProject do
   use Mix.Project
 
-  @version "1.0.0"
-  @source_url "https://github.com/mithereal/elixir-softbank"
+  @version "1.1.0"
+  @source_url "https://github.com/mithereal/ex_softbank.git"
 
   def project do
     [
@@ -17,7 +17,7 @@ defmodule SoftBank.MixProject do
       package: package(),
       name: "soft_bank",
       aliases: aliases(),
-      source_url: "https://github.com/mithereal/elixir-softbank",
+      source_url: @source_url,
       docs: docs()
     ]
   end
@@ -59,14 +59,14 @@ defmodule SoftBank.MixProject do
       files: ["lib", "mix.exs", "README.md"],
       maintainers: ["Jason Clark"],
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/mithereal/elixir-softbank"}
+      links: %{"GitHub" => "https://github.com/mithereal/ex-softbank"}
     ]
   end
 
   defp aliases do
     [
       c: "compile",
-      test: ["test"],
+      test: ["ecto.drop --quiet", "ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       install: ["SoftBank.install","ecto.setup"]
