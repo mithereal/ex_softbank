@@ -1,8 +1,8 @@
 # Softbank
 
-[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/softbank/)
-[![Hex.pm](https://img.shields.io/hexpm/dt/softbank.svg)](https://hex.pm/packages/softbank)
-[![License](https://img.shields.io/hexpm/l/softbank.svg)](https://github.com/mithereal/ex_softbank/blob/master/LICENSE)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/soft_bank/)
+[![Hex.pm](https://img.shields.io/hexpm/dt/soft_bank.svg)](https://hex.pm/packages/soft_bank)
+[![License](https://img.shields.io/hexpm/l/soft_bank.svg)](https://github.com/mithereal/ex_softbank/blob/master/LICENSE)
 [![Last Updated](https://img.shields.io/github/last-commit/mithereal/ex_softbank.svg)](https://github.com/mithereal/ex_softbank/commits/master)
 [![Build Status](https://circleci.com/gh/mithereal/ex_softbank.svg?style=svg)](https://github.com/mithereal/ex_softbank)
 
