@@ -9,16 +9,16 @@ defmodule SoftBank.MixProject do
       app: :soft_bank,
       version: @version,
       elixir: "~> 1.9",
-      elixirc_paths: elixirc_paths(Mix.env()),
+       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
-      deps: deps(),
-      build_embedded: Mix.env() == :prod,
       description: description(),
       package: package(),
-      name: "soft_bank",
+      deps: deps(),
       aliases: aliases(),
+      docs: docs(),
+      name: "soft_bank",
       source_url: @source_url,
-      docs: docs()
+       elixirc_paths: elixirc_paths(Mix.env())
     ]
   end
 
@@ -59,7 +59,7 @@ defmodule SoftBank.MixProject do
       files: ["lib", "mix.exs", "README.md"],
       maintainers: ["Jason Clark"],
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/mithereal/ex-softbank"}
+      links: %{"GitHub" => "https://github.com/mithereal/ex_softbank"}
     ]
   end
 
