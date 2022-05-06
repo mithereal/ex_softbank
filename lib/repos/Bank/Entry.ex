@@ -108,9 +108,6 @@ defmodule SoftBank.Entry do
         Money.add(i.amount.amount, acc)
       end)
 
-    IO.inspect(credit_sum, label: "credit sum in repo.bankk.amount.balanced ")
-    IO.inspect(debit_sum, label: "debit_sum  in repo.bankk.amount.balanced ")
-
     if credit_sum - debit_sum == 0 do
       true
     else

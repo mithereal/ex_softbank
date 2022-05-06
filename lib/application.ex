@@ -1,6 +1,4 @@
 defmodule SoftBank.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
   @moduledoc false
 
   use Application
@@ -9,21 +7,15 @@ defmodule SoftBank.Application do
   def start(_type, args) do
     import Supervisor.Spec
 
-    # List all child processes to be supervised
     children = [
       {SoftBank.Repo, args},
-      # Cldr.Currency,
       {Cldr.Currency, [callback: {SoftBank.Currencies, :init, []}]},
       {Registry, keys: :unique, name: :soft_bank_accountants},
-      # Starts a worker by calling: SoftBank.Worker.start_link(arg)
-      # {SoftBank.Worker, args},
       supervisor(Money.ExchangeRates.Supervisor, [[restart: true, start_retriever: true]]),
       {SoftBank.Currency.Reload, name: SoftBank.Currency.Reload},
       {DynamicSupervisor, strategy: :one_for_one, name: SoftBank.Accountant.Supervisor}
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
     opts = [
       strategy: :one_for_one,
       name: SoftBank.Supervisor
@@ -33,7 +25,10 @@ defmodule SoftBank.Application do
 
     case status do
       :ok ->
-        tables_exist = check_db_tables()
+        case check_db_tables() do
+          false -> {:error, "The Database Table(s) Do Not Exist"}
+          true -> {:ok, reply}
+        end
 
         {status, reply}
 

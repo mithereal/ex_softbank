@@ -100,7 +100,6 @@ defmodule SoftBank.Account do
   end
 
   def new(name, currency \\ :USD, hash \\ hash_id()) do
-    ## check if curreccy is valid?
 
     known? = Cldr.Currency.known_currency?(currency)
 
@@ -198,8 +197,6 @@ defmodule SoftBank.Account do
         {_, new_amt} = Money.add(r, acc)
         new_amt
       end)
-
-    IO.inspect(reply, label: "reply in repo.bank.acount.amount_sum ")
     reply
   end
 
@@ -238,7 +235,6 @@ defmodule SoftBank.Account do
         new_amt
       end)
 
-    IO.inspect(reply, label: "reply in repo.bank.acount.amount_sum ")
     reply
   end
 
@@ -353,7 +349,6 @@ defmodule SoftBank.Account do
         new_amt
       end)
 
-    IO.inspect(balance, label: "balance in repo.bank.acount.balance ")
     balance
   end
 

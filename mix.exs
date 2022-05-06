@@ -9,7 +9,7 @@ defmodule SoftBank.MixProject do
       app: :soft_bank,
       version: @version,
       elixir: "~> 1.9",
-       build_embedded: Mix.env() == :prod,
+      build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       description: description(),
       package: package(),
@@ -18,7 +18,7 @@ defmodule SoftBank.MixProject do
       docs: docs(),
       name: "soft_bank",
       source_url: @source_url,
-       elixirc_paths: elixirc_paths(Mix.env())
+      elixirc_paths: elixirc_paths(Mix.env())
     ]
   end
 
@@ -69,7 +69,7 @@ defmodule SoftBank.MixProject do
       test: ["ecto.drop --quiet", "ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      install: ["SoftBank.install","ecto.setup"]
+      install: ["SoftBank.install", "ecto.setup"]
     ]
   end
 
@@ -87,5 +87,4 @@ defmodule SoftBank.MixProject do
   # when in the test environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
-  defp elixirc_paths, do: ["lib"]
 end

@@ -11,6 +11,9 @@ defmodule SoftBank.Repo do
     {:ok, Keyword.put(opts, :url, System.get_env("DATABASE_URL"))}
   end
 
+  @doc """
+  Empty the Database Table
+  """
   def truncate(schema) do
     table_name = schema.__schema__(:source)
 
