@@ -39,13 +39,13 @@ defmodule SoftBank.MixProject do
       {:ecto, "~> 3.5"},
       {:ecto_sql, "~> 3.5"},
       {:jason, "~> 1.0"},
-      {:ex_money, "5.5.2"},
+      {:ex_money, ">= 0.0.0"},
       {:ex_money_sql, "~> 1.0"},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
       {:nanoid, "~> 2.0.1"},
       {:inch_ex, ">= 0.0.0", only: :docs},
-      {:faker, "~> 0.16"},
-      {:ex_machina, "~> 2.7.0", only: :test}
+      {:faker, "~> 0.17", only: :test},
+      {:ex_machina, ">= 0.0.0", only: :test}
     ]
   end
 
