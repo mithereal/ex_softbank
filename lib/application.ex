@@ -20,7 +20,7 @@ defmodule SoftBank.Application do
       name: SoftBank.Supervisor
     ]
 
-    {status, reply} = response = Supervisor.start_link(children, opts)
+    {status, _reply} = response = Supervisor.start_link(children, opts)
 
     if status == :ok do
       check_db_tables()
