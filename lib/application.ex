@@ -29,8 +29,6 @@ defmodule SoftBank.Application do
           true -> {:ok, reply}
         end
 
-        {status, reply}
-
       :error ->
         {status, reply}
     end
