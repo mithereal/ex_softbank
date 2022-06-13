@@ -26,7 +26,7 @@ defmodule SoftBank.Application do
       {:ok, reply} ->
         case check_db_tables() do
           false ->
-            raise "The Database Table(s) Do Not Exist"
+           # raise "The Database Table(s) Do Not Exist"
             {:error, "The Database Table(s) Do Not Exist"}
 
           true ->

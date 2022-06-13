@@ -6,7 +6,7 @@
 [![Last Updated](https://img.shields.io/github/last-commit/mithereal/ex_softbank.svg)](https://github.com/mithereal/ex_softbank/commits/master)
 [![Build Status](https://circleci.com/gh/mithereal/ex_softbank.svg?style=svg)](https://github.com/mithereal/ex_softbank)
 
-**A Soft Bank To Handle your Financal Accounts**
+**A Soft Bank To Handle your Financial Accounts**
 
 ***This Module has the following banking functions available***
 
