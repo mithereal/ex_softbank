@@ -20,18 +20,24 @@ defmodule SoftBank.Application do
       name: SoftBank.Supervisor
     ]
 
-    {status, reply} = Supervisor.start_link(children, opts)
+    response = Supervisor.start_link(children, opts)
 
-    case status do
-      :ok ->
+    case response do
+      {:ok, reply} ->
         case check_db_tables() do
-          false -> {:error, "The Database Table(s) Do Not Exist"}
-          true -> {:ok, reply}
+          false ->
+            raise "The Database Table(s) Do Not Exist"
+            {:error, "The Database Table(s) Do Not Exist"}
+
+          true ->
+            {:ok, reply}
         end
 
-      :error ->
-        {status, reply}
+      error ->
+        error
     end
+
+    response
   end
 
   def check_db_tables() do
