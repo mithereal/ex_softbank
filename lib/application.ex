@@ -34,7 +34,7 @@ defmodule SoftBank.Application do
     tb2 = SoftBank.Repo.exists?(SoftBank.Account)
     tb3 = SoftBank.Repo.exists?(SoftBank.Entry)
 
-    if tb1 == tb2 == tb3 == true do
+    if tb1 == tb2 == tb3 == false do
       raise("The Database Table(s) Do Not Exist")
     end
   end
