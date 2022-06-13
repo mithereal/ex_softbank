@@ -20,22 +20,21 @@ defmodule SoftBank.Application do
       name: SoftBank.Supervisor
     ]
 
-    {status, _reply} = response = Supervisor.start_link(children, opts)
+    Supervisor.start_link(children, opts)
+    |> check_db_tables()
+  end
 
-    if status == :ok do
-      check_db_tables()
-    end
+  defp check_db_tables(response = {:ok, _reply}) do
+    Enum.each([SoftBank.Amount, SoftBank.Account, SoftBank.Entry, SoftBank.Currencies], fn x ->
+      if SoftBank.Repo.exists?(x) == false do
+        raise("The Database Table(s) Do Not Exist")
+      end
+    end)
 
     response
   end
 
-  def check_db_tables() do
-    tb1 = SoftBank.Repo.exists?(SoftBank.Amount)
-    tb2 = SoftBank.Repo.exists?(SoftBank.Account)
-    tb3 = SoftBank.Repo.exists?(SoftBank.Entry)
-
-    if Enum.any?([tb1, tb2, tb3], &(&1 == false)) do
-      raise("The Database Table(s) Do Not Exist")
-    end
+  defp check_db_tables(response) do
+    response
   end
 end
