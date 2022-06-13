@@ -24,14 +24,7 @@ defmodule SoftBank.Application do
 
     case response do
       {:ok, reply} ->
-        case check_db_tables() do
-          false ->
-            raise "The Database Table(s) Do Not Exist"
-            {:error, "The Database Table(s) Do Not Exist"}
-
-          true ->
-            {:ok, reply}
-        end
+        check_db_tables()
 
       error ->
         error
@@ -44,6 +37,10 @@ defmodule SoftBank.Application do
     tb1 = SoftBank.Repo.exists?(SoftBank.Amount)
     tb2 = SoftBank.Repo.exists?(SoftBank.Account)
     tb3 = SoftBank.Repo.exists?(SoftBank.Entry)
-    tb1 == tb2 == tb3 == true
+
+    case tb1 == tb2 == tb3 == true do
+      true -> nil
+      false -> raise "The Database Table(s) Do Not Exist"
+    end
   end
 end
