@@ -78,7 +78,7 @@ defmodule SoftBank.Accountant do
 
     rates =
       case(latest_rates) do
-        {:error, rates} -> []
+        {:error, _rates} -> []
         {:ok, rates} -> rates
       end
 
@@ -106,6 +106,7 @@ defmodule SoftBank.Accountant do
     end
   end
 
+  @impl true
   def handle_info(:timeout, state) do
     time = DateTime.utc_now()
     cmp = DateTime.add(state.last_action_ts, @timeout, :second)
@@ -118,10 +119,12 @@ defmodule SoftBank.Accountant do
     {:noreply, state}
   end
 
+  @impl true
   def handle_call(:shutdown, _, _) do
     {:stop, :normal, nil, nil}
   end
 
+  @impl true
   def handle_cast(:shutdown, state) do
     {:stop, :normal, state}
   end
@@ -143,8 +146,6 @@ defmodule SoftBank.Accountant do
   end
 
   def handle_call({:withdrawl, amount}, _from, state) do
-    type = amount.currency()
-
     changeset =
       Entry.changeset(%Entry{
         description:
@@ -164,8 +165,6 @@ defmodule SoftBank.Accountant do
   end
 
   def handle_call({:deposit, amount}, _from, state) do
-    type = amount.currency()
-
     changeset =
       Entry.changeset(%Entry{
         description:
@@ -185,7 +184,6 @@ defmodule SoftBank.Accountant do
 
   def handle_call({:convert, amount, dest_currency}, _from, state) do
     rates = Money.ExchangeRates.latest_rates()
-    rates = []
     new_amount = Money.to_currency(amount, dest_currency, rates)
     state = %{state | last_action_ts: DateTime.utc_now()}
     {:reply, new_amount, state}

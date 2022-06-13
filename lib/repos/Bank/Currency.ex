@@ -3,9 +3,6 @@ defmodule SoftBank.Currency do
 
   import Ecto.Changeset
 
-  alias SoftBank.Repo
-  alias SoftBank.Currency
-
   @moduledoc false
 
   schema "softbank_currencies" do

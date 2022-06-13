@@ -39,7 +39,6 @@ defmodule SoftBank.Account do
   alias SoftBank.Repo
   alias SoftBank.Amount
   alias SoftBank.Account
-  alias SoftBank.Entry
   alias SoftBank.Config
 
   @typedoc "An Account type."
@@ -66,14 +65,13 @@ defmodule SoftBank.Account do
     has_many(:amounts, Amount, on_delete: :delete_all)
     has_many(:entry, through: [:amounts, :entry], on_delete: :delete_all)
 
-    timestamps
+    timestamps()
   end
 
   @params ~w(account_number type contra  name hash id default_currency)a
-  @required_fields ~w(account_number)a
 
   @credit_types ["asset"]
-  @debit_types ["liability", "equity"]
+  @required_fields ~w(account_number)a
 
   @doc """
   Builds a changeset based on the `struct` and `params`.
@@ -99,8 +97,7 @@ defmodule SoftBank.Account do
     new(name, default_currency)
   end
 
-  def new(name, currency \\ :USD, hash \\ hash_id()) do
-
+  def new(name, currency, hash \\ hash_id()) do
     known? = Cldr.Currency.known_currency?(currency)
 
     case known? do
@@ -160,11 +157,6 @@ defmodule SoftBank.Account do
   end
 
   @doc false
-  defp with_amounts(query) do
-    from(q in query, preload: [:amounts])
-  end
-
-  @doc false
   @spec amount_sum(Ecto.Repo.t(), SoftBank.Account.t(), String.t()) :: Decimal.t()
   def amount_sum(repo, account, type) do
     records =
@@ -181,7 +173,7 @@ defmodule SoftBank.Account do
 
     rates =
       case(latest_rates) do
-        {:error, rates} -> []
+        {:error, _rates} -> []
         {:ok, rates} -> rates
       end
 
@@ -197,6 +189,7 @@ defmodule SoftBank.Account do
         {_, new_amt} = Money.add(r, acc)
         new_amt
       end)
+
     reply
   end
 
@@ -218,7 +211,7 @@ defmodule SoftBank.Account do
 
     rates =
       case(latest_rates) do
-        {:error, rates} -> []
+        {:error, _rates} -> []
         {:ok, rates} -> rates
       end
 
@@ -260,10 +253,10 @@ defmodule SoftBank.Account do
   def balance(
         repo,
         account = %Account{
-          account_number: account_number,
+          account_number: _account_number,
           type: type,
           contra: contra,
-          default_currency: default_currency
+          default_currency: _default_currency
         },
         dates
       )
@@ -292,9 +285,9 @@ defmodule SoftBank.Account do
       end
 
     if type in @credit_types && !contra do
-      balance = Money.sub(debits, credits)
+      Money.sub(debits, credits)
     else
-      balance = Money.sub(credits, debits)
+      Money.sub(credits, debits)
     end
   end
 
@@ -302,10 +295,10 @@ defmodule SoftBank.Account do
   def balance(
         repo,
         account = %Account{
-          account_number: account_number,
+          account_number: _account_number,
           type: type,
           contra: contra,
-          default_currency: default_currency
+          default_currency: _default_currency
         },
         dates
       ) do
@@ -333,9 +326,9 @@ defmodule SoftBank.Account do
       end
 
     if type in @credit_types && !contra do
-      balance = Money.sub(debits, credits)
+      Money.sub(debits, credits)
     else
-      balance = Money.sub(credits, debits)
+      Money.sub(credits, debits)
     end
   end
 
@@ -357,7 +350,7 @@ defmodule SoftBank.Account do
   end
 
   defp bank_account_number(number \\ 12) do
-    base_acct_number = Nanoid.generate(number, "0123456789")
+    Nanoid.generate(number, "0123456789")
   end
 
   @doc """
@@ -367,33 +360,31 @@ defmodule SoftBank.Account do
   def fetch(account, repo \\ Repo)
 
   def fetch(%{account_number: account_number}, repo) do
-    query =
-      Account
-      |> where([a], a.account_number == ^account_number)
-      |> select([a], %{
-        account_number: a.account_number,
-        hash: a.hash,
-        type: a.type,
-        contra: a.contra,
-        id: a.id,
-        default_currency: a.default_currency
-      })
-      |> repo.one()
+    Account
+    |> where([a], a.account_number == ^account_number)
+    |> select([a], %{
+      account_number: a.account_number,
+      hash: a.hash,
+      type: a.type,
+      contra: a.contra,
+      id: a.id,
+      default_currency: a.default_currency
+    })
+    |> repo.one()
   end
 
   def fetch(%{hash: hash}, repo) do
-    query =
-      Account
-      |> where([a], a.hash == ^hash)
-      |> select([a], %{
-        account_number: a.account_number,
-        hash: a.hash,
-        type: a.type,
-        contra: a.contra,
-        id: a.id,
-        default_currency: a.default_currency
-      })
-      |> repo.all()
+    Account
+    |> where([a], a.hash == ^hash)
+    |> select([a], %{
+      account_number: a.account_number,
+      hash: a.hash,
+      type: a.type,
+      contra: a.contra,
+      id: a.id,
+      default_currency: a.default_currency
+    })
+    |> repo.all()
   end
 
   @doc """

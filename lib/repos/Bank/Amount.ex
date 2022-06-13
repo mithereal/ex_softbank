@@ -7,7 +7,7 @@ defmodule SoftBank.Amount do
   use Ecto.Schema
 
   import Ecto.Changeset
-  import Ecto.Query, only: [from: 1, from: 2]
+  import Ecto.Query, only: [from: 2]
 
   alias SoftBank.Entry
   alias SoftBank.Account
@@ -19,7 +19,7 @@ defmodule SoftBank.Amount do
     belongs_to(:entry, Entry)
     belongs_to(:account, Account)
 
-    timestamps
+    timestamps()
   end
 
   @params ~w(amount type)a
@@ -119,6 +119,6 @@ defmodule SoftBank.Amount do
     end
   end
 
-  def new(int, currency) do
+  def new(_int, _currency) do
   end
 end

@@ -1,10 +1,7 @@
 defmodule SoftBank.Accountant.Supervisor do
   use DynamicSupervisor
 
-  @registry_name :soft_bank_accountants
   @name __MODULE__
-
-  alias SoftBank.Config
 
   def child_spec([args]) do
     %{

@@ -27,8 +27,6 @@ defmodule SoftBank.ExchangeRates.CoinMarketCap do
   require Logger
   alias SoftBank.ExchangeRates.CoinMarketCap.Retriever
 
-  alias SoftBank.Config
-
   @behaviour Money.ExchangeRates
 
   @rate_url "https://pro-api.coinmarketcap.com/v1"
@@ -59,14 +57,13 @@ defmodule SoftBank.ExchangeRates.CoinMarketCap do
 
     rates = marshall_rates(data)
 
-    r =
-      rates
-      |> Cldr.Map.atomize_keys()
-      |> Enum.map(fn
-        {k, v} when is_float(v) -> {k, Decimal.from_float(v)}
-        {k, v} when is_integer(v) -> {k, Decimal.new(v)}
-      end)
-      |> Enum.into(%{})
+    rates
+    |> Cldr.Map.atomize_keys()
+    |> Enum.map(fn
+      {k, v} when is_float(v) -> {k, Decimal.from_float(v)}
+      {k, v} when is_integer(v) -> {k, Decimal.new(v)}
+    end)
+    |> Enum.into(%{})
   end
 
   defp marshall_rates(data) do
@@ -161,9 +158,7 @@ defmodule SoftBank.ExchangeRates.CoinMarketCap do
   end
 
   @historic_rates "/historical/"
-  defp retrieve_historic_rates(%Date{calendar: Calendar.ISO} = date, url, api_key, config) do
-    date_string = Date.to_string(date)
-
+  defp retrieve_historic_rates(%Date{calendar: Calendar.ISO} = _date, url, api_key, config) do
     Retriever.retrieve_rates(
       url <> @historic_rates <> "?CMC_PRO_API_KEY=" <> api_key,
       config
