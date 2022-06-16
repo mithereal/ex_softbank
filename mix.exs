@@ -1,7 +1,7 @@
 defmodule SoftBank.MixProject do
   use Mix.Project
 
-  @version "1.1.0"
+  @version "1.1.1"
   @source_url "https://github.com/mithereal/ex_softbank.git"
 
   def project do
@@ -48,7 +48,7 @@ defmodule SoftBank.MixProject do
   end
 
   defp description() do
-    "A Soft Bank To Handle your Financial Accounts."
+    "A Soft Bank To Handle your Financial Accounts using a Dual Entry Accounting System."
   end
 
   defp package() do
