@@ -12,13 +12,13 @@ defmodule SoftBank.ExchangeRates.Supervisor do
   end
 
   def init(args) do
-	  try do
-    DynamicSupervisor.init(
-      strategy: :one_for_one,
-      extra_arguments: args
-    )
+    try do
+      DynamicSupervisor.init(
+        strategy: :one_for_one,
+        extra_arguments: args
+      )
     rescue
-    _ -> throw("anerror occured")
+      _ -> throw("anerror occured")
     end
   end
 end

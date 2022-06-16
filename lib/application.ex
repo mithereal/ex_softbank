@@ -30,7 +30,7 @@ defmodule SoftBank.Application do
         end
       rescue
         _ ->
-	        raise("Unable To Read Database Table(s)")
+          raise("Unable To Read Database Table(s)")
       end
     end)
 
