@@ -41,4 +41,13 @@ defmodule SoftBank do
   def add_currency(params) do
     SoftBank.Currencies.new(params)
   end
+
+  # cache the app_version during build time
+  @version Mix.Project.config()[:version]
+  @description Mix.Project.config()[:description]
+  @source_url Mix.Project.config()[:source_url]
+
+  def description, do: @description
+  def version, do: @version
+  def source_url, do: @source_url
 end
