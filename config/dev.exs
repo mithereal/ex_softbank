@@ -13,6 +13,7 @@ config :soft_bank, SoftBank.Repo,
   password: "postgres",
   database: "soft_bank",
   hostname: "localhost",
+  port: 5433,
   pool_size: 10
 
 ### Example using coinmarketcap for cryptocurrency rates

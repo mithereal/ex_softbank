@@ -8,13 +8,14 @@ config :soft_bank, SoftBank.Repo,
   password: "postgres",
   database: "soft_bank_test",
   hostname: "localhost",
+  port: 5433,
   pool_size: 10
 
 config :soft_bank, SoftBank.TestRepo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
   password: "postgres",
-  database: "softbank_test",
+  database: "soft_bank_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10

@@ -129,6 +129,28 @@ defmodule SoftBank.Accountant do
     {:stop, :normal, state}
   end
 
+  def handle_cast(:login, state) do
+    account = Account.fetch(%{account_number: state.account_number})
+
+    changeset = SoftBank.Account.to_changeset(%SoftBank.Account{}, account)
+
+    changestruct = Ecto.Changeset.apply_changes(changeset)
+
+    {_, balance} = Account.account_balance(SoftBank.Repo, changestruct)
+
+    updated_state = %{
+      state
+      | account_number: state.account_number,
+        account: account,
+        balance: balance,
+        last_action_ts: DateTime.utc_now()
+    }
+
+    Process.send_after(self(), :timeout, @fourty_seconds)
+
+    {:noreply, updated_state}
+  end
+
   def handle_cast({:transfer, account_number, amount}, state) do
     destination_account = Account.fetch(%{account_number: account_number, type: "asset"})
     params = %{amount: amount}
@@ -223,28 +245,6 @@ defmodule SoftBank.Accountant do
 
     Process.send_after(self(), :timeout, @fourty_seconds)
     {:reply, status, state}
-  end
-
-  def handle_cast(:login, state) do
-    account = Account.fetch(%{account_number: state.account_number})
-
-    changeset = SoftBank.Account.to_changeset(%SoftBank.Account{}, account)
-
-    changestruct = Ecto.Changeset.apply_changes(changeset)
-
-    {_, balance} = Account.account_balance(SoftBank.Repo, changestruct)
-
-    updated_state = %{
-      state
-      | account_number: state.account_number,
-        account: account,
-        balance: balance,
-        last_action_ts: DateTime.utc_now()
-    }
-
-    Process.send_after(self(), :timeout, @fourty_seconds)
-
-    {:noreply, updated_state}
   end
 
   def handle_call({:relogin, account_number}, _, state) do

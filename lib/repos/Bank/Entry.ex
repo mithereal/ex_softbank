@@ -12,9 +12,7 @@ defmodule SoftBank.Entry do
   use Ecto.Schema
 
   import Ecto.Changeset
-  import Ecto.Query, only: [from: 1, from: 2]
 
-  alias SoftBank.Account
   alias SoftBank.Amount
   alias SoftBank.Entry
   SoftBank.Config

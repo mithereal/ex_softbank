@@ -7,12 +7,13 @@ defmodule SoftBank.Application do
     import Supervisor.Spec
 
     children = [
+      {SoftBank.Repo, args},
       {Cldr.Currency, [callback: {SoftBank.Currencies, :init, []}]},
       {Registry, keys: :unique, name: :soft_bank_accountants},
       supervisor(Money.ExchangeRates.Supervisor, [[restart: true, start_retriever: true]]),
       {SoftBank.Currency.Reload, name: SoftBank.Currency.Reload},
       {DynamicSupervisor, strategy: :one_for_one, name: SoftBank.Accountant.Supervisor}
-    ] ++ load_repos(args)
+    ]
 
     opts = [
       strategy: :one_for_one,
@@ -36,11 +37,4 @@ defmodule SoftBank.Application do
   defp check_db_tables(response) do
     response
   end
-
-  defp load_repos(args) do
-	  case Application.get_env(:soft_bank, :ecto_repos) do
-		  nil -> [{SoftBank.Repo,args}]
-		  repos -> repos
-	  end
-end
 end

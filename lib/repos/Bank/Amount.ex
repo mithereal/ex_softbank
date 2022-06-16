@@ -23,7 +23,6 @@ defmodule SoftBank.Amount do
   end
 
   @params ~w(amount type)a
-  @required_fields ~w()a
 
   @amount_types ["credit", "debit"]
 
