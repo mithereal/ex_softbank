@@ -98,6 +98,12 @@ defmodule SoftBank.Account do
   end
 
   def new(name, currency, hash \\ hash_id()) do
+    currency =
+      case currency do
+        :default -> Config.get(:default_currency, :USD)
+        _ -> currency
+      end
+
     known? = Cldr.Currency.known_currency?(currency)
 
     case known? do
