@@ -3,6 +3,9 @@ defmodule SoftBank.Repo.Migrations.SetupTables do
 
 
     def change do
+	    execute("CREATE TYPE public.money_with_currency AS (currency_code char(3), amount numeric);")
+	    execute("CREATE TYPE public.currency AS (currency_code char(3));")
+
       create table(:softbank_accounts) do
         add :name, :string, null: false
         add :type, :string, null: false
