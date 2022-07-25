@@ -31,8 +31,6 @@ import Config
 
 config :soft_bank, :ecto_repos, [SoftBank.Repo]
 
-config :soft_bank,
-  soft_bank: [SoftBank.Repo]
 
 config :ex_money,
   exchange_rates_retrieve_every: 300_000,

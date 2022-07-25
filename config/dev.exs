@@ -4,9 +4,6 @@ config :logger, :console, format: "[$level] $message\n"
 
 config :soft_bank, :ecto_repos, [SoftBank.Repo]
 
-config :soft_bank,
-  soft_bank: [SoftBank.Repo]
-
 config :soft_bank, SoftBank.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
