@@ -19,7 +19,6 @@ defmodule SoftBank.Application do
     ]
 
     Supervisor.start_link(children, opts)
-    |> check_db_tables()
   end
 
   defp check_db_tables(response = {:ok, _reply}) do
