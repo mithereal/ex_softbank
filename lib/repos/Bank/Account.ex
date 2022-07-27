@@ -273,8 +273,8 @@ defmodule SoftBank.Account do
     credits =
       case is_nil(credits) do
         true ->
-          {_, credit} = Money.new(:USD, 0)
-          [credit]
+           data = Money.new(:USD, 0)
+          [data]
 
         false ->
           credits
@@ -283,8 +283,8 @@ defmodule SoftBank.Account do
     debits =
       case is_nil(debits) do
         true ->
-          {_, debits} = Money.new(:USD, 0)
-          [debits]
+	        data = Money.new(:USD, 0)
+          [data]
 
         false ->
           debits
@@ -314,8 +314,8 @@ defmodule SoftBank.Account do
     credits =
       case is_nil(credits) do
         true ->
-          {_, credit} = Money.new(:USD, 0)
-          [credit]
+          data = Money.new(:USD, 0)
+          [data]
 
         false ->
           credits
@@ -324,8 +324,8 @@ defmodule SoftBank.Account do
     debits =
       case is_nil(debits) do
         true ->
-          {_, debits} = Money.new(:USD, 0)
-          [debits]
+          data = Money.new(:USD, 0)
+          [data]
 
         false ->
           debits
@@ -344,7 +344,9 @@ defmodule SoftBank.Account do
 
     balance =
       Enum.reduce(accounts, new_amt, fn account, acc ->
-        {_, new_amt} = Money.add(Account.balance(repo, account, dates), acc)
+        {_, money} = Account.balance(repo, account, dates)
+
+        {_, new_amt} = Money.add(money, acc)
         new_amt
       end)
 
@@ -399,7 +401,8 @@ defmodule SoftBank.Account do
   """
   def test_balance(repo \\ Config.repo()) do
     accounts = repo.all(Account)
-    default_currency = repo.get(:default_currency, :USD)
+
+    default_currency = Config.get(:default_currency, :USD)
 
     case Enum.count(accounts) > 0 do
       true ->
@@ -411,8 +414,8 @@ defmodule SoftBank.Account do
           end)
 
         accounts_by_type[:asset]
-        |> Money.sub(accounts_by_type[:liability])
-        |> Money.sub(accounts_by_type[:equity])
+        |> Money.sub!(accounts_by_type[:liability])
+        |> Money.sub!(accounts_by_type[:equity])
 
       false ->
         Money.new(default_currency, 0)
