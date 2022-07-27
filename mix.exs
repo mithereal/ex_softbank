@@ -64,7 +64,7 @@ defmodule SoftBank.MixProject do
   defp aliases do
     [
       c: "compile",
-      test: ["ecto.drop --quiet", "ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      test: ["ecto.drop --quiet", "ecto.create --quiet", "ecto.migrate --quiet", "run priv/seeds.exs", "test"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       install: ["SoftBank.install", "ecto.setup"]
