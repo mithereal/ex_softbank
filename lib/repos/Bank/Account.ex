@@ -104,7 +104,7 @@ defmodule SoftBank.Account do
         _ -> currency
       end
 
-    known? = Cldr.Currency.known_currency?(currency)
+    known? = Cldr.Currency.known_currency_code?(currency)
 
     case known? do
       true ->

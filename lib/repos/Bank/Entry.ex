@@ -15,7 +15,7 @@ defmodule SoftBank.Entry do
 
   alias SoftBank.Amount
   alias SoftBank.Entry
-  SoftBank.Config
+  alias SoftBank.Config
 
   schema "softbank_entries" do
     field(:description, :string)
