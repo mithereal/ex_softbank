@@ -8,7 +8,7 @@ defmodule SoftBank.Repo do
   DATABASE_URL environment variable.
   """
   def init(arg, nil) do
-	  start(arg, [])
+	  init(arg, [])
   end
 
   def init(_, opts) do
