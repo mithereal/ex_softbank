@@ -131,6 +131,12 @@ defmodule SoftBank.Accountant do
     {:noreply, state}
   end
 
+  def handle_cast({:reload, account_number}, state) do
+    data = Account.fetch(%{account_number: account_number}, Repo)
+    :ets.update(state.ref, {:account, data})
+    {:noreply, state}
+  end
+
   def handle_call({:transfer, account_number, amount}, _, state) do
     destination_account = Account.fetch(%{account_number: account_number, type: "asset"})
     params = %{amount: amount}
