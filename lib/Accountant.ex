@@ -4,10 +4,6 @@ defmodule SoftBank.Accountant do
 
   @registry_name :soft_bank_accountants
 
-  @timeout 120
-  @ten_seconds 10000
-  @fourty_seconds 400_000
-
   @moduledoc false
 
   alias SoftBank.Transfer
@@ -17,10 +13,7 @@ defmodule SoftBank.Accountant do
 
   alias SoftBank.Repo
 
-  defstruct account_number: nil,
-            account: nil,
-            balance: 0,
-            last_action_ts: nil
+  defstruct account_number: nil
 
   def child_spec(args) do
     %{
@@ -32,17 +25,23 @@ defmodule SoftBank.Accountant do
 
   def start_link(account_number) do
     name = via_tuple(account_number)
-    params = %SoftBank.Accountant{account: 0, balance: 0, account_number: account_number}
     GenServer.start_link(__MODULE__, params, name: name)
   end
 
   @impl true
   def init(args) do
-    name = via_tuple(args.account_number)
+    ref =
+      :ets.new(String.to_atom(args.account_number), [
+        :set,
+        :named_table,
+        :public,
+        read_concurrency: true,
+        write_concurrency: true
+      ])
 
-    GenServer.cast(name, :login)
+    :ets.insert(ref, {:default, args})
 
-    {:ok, args}
+    {:ok, %{account_number: args.account_number, ref: ref}}
   end
 
   def shutdown(pid) do
@@ -55,7 +54,6 @@ defmodule SoftBank.Accountant do
 
     try do
       GenServer.call(name, {:deposit, amount})
-      GenServer.call(name, {:relogin, to})
     catch
       :exit, _ -> {:error, "invalid_account"}
     end
@@ -67,7 +65,6 @@ defmodule SoftBank.Accountant do
 
     try do
       GenServer.call(name, {:withdrawl, amount})
-      GenServer.call(name, {:relogin, from})
     catch
       :exit, _ -> {:error, "invalid_account"}
     end
@@ -100,55 +97,32 @@ defmodule SoftBank.Accountant do
 
     try do
       GenServer.call(name, {:transfer, to, amount})
-      GenServer.call(name, {:relogin, from})
     catch
       :exit, _ -> {:error, "invalid_account"}
     end
   end
 
   @impl true
-  def handle_info(:timeout, state) do
-    time = DateTime.utc_now()
-    cmp = DateTime.add(state.last_action_ts, @timeout, :second)
-
-    case DateTime.compare(time, cmp) do
-      :gt -> Process.send_after(self(), :shutdown, @ten_seconds)
-      _ -> Process.send_after(self(), :timeout, @fourty_seconds)
-    end
-
-    {:noreply, state}
+  def handle_call(
+        :shutdown,
+        _from,
+        state
+      ) do
+    {:stop, {:ok, "Normal Shutdown"}, state}
   end
 
   @impl true
-  def handle_call(:shutdown, _, _) do
-    {:stop, :normal, nil, nil}
-  end
-
-  @impl true
-  def handle_cast(:shutdown, state) do
+  def handle_cast(
+        :shutdown,
+        state
+      ) do
     {:stop, :normal, state}
   end
 
-  def handle_cast(:login, state) do
-    account = Account.fetch(%{account_number: state.account_number})
-
-    changeset = SoftBank.Account.to_changeset(%SoftBank.Account{}, account)
-
-    changestruct = Ecto.Changeset.apply_changes(changeset)
-
-    {_, balance} = Account.account_balance(SoftBank.Repo, changestruct)
-
-    updated_state = %{
-      state
-      | account_number: state.account_number,
-        account: account,
-        balance: balance,
-        last_action_ts: DateTime.utc_now()
-    }
-
-    Process.send_after(self(), :timeout, @fourty_seconds)
-
-    {:noreply, updated_state}
+  @impl true
+  def handle_info({:DOWN, _ref, :process, _pid, _reason}, {names, refs}) do
+    :ets.delete(names)
+    {:noreply, {names, refs}}
   end
 
   def handle_cast({:transfer, account_number, amount}, state) do
@@ -216,66 +190,7 @@ defmodule SoftBank.Accountant do
     {:reply, state.balance, state}
   end
 
-  def handle_call({:login, account_number}, _from, state) do
-    accounts = Account.fetch(%{account_number: account_number})
-
-    {status, state} =
-      case Enum.count(accounts) > 0 do
-        false ->
-          {:error, state}
-
-        true ->
-          account = List.first(accounts)
-
-          changeset = SoftBank.Account.to_changeset(%SoftBank.Account{}, account)
-          changestruct = Ecto.Changeset.apply_changes(changeset)
-
-          {_, balance} = Account.account_balance(SoftBank.Repo, changestruct)
-
-          updated_state = %{
-            state
-            | account_number: account_number,
-              account: account,
-              balance: balance,
-              last_action_ts: DateTime.utc_now()
-          }
-
-          {:ok, updated_state}
-      end
-
-    Process.send_after(self(), :timeout, @fourty_seconds)
-    {:reply, status, state}
-  end
-
-  def handle_call({:relogin, account_number}, _, state) do
-    account = Account.fetch(%{account_number: account_number})
-
-    {status, state} =
-      case Enum.count(account) > 0 do
-        false ->
-          {:error, state}
-
-        true ->
-          changeset = SoftBank.Account.to_changeset(%SoftBank.Account{}, account)
-          changestruct = Ecto.Changeset.apply_changes(changeset)
-
-          balance = Account.account_balance(SoftBank.Repo, changestruct)
-
-          updated_state = %{
-            state
-            | account_number: account_number,
-              account: account,
-              balance: balance,
-              last_action_ts: DateTime.utc_now()
-          }
-
-          {:ok, updated_state}
-      end
-
-    {:reply, status, state}
-  end
-
-  def handle_call(:show_state, _from, state) do
+  def handle_call(:show, _from, state) do
     state = %{state | last_action_ts: DateTime.utc_now()}
     {:reply, state, state}
   end
@@ -285,11 +200,11 @@ defmodule SoftBank.Accountant do
     {:via, Registry, {registry, hash}}
   end
 
-  def show_state(account) do
+  def show(account) do
     name = via_tuple(account)
 
     try do
-      GenServer.call(name, :show_state)
+      GenServer.call(name, :show)
     catch
       :exit, _ -> {:error, "invalid_account"}
     end
