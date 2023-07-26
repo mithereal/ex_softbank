@@ -2,7 +2,7 @@ defmodule SoftBank.Accountant do
   use GenServer
   require Logger
 
-  @registry_name :soft_bank_accountants
+  @registry_name :soft_bank_accounts
 
   @moduledoc false
 
@@ -21,9 +21,10 @@ defmodule SoftBank.Accountant do
     }
   end
 
-  def start_link(account_number, params \\ []) do
-    name = via_tuple(account_number)
-    GenServer.start_link(__MODULE__, params, name: name)
+  def start_link(params \\ []) do
+    data = Account.fetch(%{account_number: params.account_number}, Repo)
+    name = via_tuple(params.account_number)
+    GenServer.start_link(__MODULE__, data, name: name)
   end
 
   @impl true

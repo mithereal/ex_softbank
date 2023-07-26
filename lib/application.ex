@@ -7,7 +7,7 @@ defmodule SoftBank.Application do
     children = [
       {SoftBank.Repo, args},
       {Cldr.Currency, [callback: {SoftBank.Currencies, :init, []}]},
-      {Registry, keys: :unique, name: :soft_bank_accountants},
+      {Registry, keys: :unique, name: :soft_bank_accounts},
       {SoftBank.ExchangeRates.Supervisor, [restart: true, start_retriever: true]},
       {SoftBank.Currency.Reload, name: SoftBank.Currency.Reload},
       {DynamicSupervisor, strategy: :one_for_one, name: SoftBank.Accountant.Supervisor}
