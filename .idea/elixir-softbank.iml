@@ -5,7 +5,8 @@
       <configuration />
     </facet>
   </component>
-  <component name="NewModuleRootManager">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/ex_money" />
       <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/parse_trans" />
@@ -24,6 +25,8 @@
       <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/money" />
       <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/earmark_parser" />
       <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/makeup_erlang" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/digital_token" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/telemetry" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -92,5 +95,9 @@
     <orderEntry type="library" name="ex_machina" level="project" />
     <orderEntry type="library" name="myxql" level="project" />
     <orderEntry type="library" name="tds" level="project" />
+    <orderEntry type="library" name="table" level="project" />
+    <orderEntry type="library" name="makeup_html" level="project" />
+    <orderEntry type="library" name="floki" level="project" />
+    <orderEntry type="library" name="easyhtml" level="project" />
   </component>
 </module>

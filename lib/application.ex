@@ -18,7 +18,14 @@ defmodule SoftBank.Application do
       name: SoftBank.Supervisor
     ]
 
-    Supervisor.start_link(children, opts)
+    case Enum.member?([:dev, :test], Application.get_env(:soft_bank, :env, :dev)) do
+      false ->
+        Supervisor.start_link(children, opts)
+        |> check_db_tables()
+
+      true ->
+        Supervisor.start_link(children, opts)
+    end
   end
 
   defp check_db_tables(response = {:ok, _reply}) do

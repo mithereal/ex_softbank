@@ -273,7 +273,7 @@ defmodule SoftBank.Account do
     credits =
       case is_nil(credits) do
         true ->
-           data = Money.new(:USD, 0)
+          data = Money.new(:USD, 0)
           [data]
 
         false ->
@@ -283,7 +283,7 @@ defmodule SoftBank.Account do
     debits =
       case is_nil(debits) do
         true ->
-	        data = Money.new(:USD, 0)
+          data = Money.new(:USD, 0)
           [data]
 
         false ->
