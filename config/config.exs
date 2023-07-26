@@ -48,5 +48,4 @@ config :ex_money,
 config :ex_cldr,
   json_library: Jason
 
-
 import_config "#{Mix.env()}.exs"

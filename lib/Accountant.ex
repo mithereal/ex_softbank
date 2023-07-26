@@ -178,15 +178,14 @@ defmodule SoftBank.Accountant do
     new_amount = Money.to_currency(amount, dest_currency, rates)
     {:reply, new_amount, state}
   end
- # TODO: fetch balance from ets
+
   def handle_call(:balance, _from, state) do
-	  balance = 0.0
-	  reply = %{state | balance: balance}
+    reply = :ets.lookup(state.ref, :account)
     {:reply, reply, state}
   end
-  # TODO: fetch account from ets
+
   def handle_call(:show, _from, state) do
-	  reply = %{state | last_action_ts: DateTime.utc_now()}
+    reply = :ets.lookup(state.ref, :account)
     {:reply, reply, state}
   end
 
