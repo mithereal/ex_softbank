@@ -30,6 +30,7 @@ import Config
 #     import_config "#{Mix.env()}.exs"
 
 config :soft_bank, :ecto_repos, [SoftBank.Repo]
+config :soft_bank, env: config_env()
 
 config :ex_money,
   exchange_rates_retrieve_every: 300_000,
@@ -46,5 +47,6 @@ config :ex_money,
 
 config :ex_cldr,
   json_library: Jason
+
 
 import_config "#{Mix.env()}.exs"
