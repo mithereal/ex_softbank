@@ -18,10 +18,6 @@ Custom Currencies ( added to the accounting system automatically)
 
 Transfers(the producers send amount will be converted to match the recievers account currency type)
 
-Typically the Account Management genserver would be considered an anti pattern, however I needed a way to persist the state of my accounts ledgers in order to decouple accounting from user management. 
-
-This allows an accounts ledger state to be persisted for a ttl, when some other system process needs also to use the account ledger data the ttl is reset and state persisted until timeout occurs. 
-
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
