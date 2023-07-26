@@ -101,6 +101,10 @@ defmodule SoftBank.Accountant do
     end
   end
 
+  defp reload do
+    Process.send_after(self(), :work, 1000)
+  end
+
   @impl true
   def handle_call(
         :shutdown,
@@ -128,11 +132,13 @@ defmodule SoftBank.Accountant do
     destination_account = Account.fetch(%{account_number: account_number, type: "asset"})
     params = %{amount: amount}
     Transfer.send(state.account, destination_account, params)
+    reload()
     {:noreply, state}
   end
 
-  def handle_cast({:reload, account_number}, state) do
-    data = Account.fetch(%{account_number: account_number}, Repo)
+  def handle_info(:reload, state) do
+    account = :ets.lookup(state.ref, :account)
+    data = Account.fetch(%{account_number: account.account_number}, Repo)
     :ets.update(state.ref, {:account, data})
     {:noreply, state}
   end
@@ -141,6 +147,7 @@ defmodule SoftBank.Accountant do
     destination_account = Account.fetch(%{account_number: account_number, type: "asset"})
     params = %{amount: amount}
     reply = Transfer.send(state.account, destination_account, params)
+    reload()
     {:reply, reply, state}
   end
 
@@ -158,7 +165,7 @@ defmodule SoftBank.Accountant do
       })
 
     reply = Repo.insert(changeset)
-
+    reload()
     {:reply, reply, state}
   end
 
@@ -176,7 +183,7 @@ defmodule SoftBank.Accountant do
       })
 
     reply = Repo.insert(changeset)
-
+    reload()
     {:reply, reply, state}
   end
 
