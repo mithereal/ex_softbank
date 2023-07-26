@@ -102,7 +102,7 @@ defmodule SoftBank.Accountant do
   end
 
   defp reload do
-    Process.send_after(self(), :work, 1000)
+    Process.send_after(self(), :reload, 1000)
   end
 
   @impl true
