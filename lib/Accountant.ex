@@ -13,8 +13,6 @@ defmodule SoftBank.Accountant do
 
   alias SoftBank.Repo
 
-  defstruct account_number: nil
-
   def child_spec(args) do
     %{
       id: __MODULE__,
@@ -23,7 +21,7 @@ defmodule SoftBank.Accountant do
     }
   end
 
-  def start_link(account_number) do
+  def start_link(account_number, params \\ []) do
     name = via_tuple(account_number)
     GenServer.start_link(__MODULE__, params, name: name)
   end
@@ -31,7 +29,7 @@ defmodule SoftBank.Accountant do
   @impl true
   def init(args) do
     ref =
-      :ets.new(String.to_atom(args.account_number), [
+      :ets.new(String.to_atom(args.hash), [
         :set,
         :named_table,
         :public,
@@ -39,9 +37,9 @@ defmodule SoftBank.Accountant do
         write_concurrency: true
       ])
 
-    :ets.insert(ref, {:default, args})
+    :ets.insert(ref, {:account, args})
 
-    {:ok, %{account_number: args.account_number, ref: ref}}
+    {:ok, %{ref: ref}}
   end
 
   def shutdown(pid) do
@@ -129,16 +127,14 @@ defmodule SoftBank.Accountant do
     destination_account = Account.fetch(%{account_number: account_number, type: "asset"})
     params = %{amount: amount}
     Transfer.send(state.account, destination_account, params)
-    state = %{state | last_action_ts: DateTime.utc_now()}
     {:noreply, state}
   end
 
   def handle_call({:transfer, account_number, amount}, _, state) do
     destination_account = Account.fetch(%{account_number: account_number, type: "asset"})
     params = %{amount: amount}
-    Transfer.send(state.account, destination_account, params)
-    state = %{state | last_action_ts: DateTime.utc_now()}
-    {:reply, :ok, state}
+    reply = Transfer.send(state.account, destination_account, params)
+    {:reply, reply, state}
   end
 
   def handle_call({:withdrawl, amount}, _from, state) do
@@ -154,10 +150,9 @@ defmodule SoftBank.Accountant do
         ]
       })
 
-    Repo.insert(changeset)
+    reply = Repo.insert(changeset)
 
-    state = %{state | last_action_ts: DateTime.utc_now()}
-    {:reply, state, state}
+    {:reply, reply, state}
   end
 
   def handle_call({:deposit, amount}, _from, state) do
@@ -173,26 +168,26 @@ defmodule SoftBank.Accountant do
         ]
       })
 
-    Repo.insert(changeset)
-    state = %{state | last_action_ts: DateTime.utc_now()}
-    {:reply, state, state}
+    reply = Repo.insert(changeset)
+
+    {:reply, reply, state}
   end
 
   def handle_call({:convert, amount, dest_currency}, _from, state) do
     rates = Money.ExchangeRates.latest_rates()
     new_amount = Money.to_currency(amount, dest_currency, rates)
-    state = %{state | last_action_ts: DateTime.utc_now()}
     {:reply, new_amount, state}
   end
-
+ # TODO: fetch balance from ets
   def handle_call(:balance, _from, state) do
-    state = %{state | last_action_ts: DateTime.utc_now()}
-    {:reply, state.balance, state}
+	  balance = 0.0
+	  reply = %{state | balance: balance}
+    {:reply, reply, state}
   end
-
+  # TODO: fetch account from ets
   def handle_call(:show, _from, state) do
-    state = %{state | last_action_ts: DateTime.utc_now()}
-    {:reply, state, state}
+	  reply = %{state | last_action_ts: DateTime.utc_now()}
+    {:reply, reply, state}
   end
 
   @doc false
