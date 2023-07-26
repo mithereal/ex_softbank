@@ -21,16 +21,16 @@ defmodule SoftBank.Accountant do
     }
   end
 
-  def start_link(params \\ []) do
-    data = Account.fetch(%{account_number: params.account_number}, Repo)
-    name = via_tuple(params.account_number)
+  def start_link(account_number) do
+    data = Owner.fetch(%{account_number: account_number}, Repo)
+    name = via_tuple(account_number)
     GenServer.start_link(__MODULE__, data, name: name)
   end
 
   @impl true
   def init(args) do
     ref =
-      :ets.new(String.to_atom(args.hash), [
+      :ets.new(String.to_atom("sb_owner." <> args.account_number), [
         :set,
         :named_table,
         :public,
@@ -38,7 +38,10 @@ defmodule SoftBank.Accountant do
         write_concurrency: true
       ])
 
-    :ets.insert(ref, {:account, args})
+    Enum.map(args.accounts, fn x ->
+      # 	:ets.insert(ref, {String.to_atom(x.type), x})
+      :ets.insert(ref, {:accounts, x})
+    end)
 
     {:ok, %{ref: ref}}
   end
@@ -52,7 +55,7 @@ defmodule SoftBank.Accountant do
     amount = Money.new!(currency, amount)
 
     try do
-      GenServer.call(name, {:deposit, amount})
+      GenServer.call(name, {:deposit, amount, to})
     catch
       :exit, _ -> {:error, "invalid_account"}
     end
@@ -63,7 +66,7 @@ defmodule SoftBank.Accountant do
     amount = Money.new!(currency, amount)
 
     try do
-      GenServer.call(name, {:withdrawl, amount})
+      GenServer.call(name, {:withdrawl, amount, from})
     catch
       :exit, _ -> {:error, "invalid_account"}
     end
@@ -131,36 +134,39 @@ defmodule SoftBank.Accountant do
   def handle_cast({:transfer, account_number, amount}, state) do
     destination_account = Account.fetch(%{account_number: account_number, type: "asset"})
     params = %{amount: amount}
-    Transfer.send(state.account, destination_account, params)
+    from = List.first(state)
+    Transfer.send(from.account, destination_account, params)
     reload()
     {:noreply, state}
   end
 
   def handle_info(:reload, state) do
-    account = :ets.lookup(state.ref, :account)
-    data = Account.fetch(%{account_number: account.account_number}, Repo)
-    :ets.update(state.ref, {:account, data})
+    account = :ets.lookup(state.ref, :accounts)
+    data = Account.fetch(%{hash: account.hash}, Repo)
+    :ets.update(state.ref, {:accounts, data})
     {:noreply, state}
   end
 
   def handle_call({:transfer, account_number, amount}, _, state) do
+    ## pull out of ets
     destination_account = Account.fetch(%{account_number: account_number, type: "asset"})
     params = %{amount: amount}
-    reply = Transfer.send(state.account, destination_account, params)
+    account = :ets.lookup(state.ref, :liability)
+    reply = Transfer.send(account, destination_account, params)
     reload()
     {:reply, reply, state}
   end
 
-  def handle_call({:withdrawl, amount}, _from, state) do
+  def handle_call({:withdrawl, amount, from}, _from, state) do
     changeset =
       Entry.changeset(%Entry{
         description:
           "Withdrawl : " <>
-            to_string(amount) <> " from " <> to_string(state.account.account_number),
+            to_string(amount) <> " from " <> to_string(from.account_number),
         date: DateTime.utc_now(),
         amounts: [
-          %Amount{amount: amount, type: "credit", account_id: state.account.id},
-          %Amount{amount: amount, type: "debit", account_id: state.account.id}
+          %Amount{amount: amount, type: "credit", account_id: from.id},
+          %Amount{amount: amount, type: "debit", account_id: from.id}
         ]
       })
 
@@ -169,16 +175,16 @@ defmodule SoftBank.Accountant do
     {:reply, reply, state}
   end
 
-  def handle_call({:deposit, amount}, _from, state) do
+  def handle_call({:deposit, amount, account_number}, _from, state) do
+    account = Account.fetch(%{account_number: account_number})
+
     changeset =
       Entry.changeset(%Entry{
-        description:
-          "deposit : " <> to_string(amount) <> " into " <> to_string(state.account_number),
-        ## remove microseconds
-        date: DateTime.utc_now(),
+        description: "deposit : " <> to_string(amount) <> " into " <> to_string(account_number),
+        date: DateTime.truncate(DateTime.utc_now(), :second),
         amounts: [
-          %Amount{amount: amount, type: "debit", account_id: state.account.id},
-          %Amount{amount: amount, type: "credit", account_id: state.account.id}
+          %Amount{amount: amount, type: "debit", account_id: account.id},
+          %Amount{amount: amount, type: "credit", account_id: account.id}
         ]
       })
 
@@ -194,12 +200,12 @@ defmodule SoftBank.Accountant do
   end
 
   def handle_call(:balance, _from, state) do
-    reply = :ets.lookup(state.ref, :account)
-    {:reply, reply, state}
+    reply = :ets.lookup(state.ref, :owner)
+    {:reply, reply.balance, state}
   end
 
   def handle_call(:show, _from, state) do
-    reply = :ets.lookup(state.ref, :account)
+    reply = :ets.lookup(state.ref, :accounts)
     {:reply, reply, state}
   end
 

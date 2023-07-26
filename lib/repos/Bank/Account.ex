@@ -15,7 +15,7 @@ defmodule SoftBank.Account do
    normal balance swapped. For example, to remove equity, a "Drawing" account may be created
    as a contra equity account as follows:
 
-     `account = %Fuentes.Account{name: "Drawing", type: "asset", contra: true}`
+     `account = %SoftBank.Account{name: "Drawing", type: "asset", contra: true}`
 
    At all times the balance of all accounts should conform to the "accounting equation"
 
@@ -36,6 +36,7 @@ defmodule SoftBank.Account do
   import Ecto.Changeset
   import Ecto.Query
 
+  alias SoftBank.Owner
   alias SoftBank.Repo
   alias SoftBank.Amount
   alias SoftBank.Account
@@ -47,7 +48,6 @@ defmodule SoftBank.Account do
           account_number: String.t(),
           type: String.t(),
           contra: Boolean.t(),
-          hash: String.t(),
           default_currency: String.t(),
           amounts: [SoftBank.Amount]
         }
@@ -55,10 +55,11 @@ defmodule SoftBank.Account do
   schema "softbank_accounts" do
     field(:name, :string)
     field(:account_number, :string)
-    field(:hash, :string)
     field(:type, :string)
     field(:contra, :boolean)
     field(:default_currency, :string)
+
+    belongs_to(:owner, Owner)
 
     field(:balance, Money.Ecto.Composite.Type, virtual: true)
 
@@ -68,7 +69,7 @@ defmodule SoftBank.Account do
     timestamps()
   end
 
-  @params ~w(account_number type contra  name hash id default_currency)a
+  @params ~w(account_number type contra  name id default_currency)a
 
   @credit_types ["asset"]
   @required_fields ~w(account_number)a
@@ -91,13 +92,15 @@ defmodule SoftBank.Account do
   @doc """
   Create new account with default ledgers
   """
-  def new(name) do
+  def new(owner) do
     default_currency = Config.get(:default_currency, :USD)
 
-    new(name, default_currency)
+    new(owner, default_currency)
   end
 
-  def new(name, currency, hash \\ hash_id()) do
+  def new(owner, currency) do
+    name = owner.name
+
     currency =
       case currency do
         :default -> Config.get(:default_currency, :USD)
@@ -118,7 +121,7 @@ defmodule SoftBank.Account do
           %Account{}
           |> Account.to_changeset(asset_struct)
           |> put_change(:account_number, account_number)
-          |> put_change(:hash, hash)
+          |> put_change(:owner, owner)
           |> validate_required(@required_fields)
           |> Repo.insert()
 
@@ -134,7 +137,7 @@ defmodule SoftBank.Account do
           %Account{}
           |> Account.to_changeset(liablilty_struct)
           |> put_change(:account_number, account_number)
-          |> put_change(:hash, hash)
+          |> put_change(:owner, owner)
           |> validate_required(@required_fields)
           |> Repo.insert()
 
@@ -146,12 +149,11 @@ defmodule SoftBank.Account do
           %Account{}
           |> Account.to_changeset(equity_struct)
           |> put_change(:account_number, account_number)
-          |> put_change(:hash, hash)
+          |> put_change(:owner, owner)
           |> validate_required(@required_fields)
           |> Repo.insert()
 
         %{
-          hash: hash,
           debit_account: debit_account,
           credit_account: credit_account,
           equity_account: equity_account
@@ -353,11 +355,7 @@ defmodule SoftBank.Account do
     balance
   end
 
-  defp hash_id(number \\ 20) do
-    Nanoid.generate(number, "0123456789")
-  end
-
-  defp bank_account_number(number \\ 12) do
+  def bank_account_number(number \\ 12) do
     Nanoid.generate(number, "0123456789")
   end
 
@@ -372,27 +370,12 @@ defmodule SoftBank.Account do
     |> where([a], a.account_number == ^account_number)
     |> select([a], %{
       account_number: a.account_number,
-      hash: a.hash,
       type: a.type,
       contra: a.contra,
       id: a.id,
       default_currency: a.default_currency
     })
     |> repo.one()
-  end
-
-  def fetch(%{hash: hash}, repo) do
-    Account
-    |> where([a], a.hash == ^hash)
-    |> select([a], %{
-      account_number: a.account_number,
-      hash: a.hash,
-      type: a.type,
-      contra: a.contra,
-      id: a.id,
-      default_currency: a.default_currency
-    })
-    |> repo.all()
   end
 
   @doc """

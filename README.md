@@ -84,9 +84,10 @@ mix SoftBank.install
 
 ```elixir
 # login to your account and return the balance
+my_account_hash = "account_hash"
 my_account_number = "from-acct-number"
 to_account_number = "to-acct-number"
-SoftBank.login(my_account_number)
+SoftBank.login(my_account_hash)
 
 amount = Money.new :USD, 10
 SoftBank.deposit(amount,my_account_number)

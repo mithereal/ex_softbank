@@ -6,13 +6,21 @@ defmodule SoftBank.Repo.Migrations.SetupTables do
 	    execute("CREATE TYPE public.money_with_currency AS (currency_code char(3), amount numeric);")
 	    execute("CREATE TYPE public.currency AS (currency_code char(3));")
 
+	    create table(:softbank_owners) do
+		    add :name, :string, null: false
+		    add :account_number, :string, null: false
+	    end
+
+	    create index(:softbank_owners, [:name, :account_number])
+
       create table(:softbank_accounts) do
         add :name, :string, null: false
         add :type, :string, null: false
         add :account_number, :string, null: false
-        add :hash, :string, null: false
         add :default_currency, :string, null: false
         add :contra, :boolean, default: false
+
+        add :owner_id, references(:softbank_owners, on_delete: :delete_all), null: false
 
          timestamps([type: :utc_datetime_usec])
       end

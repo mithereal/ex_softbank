@@ -1,2 +1,2 @@
 name = "System Account"
-SoftBank.Account.new(name)
+SoftBank.Owner.new(name)

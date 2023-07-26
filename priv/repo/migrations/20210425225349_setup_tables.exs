@@ -2,19 +2,28 @@ defmodule SoftBank.Repo.Migrations.Tables do
     use Ecto.Migration
  
     def change do
+
+	    create table(:softbank_owners) do
+		    add :name, :string, null: false
+		    add :account_number, :string, null: false
+	    end
+
+	    create index(:softbank_owners, [:name, :account_number])
+
       create table(:softbank_accounts) do
         add :name, :string, null: false
         add :type, :string, null: false
         add :account_number, :string, null: false
-        add :hash, :string, null: false
         add :default_currency, :string, null: false
         add :contra, :boolean, default: false
+
+        add :owner_id, references(:softbank_owners, on_delete: :delete_all), null: false
   
          timestamps([type: :utc_datetime_usec])
       end
 
       create index(:softbank_accounts, [:name, :type])
-  
+
       create table(:softbank_entries) do
         add :description, :string, null: false
         add :date, :utc_datetime_usec, null: false
