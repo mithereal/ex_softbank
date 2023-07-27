@@ -7,7 +7,7 @@ defmodule SoftBank.AccountantTest do
   alias SoftBank.{Account, TestRepo, Accountant}
 
   test "check the account balance via an accountant/ets" do
-    owner = Owner.new("demo")
+    owner = SoftBank.Owner.new("demo")
     SoftBank.login(owner.owner.account_number)
     balance = Accountant.balance(owner.owner.account_number)
 
