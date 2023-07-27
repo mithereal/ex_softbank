@@ -10,6 +10,7 @@ defmodule SoftBank.Accountant do
   alias SoftBank.Account
   alias SoftBank.Amount
   alias SoftBank.Entry
+  alias SoftBank.Owner
 
   alias SoftBank.Repo
 
@@ -38,9 +39,7 @@ defmodule SoftBank.Accountant do
         write_concurrency: true
       ])
 
-    Enum.map(args.accounts, fn x ->
-      :ets.insert(ref, {:accounts, x})
-    end)
+    :ets.insert(ref, {:accounts, args.accounts})
 
     {:ok, %{ref: ref}}
   end
@@ -146,7 +145,8 @@ defmodule SoftBank.Accountant do
         Account.fetch(%{account_number: x.account_number}, Repo)
       end)
 
-    :ets.update_element(state.ref, :accounts, data)
+    :ets.insert(state.ref, {:accounts, data})
+
     {:noreply, state}
   end
 
@@ -204,8 +204,9 @@ defmodule SoftBank.Accountant do
   end
 
   def handle_call(:balance, _from, state) do
-    reply = :ets.lookup(state.ref, :accounts) |> Enum.sum(fn x -> x.balance end)
-    {:reply, reply.balance, state}
+    reply = Enum.map(:ets.lookup(state.ref, :accounts), fn {_, x} -> x.balance end)
+    IO.inspect(:ets.lookup(state.ref, :accounts))
+    {:reply, reply, state}
   end
 
   def handle_call(:show, _from, state) do

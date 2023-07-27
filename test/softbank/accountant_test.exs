@@ -9,7 +9,7 @@ defmodule SoftBank.AccountTest do
   test "check the account balance via an accountant/ets" do
     owner = Owner.new("demo")
 
-    SoftBank.login(owner.account_number)
-    Accountant.balance(owner.account_number)
+    SoftBank.login(owner.owner.account_number)
+    Accountant.balance(owner.owner.account_number)
   end
 end
