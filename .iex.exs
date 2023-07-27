@@ -1,6 +1,6 @@
 alias :observer, as: O
 alias :debugger, as: D
-alias SoftBank.{Account, AccountTest, TestRepo, Repo, Entry, EntryTest, Accountant, Amount, Currencies, Currency }
+alias SoftBank.{Owner, Account, AccountTest, TestRepo, Repo, Entry, EntryTest, Accountant, Amount, Currencies, Currency }
 
 
 local_time = fn  ->

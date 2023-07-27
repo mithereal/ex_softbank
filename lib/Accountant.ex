@@ -39,7 +39,6 @@ defmodule SoftBank.Accountant do
       ])
 
     Enum.map(args.accounts, fn x ->
-      # 	:ets.insert(ref, {String.to_atom(x.type), x})
       :ets.insert(ref, {:accounts, x})
     end)
 
@@ -131,42 +130,47 @@ defmodule SoftBank.Accountant do
     {:noreply, {names, refs}}
   end
 
-  def handle_cast({:transfer, account_number, amount}, state) do
-    destination_account = Account.fetch(%{account_number: account_number, type: "asset"})
+  def handle_cast({:transfer, account_number, dest_account_number, amount}, state) do
+    destination_account = Account.fetch(%{account_number: dest_account_number})
     params = %{amount: amount}
-    from = List.first(state)
+    from = Account.fetch(%{account_number: account_number})
     Transfer.send(from.account, destination_account, params)
     reload()
     {:noreply, state}
   end
 
   def handle_info(:reload, state) do
-    account = :ets.lookup(state.ref, :accounts)
-    data = Account.fetch(%{hash: account.hash}, Repo)
-    :ets.update(state.ref, {:accounts, data})
+    data =
+      :ets.lookup(state.ref, :accounts)
+      |> Enum.map(fn x ->
+        Account.fetch(%{account_number: x.account_number}, Repo)
+      end)
+
+    :ets.update_element(state.ref, :accounts, data)
     {:noreply, state}
   end
 
-  def handle_call({:transfer, account_number, amount}, _, state) do
-    ## pull out of ets
-    destination_account = Account.fetch(%{account_number: account_number, type: "asset"})
+  def handle_call({:transfer, account_number, dest_account_number, amount}, _, state) do
     params = %{amount: amount}
-    account = :ets.lookup(state.ref, :liability)
+    account = Account.fetch(%{account_number: account_number})
+    destination_account = Account.fetch(%{account_number: dest_account_number})
     reply = Transfer.send(account, destination_account, params)
     reload()
     {:reply, reply, state}
   end
 
-  def handle_call({:withdrawl, amount, from}, _from, state) do
+  def handle_call({:withdrawl, amount, account_number}, _from, state) do
+    account = Account.fetch(%{account_number: account_number})
+
     changeset =
       Entry.changeset(%Entry{
         description:
           "Withdrawl : " <>
-            to_string(amount) <> " from " <> to_string(from.account_number),
-        date: DateTime.utc_now(),
+            to_string(amount) <> " from " <> to_string(account.account_number),
+        date: DateTime.truncate(DateTime.utc_now(), :second),
         amounts: [
-          %Amount{amount: amount, type: "credit", account_id: from.id},
-          %Amount{amount: amount, type: "debit", account_id: from.id}
+          %Amount{amount: amount, type: "credit", account_id: account.id},
+          %Amount{amount: amount, type: "debit", account_id: account.id}
         ]
       })
 
@@ -200,7 +204,7 @@ defmodule SoftBank.Accountant do
   end
 
   def handle_call(:balance, _from, state) do
-    reply = :ets.lookup(state.ref, :owner)
+    reply = :ets.lookup(state.ref, :accounts) |> Enum.sum(fn x -> x.balance end)
     {:reply, reply.balance, state}
   end
 

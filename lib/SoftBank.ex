@@ -18,7 +18,7 @@ defmodule SoftBank do
 
   @doc """
   Login to the account
-  This will start a genserver to act as an accountant to abstract transactions, accountants auto shutdown after a ttl.
+  This will start a genserver to act as an accountant to abstract transactions.
   """
   def login(account_number) do
     SUPERVISOR.start_child(account_number)

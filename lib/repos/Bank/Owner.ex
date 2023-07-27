@@ -20,8 +20,6 @@ defmodule SoftBank.Owner do
     field(:name, :string)
     field(:account_number, :string)
 
-    field(:balance, Money.Ecto.Composite.Type, virtual: true)
-
     has_many(:accounts, Account)
   end
 
