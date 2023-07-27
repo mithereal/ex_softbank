@@ -52,7 +52,8 @@ defmodule SoftBank.Owner do
     {_, owner} =
       %Owner{name: name, account_number: account_number}
       |> Repo.insert()
-      |> Map.delete(:accounts)
+
+    owner = Map.delete(owner,:accounts)
 
     accounts = Account.new(owner, default_currency)
     %{owner: owner, accounts: accounts}
