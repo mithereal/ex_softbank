@@ -1,4 +1,4 @@
-defmodule SoftBank.AccountTest do
+defmodule SoftBank.AccountantTest do
   use SoftBank.EctoCase
 
   :ok = Ecto.Adapters.SQL.Sandbox.checkout(SoftBank.TestRepo)
@@ -8,7 +8,6 @@ defmodule SoftBank.AccountTest do
 
   test "check the account balance via an accountant/ets" do
     owner = Owner.new("demo")
-		amount =
     SoftBank.login(owner.owner.account_number)
     balance = Accountant.balance(owner.owner.account_number)
 
