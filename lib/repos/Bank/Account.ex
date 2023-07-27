@@ -69,7 +69,7 @@ defmodule SoftBank.Account do
     timestamps()
   end
 
-  @params ~w(account_number type contra  name id default_currency)a
+  @params ~w(account_number type contra name id default_currency)a
 
   @credit_types ["asset"]
   @required_fields ~w(account_number)a
@@ -80,6 +80,7 @@ defmodule SoftBank.Account do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, @params)
+    |> cast_assoc(params, "owner")
     |> validate_required(@required_fields)
   end
 

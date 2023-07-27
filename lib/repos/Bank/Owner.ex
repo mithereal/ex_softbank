@@ -6,7 +6,6 @@ defmodule SoftBank.Owner do
 
   alias SoftBank.Owner
   alias SoftBank.Repo
-  alias SoftBank.Amount
   alias SoftBank.Account
   alias SoftBank.Config
 
@@ -65,7 +64,7 @@ defmodule SoftBank.Owner do
   def fetch(account, repo \\ Repo)
 
   def fetch(%{account_number: account_number}, repo) do
-    reply = Owner
+    Owner
     |> where([a], a.account_number == ^account_number)
     |> select([a], %Owner{
       account_number: a.account_number,

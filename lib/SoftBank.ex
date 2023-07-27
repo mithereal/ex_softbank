@@ -25,7 +25,7 @@ defmodule SoftBank do
   end
 
   def show(account_number) do
-    ACCOUNTANT.show_state(account_number)
+    ACCOUNTANT.show(account_number)
   end
 
   @doc """

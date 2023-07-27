@@ -6,12 +6,15 @@ defmodule SoftBank.TestFactory do
   @chars "ABCDEFGHIJKLMNOPQRSTUVWXYZ" |> String.split("")
 
   def account_factory do
+    owner = SoftBank.Owner.new("demo")
+
     %Account{
       name: "My Assets",
       type: "asset",
       contra: false,
       account_number: generate_rand_string(),
-      default_currency: "USD"
+      default_currency: "USD",
+      owner: owner
     }
   end
 

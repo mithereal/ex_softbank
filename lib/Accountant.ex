@@ -40,11 +40,11 @@ defmodule SoftBank.Accountant do
       ])
 
     data =
-	    args.accounts
-	    |> Enum.map(fn x ->
-		    account = Account.fetch(%{account_number: x.account_number}, Repo)
-		    %{account | balance: Account.balance(Repo, x, nil)}
-	    end)
+      args.accounts
+      |> Enum.map(fn x ->
+        account = Account.fetch(%{account_number: x.account_number}, Repo)
+        %{account | balance: Account.balance(Repo, x, nil)}
+      end)
 
     :ets.insert(ref, {:accounts, data})
 
@@ -109,6 +109,16 @@ defmodule SoftBank.Accountant do
     end
   end
 
+  def show(account) do
+    name = via_tuple(account)
+
+    try do
+      GenServer.call(name, :show)
+    catch
+      :exit, _ -> {:error, "invalid_account"}
+    end
+  end
+
   defp reload do
     Process.send_after(self(), :reload, 1000)
   end
@@ -123,41 +133,6 @@ defmodule SoftBank.Accountant do
   end
 
   @impl true
-  def handle_cast(
-        :shutdown,
-        state
-      ) do
-    {:stop, :normal, state}
-  end
-
-  @impl true
-  def handle_info({:DOWN, _ref, :process, _pid, _reason}, {names, refs}) do
-    :ets.delete(names)
-    {:noreply, {names, refs}}
-  end
-
-  def handle_cast({:transfer, account_number, dest_account_number, amount}, state) do
-    destination_account = Account.fetch(%{account_number: dest_account_number})
-    params = %{amount: amount}
-    from = Account.fetch(%{account_number: account_number})
-    Transfer.send(from.account, destination_account, params)
-    reload()
-    {:noreply, state}
-  end
-
-  def handle_info(:reload, state) do
-    data =
-      :ets.lookup(state.ref, :accounts)
-      |> Enum.map(fn x ->
-       account = Account.fetch(%{account_number: x.account_number}, Repo)
-       %{account | balance: Account.balance(Repo, x, nil)}
-      end)
-
-    :ets.insert(state.ref, {:accounts, data})
-
-    {:noreply, state}
-  end
-
   def handle_call({:transfer, account_number, dest_account_number, amount}, _, state) do
     params = %{amount: amount}
     account = Account.fetch(%{account_number: account_number})
@@ -167,6 +142,7 @@ defmodule SoftBank.Accountant do
     {:reply, reply, state}
   end
 
+  @impl true
   def handle_call({:withdrawl, amount, account_number}, _from, state) do
     account = Account.fetch(%{account_number: account_number})
 
@@ -187,6 +163,7 @@ defmodule SoftBank.Accountant do
     {:reply, reply, state}
   end
 
+  @impl true
   def handle_call({:deposit, amount, account_number}, _from, state) do
     account = Account.fetch(%{account_number: account_number})
 
@@ -205,36 +182,67 @@ defmodule SoftBank.Accountant do
     {:reply, reply, state}
   end
 
+  @impl true
   def handle_call({:convert, amount, dest_currency}, _from, state) do
     rates = Money.ExchangeRates.latest_rates()
     new_amount = Money.to_currency(amount, dest_currency, rates)
     {:reply, new_amount, state}
   end
 
+  @impl true
   def handle_call(:balance, _from, state) do
-  accounts = :ets.lookup(state.ref, :accounts)
-  {:ok,accounts} = Keyword.fetch(accounts, :accounts)
-	  reply = Account.balance(Repo,accounts, nil)
+    accounts = :ets.lookup(state.ref, :accounts)
+    {:ok, accounts} = Keyword.fetch(accounts, :accounts)
+    reply = Account.balance(Repo, accounts, nil)
     {:reply, reply, state}
   end
 
+  @impl true
   def handle_call(:show, _from, state) do
     reply = :ets.lookup(state.ref, :accounts)
     {:reply, reply, state}
   end
 
+  @impl true
+  def handle_cast(
+        :shutdown,
+        state
+      ) do
+    {:stop, :normal, state}
+  end
+
+  @impl true
+  def handle_cast({:transfer, account_number, dest_account_number, amount}, state) do
+    destination_account = Account.fetch(%{account_number: dest_account_number})
+    params = %{amount: amount}
+    from = Account.fetch(%{account_number: account_number})
+    Transfer.send(from.account, destination_account, params)
+    reload()
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info(:reload, state) do
+    data =
+      :ets.lookup(state.ref, :accounts)
+      |> Enum.map(fn x ->
+        account = Account.fetch(%{account_number: x.account_number}, Repo)
+        %{account | balance: Account.balance(Repo, x, nil)}
+      end)
+
+    :ets.insert(state.ref, {:accounts, data})
+
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info({:DOWN, _ref, :process, _pid, _reason}, {names, refs}) do
+    :ets.delete(names)
+    {:noreply, {names, refs}}
+  end
+
   @doc false
   def via_tuple(hash, registry \\ @registry_name) do
     {:via, Registry, {registry, hash}}
-  end
-
-  def show(account) do
-    name = via_tuple(account)
-
-    try do
-      GenServer.call(name, :show)
-    catch
-      :exit, _ -> {:error, "invalid_account"}
-    end
   end
 end

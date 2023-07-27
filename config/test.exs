@@ -8,7 +8,7 @@ config :soft_bank, SoftBank.Repo,
   password: "postgres",
   database: "soft_bank_test",
   hostname: "localhost",
-  port: 5432,
+  port: 55436,
   pool_size: 10
 
 config :soft_bank, SoftBank.TestRepo,
