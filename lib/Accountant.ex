@@ -39,7 +39,14 @@ defmodule SoftBank.Accountant do
         write_concurrency: true
       ])
 
-    :ets.insert(ref, {:accounts, args.accounts})
+    data =
+	    args.accounts
+	    |> Enum.map(fn x ->
+		    account = Account.fetch(%{account_number: x.account_number}, Repo)
+		    %{account | balance: Account.balance(Repo, x, nil)}
+	    end)
+
+    :ets.insert(ref, {:accounts, data})
 
     {:ok, %{ref: ref}}
   end
@@ -142,7 +149,8 @@ defmodule SoftBank.Accountant do
     data =
       :ets.lookup(state.ref, :accounts)
       |> Enum.map(fn x ->
-        Account.fetch(%{account_number: x.account_number}, Repo)
+       account = Account.fetch(%{account_number: x.account_number}, Repo)
+       %{account | balance: Account.balance(Repo, x, nil)}
       end)
 
     :ets.insert(state.ref, {:accounts, data})
@@ -204,8 +212,9 @@ defmodule SoftBank.Accountant do
   end
 
   def handle_call(:balance, _from, state) do
-    reply = Enum.map(:ets.lookup(state.ref, :accounts), fn {_, x} -> x.balance end)
-    IO.inspect(:ets.lookup(state.ref, :accounts))
+  accounts = :ets.lookup(state.ref, :accounts)
+  {:ok,accounts} = Keyword.fetch(accounts, :accounts)
+	  reply = Account.balance(Repo,accounts, nil)
     {:reply, reply, state}
   end
 

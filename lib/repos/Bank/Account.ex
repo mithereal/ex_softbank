@@ -368,7 +368,7 @@ defmodule SoftBank.Account do
   def fetch(%{account_number: account_number}, repo) do
     Account
     |> where([a], a.account_number == ^account_number)
-    |> select([a], %{
+    |> select([a], %Account{
       account_number: a.account_number,
       type: a.type,
       contra: a.contra,

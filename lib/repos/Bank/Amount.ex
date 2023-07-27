@@ -42,7 +42,6 @@ defmodule SoftBank.Amount do
 
   def validate_amount_type(model) do
     type = model.amount.type
-    IO.inspect(type, label: "type in repo.bank.amount.validate_amount_type")
     valid = Enum.member?(Money.Currency.known_current_currencies(), type)
 
     case valid do

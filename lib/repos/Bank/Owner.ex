@@ -65,7 +65,7 @@ defmodule SoftBank.Owner do
   def fetch(account, repo \\ Repo)
 
   def fetch(%{account_number: account_number}, repo) do
-    Owner
+    reply = Owner
     |> where([a], a.account_number == ^account_number)
     |> select([a], %Owner{
       account_number: a.account_number,
