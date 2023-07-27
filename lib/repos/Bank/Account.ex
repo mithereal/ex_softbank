@@ -122,7 +122,7 @@ defmodule SoftBank.Account do
           %Account{}
           |> Account.to_changeset(asset_struct)
           |> put_change(:account_number, account_number)
-          |> put_change(:owner, owner)
+          |> put_assoc(:owner, owner)
           |> validate_required(@required_fields)
           |> Repo.insert()
 
@@ -138,7 +138,7 @@ defmodule SoftBank.Account do
           %Account{}
           |> Account.to_changeset(liablilty_struct)
           |> put_change(:account_number, account_number)
-          |> put_change(:owner, owner)
+          |> put_assoc(:owner, owner)
           |> validate_required(@required_fields)
           |> Repo.insert()
 
@@ -150,7 +150,7 @@ defmodule SoftBank.Account do
           %Account{}
           |> Account.to_changeset(equity_struct)
           |> put_change(:account_number, account_number)
-          |> put_change(:owner, owner)
+          |> put_assoc(:owner, owner)
           |> validate_required(@required_fields)
           |> Repo.insert()
 
