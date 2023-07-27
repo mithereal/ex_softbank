@@ -8,8 +8,10 @@ defmodule SoftBank.AccountTest do
 
   test "check the account balance via an accountant/ets" do
     owner = Owner.new("demo")
-
+		amount =
     SoftBank.login(owner.owner.account_number)
-    Accountant.balance(owner.owner.account_number)
+    balance = Accountant.balance(owner.owner.account_number)
+
+    assert Money.new(:USD, "0") == balance
   end
 end
