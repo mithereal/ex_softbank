@@ -1,21 +1,28 @@
 defmodule SoftBank.TestFactory do
   use ExMachina.Ecto, repo: SoftBank.TestRepo
 
-  alias SoftBank.{Account, Amount, Entry}
+  alias SoftBank.{Account, Amount, Entry, Owner}
 
   @chars "ABCDEFGHIJKLMNOPQRSTUVWXYZ" |> String.split("")
 
-  def account_factory do
-    owner = SoftBank.Owner.new("demo")
+  def owner_factory do
+    %Owner{
+      name: "Test Owner",
+      account_number: Account.bank_account_number()
+    }
+  end
 
-    %Account{
+  def account_factory(attrs) do
+    account = %Account{
       name: "My Assets",
       type: "asset",
       contra: false,
-      account_number: generate_rand_string(),
+      account_number: Account.bank_account_number(),
       default_currency: "USD",
-      owner: owner
+      owner: attrs["owner"]
     }
+
+    merge_attributes(account, attrs)
   end
 
   def entry_factory do

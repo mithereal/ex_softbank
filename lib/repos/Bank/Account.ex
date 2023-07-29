@@ -80,7 +80,6 @@ defmodule SoftBank.Account do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, @params)
-    |> cast_assoc(params, "owner")
     |> validate_required(@required_fields)
   end
 

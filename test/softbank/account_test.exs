@@ -20,12 +20,13 @@ defmodule SoftBank.AccountTest do
   end
 
   test "test balance zero with and without entries" do
-    asset = insert(:account)
-    insert(:account, name: "Liabilities", type: "liability")
-    insert(:account, name: "Revenue", type: "asset")
-    insert(:account, name: "Expense", type: "asset")
-    equity = insert(:account, name: "Equity", type: "equity")
-    drawing = insert(:account, name: "Drawing", type: "equity", contra: true)
+    owner = insert(:owner)
+    asset = insert(:account, owner: owner)
+    insert(:account, name: "Liabilities", type: "liability", owner: owner)
+    insert(:account, name: "Revenue", type: "asset", owner: owner)
+    insert(:account, name: "Expense", type: "asset", owner: owner)
+    equity = insert(:account, name: "Equity", type: "equity", owner: owner)
+    drawing = insert(:account, name: "Drawing", type: "equity", contra: true, owner: owner)
 
     result = Account.test_balance(TestRepo)
 
@@ -49,12 +50,13 @@ defmodule SoftBank.AccountTest do
   end
 
   test "account balances with entries and dates" do
-    insert(:account)
-    insert(:account, name: "Liabilities", type: "liability")
-    insert(:account, name: "Revenue", type: "asset")
-    insert(:account, name: "Expense", type: "asset")
-    equity = insert(:account, name: "Equity", type: "equity")
-    drawing = insert(:account, name: "Drawing", type: "equity", contra: true)
+    owner = insert(:owner)
+    insert(:account, owner: owner)
+    insert(:account, name: "Liabilities", type: "liability", owner: owner)
+    insert(:account, name: "Revenue", type: "asset", owner: owner)
+    insert(:account, name: "Expense", type: "asset", owner: owner)
+    equity = insert(:account, name: "Equity", type: "equity", owner: owner)
+    drawing = insert(:account, name: "Drawing", type: "equity", contra: true, owner: owner)
 
     insert(:entry,
       amounts: [build(:credit, account_id: equity.id), build(:debit, account_id: drawing.id)]
