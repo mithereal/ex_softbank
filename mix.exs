@@ -8,7 +8,7 @@ defmodule SoftBank.MixProject do
     [
       app: :soft_bank,
       version: @version,
-      elixir: "~> 1.13",
+      elixir: "~> 1.14",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       description: description(),
