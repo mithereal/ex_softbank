@@ -1,7 +1,7 @@
 defmodule SoftBank.MixProject do
   use Mix.Project
 
-  @version "1.1.3"
+  @version "1.1.4"
   @source_url "https://github.com/mithereal/ex_softbank.git"
 
   def project do
