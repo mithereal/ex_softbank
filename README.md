@@ -99,3 +99,9 @@ Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_do
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/soft_bank](https://hexdocs.pm/soft_bank).
 
+## Credits 
+* Fuentes by davidkuhta https://github.com/davidkuhta/fuentes
+
+## Reason For Package
+thx to the owner of the excellent fuentes package upon which this was based i needed the ability to handle multiple accounts currencys and cldr, this is what it morphed into.
+fuentes had some build problems when i used it but it was long ago, and i was living outdoors at the time it served as good refresher for the elixir language.
