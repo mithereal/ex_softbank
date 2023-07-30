@@ -44,7 +44,6 @@ Add the following to your config.exs
 ```elixir
 config :soft_bank, :ecto_repos, [SoftBank.Repo]
 
-
 config :ex_money,
   exchange_rates_retrieve_every: 300_000,
   api_module: Money.ExchangeRates.OpenExchangeRates,
