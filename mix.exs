@@ -1,7 +1,7 @@
 defmodule SoftBank.MixProject do
   use Mix.Project
 
-  @version "1.1.4"
+  @version "1.1.5"
   @source_url "https://github.com/mithereal/ex_softbank.git"
 
   def project do
@@ -54,7 +54,7 @@ defmodule SoftBank.MixProject do
   defp package() do
     [
       name: "soft_bank",
-      files: ["lib", "mix.exs", "README.md"],
+      files: ["lib", "priv", "mix.exs", "README.md"],
       maintainers: ["Jason Clark"],
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/mithereal/ex_softbank"}

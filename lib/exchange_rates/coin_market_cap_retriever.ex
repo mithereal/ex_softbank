@@ -199,13 +199,13 @@ defmodule SoftBank.ExchangeRates.CoinMarketCap.Retriever do
     |> process_response(url, config)
   end
 
-  defp process_response({:ok, {{_version, 200, 'OK'}, headers, body}}, url, config) do
+  defp process_response({:ok, {{_version, 200, ~c"OK"}, headers, body}}, url, config) do
     rates = config.api_module.decode_rates(body)
     cache_etag(headers, url)
     {:ok, rates}
   end
 
-  defp process_response({:ok, {{_version, 304, 'Not Modified'}, headers, _body}}, url, _config) do
+  defp process_response({:ok, {{_version, 304, ~c"Not Modified"}, headers, _body}}, url, _config) do
     cache_etag(headers, url)
     {:ok, :not_modified}
   end
@@ -230,8 +230,8 @@ defmodule SoftBank.ExchangeRates.CoinMarketCap.Retriever do
     case get_etag(url) do
       {etag, date} ->
         [
-          {'If-None-Match', etag},
-          {'If-Modified-Since', date}
+          {~c"If-None-Match", etag},
+          {~c"If-Modified-Since", date}
         ]
 
       _ ->
@@ -240,8 +240,8 @@ defmodule SoftBank.ExchangeRates.CoinMarketCap.Retriever do
   end
 
   defp cache_etag(headers, url) do
-    etag = :proplists.get_value('etag', headers)
-    date = :proplists.get_value('date', headers)
+    etag = :proplists.get_value(~c"etag", headers)
+    date = :proplists.get_value(~c"date", headers)
 
     if etag?(etag, date) do
       :ets.insert(@etag_cache, {url, {etag, date}})
