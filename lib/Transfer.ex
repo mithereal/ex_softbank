@@ -1,5 +1,5 @@
 defmodule SoftBank.Transfer do
-  use Ecto.Schema
+  use SoftBank.Schema
   import Ecto.Query
   import Ecto.Changeset
 

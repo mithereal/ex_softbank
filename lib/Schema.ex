@@ -14,8 +14,6 @@ defmodule SoftBank.Schema do
       _ ->
         quote do
           use Ecto.Schema
-          @primary_key {:id, :id, autogenerate: true}
-          @foreign_key_type :id
         end
     end
   end
