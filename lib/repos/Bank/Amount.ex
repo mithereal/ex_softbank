@@ -4,7 +4,7 @@ defmodule SoftBank.Amount do
   part of a balanced entry.
   """
 
-  use Ecto.Schema
+  use SoftBank.Schema
 
   import Ecto.Changeset
   import Ecto.Query, only: [from: 2]

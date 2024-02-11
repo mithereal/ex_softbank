@@ -9,7 +9,7 @@ defmodule SoftBank.Entry do
           date: Ecto.Date.t()
         }
 
-  use Ecto.Schema
+  use SoftBank.Schema
 
   import Ecto.Changeset
 

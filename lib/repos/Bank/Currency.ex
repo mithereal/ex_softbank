@@ -1,5 +1,5 @@
 defmodule SoftBank.Currency do
-  use Ecto.Schema
+  use SoftBank.Schema
 
   import Ecto.Changeset
 

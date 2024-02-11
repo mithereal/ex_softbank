@@ -31,7 +31,7 @@ defmodule SoftBank.Account do
 
   import Kernel, except: [abs: 1]
 
-  use Ecto.Schema
+  use SoftBank.Schema
 
   import Ecto.Changeset
   import Ecto.Query

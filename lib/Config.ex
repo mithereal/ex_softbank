@@ -30,14 +30,14 @@ defmodule SoftBank.Config do
 
   def key_type() do
     case Application.get_env(:soft_bank, repo())[:primary_key_type] do
-      nil -> :id
+      nil -> :integer
       _ -> :binary_id
     end
   end
 
   def key_type(:migration) do
     case Application.get_env(:soft_bank, repo())[:primary_key_type] do
-      nil -> :id
+      nil -> :integer
       _ -> :uuid
     end
   end
