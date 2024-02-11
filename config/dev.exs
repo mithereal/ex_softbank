@@ -11,7 +11,8 @@ config :soft_bank, SoftBank.Repo,
   database: "soft_bank",
   hostname: "localhost",
   port: 55436,
-  pool_size: 10
+  pool_size: 10,
+  primary_key_type: :id
 
 ### Example using coinmarketcap for cryptocurrency rates
 #  config :ex_money,

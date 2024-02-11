@@ -72,6 +72,7 @@ config :soft_bank, SoftBank.Repo,
   database: "softbank_dev",
   hostname: "localhost",
   pool_size: 10
+  #primary_key_type: :id
 ```
 
 ## (Optional) Generate a `setup_softbank_tables` migration
