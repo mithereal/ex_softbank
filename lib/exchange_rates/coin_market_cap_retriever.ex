@@ -501,7 +501,7 @@ defmodule SoftBank.ExchangeRates.CoinMarketCap.Retriever do
 
   @certificate_locations [
                            # Configured cacertfile
-                           Application.get_env(Cldr.Config.app_name(), :cacertfile),
+                           Application.compile_env(Cldr.Config.app_name(), :cacertfile, nil),
 
                            # Populated if hex package CAStore is configured
                            if(Code.ensure_loaded?(CAStore), do: CAStore.file_path()),

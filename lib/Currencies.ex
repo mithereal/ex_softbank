@@ -1,6 +1,7 @@
 defmodule SoftBank.Currencies do
   alias SoftBank.Currency
   alias SoftBank.Config
+  alias SoftBank.Repo
 
   require Logger
 

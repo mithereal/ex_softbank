@@ -4,7 +4,7 @@ defmodule SoftBank.Currency.Reload do
 
   @moduledoc false
 
-  def start_link(data \\ []) do
+  def start_link(_data \\ []) do
     Logger.info("Custom Currencies will be retrieved now and then every 300 seconds.")
     Task.start_link(&poll/0)
   end

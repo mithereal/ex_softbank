@@ -1,12 +1,12 @@
 defmodule SoftBank.Note do
   import Kernel, except: [abs: 1]
-  import Money
 
   @moduledoc """
     Defines a `SoftBank.Note` struct along with convenience methods for working with currencies.
   """
 
-  defstruct amount: Money.new(:USD, 0), currency: Application.get_env(:note, :default_currency)
+  defstruct amount: Money.new(:USD, 0),
+            currency: Application.compile_env(:note, :default_currency, :USD)
 
   @doc ~S"""
   Create a new `SoftBank.Note` struct using a default currency.
@@ -23,8 +23,12 @@ defmodule SoftBank.Note do
       %SoftBank.Note{amount: 123, currency: :USD}
   """
 
-  def new(amount) do
-    currency = Application.get_env(:note, :default_currency)
+  def new(amount, currency \\ nil) do
+    currency =
+      case is_nil(currency) do
+        true -> Application.get_env(:note, :default_currency)
+        false -> currency
+      end
 
     if currency do
       Money.new(currency, amount)
