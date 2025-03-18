@@ -8,7 +8,6 @@ defmodule SoftBank.Transfer do
   alias SoftBank.Transfer
   alias SoftBank.Entry
   alias SoftBank.Repo
-  alias SoftBank.Config
 
   @moduledoc """
   Transfer from one account to another.
@@ -60,7 +59,7 @@ defmodule SoftBank.Transfer do
       destination_account = transfer.recipient
       amount = transfer.amount
 
-      {_, account_balance} = Account.balance(Config.repo(), source_account, nil)
+      {_, account_balance} = Account.balance(Repo, source_account, nil)
 
       sum_amt = Money.sub!(account_balance, amount)
       zero_amt = Money.new(:USD, 0)

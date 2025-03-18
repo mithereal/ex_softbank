@@ -2,8 +2,6 @@ import Config
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
 
-config :soft_bank, :ecto_repos, [SoftBank.Repo]
-
 config :soft_bank, SoftBank.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
@@ -11,8 +9,7 @@ config :soft_bank, SoftBank.Repo,
   database: "soft_bank",
   hostname: "localhost",
   port: 55436,
-  pool_size: 10,
-  primary_key_type: :id
+  pool_size: 10
 
 ### Example using coinmarketcap for cryptocurrency rates
 #  config :ex_money,

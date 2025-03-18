@@ -16,7 +16,7 @@ defmodule SoftBank.ExchangeRates.Supervisor do
         extra_arguments: args
       )
     rescue
-      _ -> throw("anerror occured")
+      _ -> throw("an error occured")
     end
   end
 end

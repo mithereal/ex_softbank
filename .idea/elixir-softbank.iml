@@ -28,6 +28,36 @@
       <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/digital_token" />
       <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/telemetry" />
       <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/digital_token" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/cldr_utils" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/db_connection" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/decimal" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/ecto" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/ex_cldr" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/ex_cldr_currencies" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/ex_cldr_numbers" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/ex_doc" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/ex_money_sql" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/makeup" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/makeup_elixir" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/nanoid" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/nimble_parsec" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/postgrex" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/cldr_utils" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/db_connection" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/decimal" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/ecto" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/ecto_sql" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/ex_cldr" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/ex_cldr_currencies" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/ex_cldr_numbers" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/ex_machina" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/ex_money" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/ex_money_sql" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/faker" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/jason" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/nanoid" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/nimble_parsec" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/postgrex" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -100,5 +130,17 @@
     <orderEntry type="library" name="makeup_html" level="project" />
     <orderEntry type="library" name="floki" level="project" />
     <orderEntry type="library" name="easyhtml" level="project" />
+    <orderEntry type="library" name="earmark" level="project" />
+    <orderEntry type="library" name="postgrex" level="project" />
+    <orderEntry type="library" name="ecto" level="project" />
+    <orderEntry type="library" name="ecto_sql" level="project" />
+    <orderEntry type="library" name="jason" level="project" />
+    <orderEntry type="library" name="ex_money" level="project" />
+    <orderEntry type="library" name="ex_money_sql" level="project" />
+    <orderEntry type="library" name="ex_doc" level="project" />
+    <orderEntry type="library" name="nanoid" level="project" />
+    <orderEntry type="library" name="inch_ex" level="project" />
+    <orderEntry type="library" name="faker" level="project" />
+    <orderEntry type="library" name="ex_machina" level="project" />
   </component>
 </module>

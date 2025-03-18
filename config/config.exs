@@ -30,6 +30,7 @@ import Config
 #     import_config "#{Mix.env()}.exs"
 
 config :soft_bank, :ecto_repos, [SoftBank.Repo]
+config :soft_bank, primary_key_type: :uuid
 config :soft_bank, env: config_env()
 
 config :ex_money,

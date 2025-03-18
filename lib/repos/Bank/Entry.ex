@@ -15,7 +15,6 @@ defmodule SoftBank.Entry do
 
   alias SoftBank.Amount
   alias SoftBank.Entry
-  alias SoftBank.Config
 
   schema "softbank_entries" do
     field(:description, :string)
@@ -81,7 +80,7 @@ defmodule SoftBank.Entry do
   the associated amounts for that entry sum to zero.
   """
   @spec(balanced?(Ecto.Repo.t(), SoftBank.Entry.t()) :: Boolean.t(), String.t())
-  def balanced?(repo \\ Config.repo(), entry = %Entry{}, default_currency \\ :USD) do
+  def balanced?(repo \\ Repo, entry = %Entry{}, default_currency \\ :USD) do
     credits =
       Amount
       |> Amount.for_entry(entry)

@@ -247,7 +247,7 @@ defmodule SoftBank.Account do
   """
 
   @spec balance(Ecto.Repo.t(), [SoftBank.Account.t()], Ecto.Date.t()) :: Decimal.t()
-  def account_balance(repo \\ Config.repo(), account_or_account_list, dates \\ nil) do
+  def account_balance(repo \\ Repo, account_or_account_list, dates \\ nil) do
     balance(repo, account_or_account_list, dates)
   end
 
@@ -382,7 +382,7 @@ defmodule SoftBank.Account do
   Computes a test balance for all accounts in the provided Ecto.Repo.
   Returns Money type.
   """
-  def test_balance(repo \\ Config.repo()) do
+  def test_balance(repo \\ Repo) do
     accounts = repo.all(Account)
 
     default_currency = Config.get(:default_currency, :USD)

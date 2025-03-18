@@ -1,13 +1,12 @@
 defmodule SoftBank.Currencies do
   alias SoftBank.Currency
-  alias SoftBank.Config
   alias SoftBank.Repo
 
   require Logger
 
   def init(_pid, _table) do
-    # currencies = Config.repo().all(Currency)
     currencies = []
+    # currencies = Repo.all(Currency)
 
     Enum.map(currencies, fn x ->
       Cldr.Currency.new(x.symbol,
@@ -52,7 +51,7 @@ defmodule SoftBank.Currencies do
   end
 
   def reload() do
-    currencies = Config.repo().all(Currency)
+    currencies = Repo.all(Currency)
 
     Logger.info("Reloading Custom Currencies")
 
