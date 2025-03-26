@@ -1,7 +1,7 @@
 defmodule SoftBank.MixProject do
   use Mix.Project
 
-  @version "1.2.4"
+  @version "1.2.5"
   @source_url "https://github.com/mithereal/ex_softbank.git"
 
   def project do
@@ -33,7 +33,7 @@ defmodule SoftBank.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:postgrex, ">= 0.0.0"},
+      {:postgrex, ">= 0.0.0", optional: true},
       {:ecto, "~> 3.5"},
       {:ecto_sql, "~> 3.5"},
       {:jason, "~> 1.0"},

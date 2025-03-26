@@ -4,10 +4,8 @@ defmodule SoftBank.Application do
   use Application
 
   def start(_type, args) do
-	  config = SoftBank.Config.new()
 
     children = [
-      {config.repo, args},
       {Cldr.Currency, [callback: {SoftBank.Currencies, :init, []}]},
       {Registry, keys: :unique, name: :soft_bank_accounts},
       {SoftBank.ExchangeRates.Supervisor, [restart: true, start_retriever: true]},

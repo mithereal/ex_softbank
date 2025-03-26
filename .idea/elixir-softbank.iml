@@ -142,5 +142,7 @@
     <orderEntry type="library" name="inch_ex" level="project" />
     <orderEntry type="library" name="faker" level="project" />
     <orderEntry type="library" name="ex_machina" level="project" />
+    <orderEntry type="library" name="digital_token" level="project" />
+    <orderEntry type="library" name="certifi" level="project" />
   </component>
 </module>

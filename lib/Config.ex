@@ -23,7 +23,7 @@ defmodule SoftBank.Config do
   end
 
   def new(opts \\ []) do
-	  repo = SoftBank.Config.get(:repo)
+    repo = SoftBank.Config.get(:repo)
     struct!(__MODULE__, [repo: repo] ++ opts)
   end
 end
