@@ -3,6 +3,13 @@ defmodule SoftBank.TestRepo do
     otp_app: :soft_bank,
     adapter: Ecto.Adapters.Postgres
 
+  @name __MODULE__
+
+  def start_link(_) do
+
+	  GenServer.start_link(__MODULE__, [@name])
+  end
+
   @doc """
   Dynamically loads the repository url from the
   DATABASE_URL environment variable.

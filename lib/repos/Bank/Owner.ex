@@ -85,7 +85,6 @@ defmodule SoftBank.Owner do
       |> repo.one(query)
 
     config
-    ## arity is wrong 2 vs 3
     |> repo.preload(result, :accounts)
   end
 end

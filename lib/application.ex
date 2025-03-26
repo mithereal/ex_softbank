@@ -4,14 +4,19 @@ defmodule SoftBank.Application do
   use Application
 
   def start(_type, args) do
+	  env =
+		  case Mix.env() == :test do
+			  true -> [{SoftBank.TestRepo, args}]
+			  false -> []
+		  end
 
-    children = [
+	  children = [
       {Cldr.Currency, [callback: {SoftBank.Currencies, :init, []}]},
       {Registry, keys: :unique, name: :soft_bank_accounts},
       {SoftBank.ExchangeRates.Supervisor, [restart: true, start_retriever: true]},
       {SoftBank.Currency.Reload, name: SoftBank.Currency.Reload},
       {DynamicSupervisor, strategy: :one_for_one, name: SoftBank.Accountant.Supervisor}
-    ]
+    ] ++ env
 
     opts = [
       strategy: :one_for_one,

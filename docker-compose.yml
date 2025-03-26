@@ -9,7 +9,7 @@ services:
     networks:
       - soft-bank
     ports:
-      - 55436:5432
+      - 55432:5432
     volumes:
       - soft-bank-db-data:/var/lib/postgresql/data
 networks:

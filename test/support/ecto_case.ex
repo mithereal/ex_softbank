@@ -6,6 +6,7 @@ defmodule SoftBank.EctoCase do
   # end
 
   setup tags do
+
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(SoftBank.TestRepo)
 
     unless tags[:async] do
