@@ -6,8 +6,8 @@ defmodule SoftBank.EntryTest do
 
   @valid_attrs params_for(:entry)
   @invalid_attrs %{}
-  @test_amount Money.new!(:USD, "125,000.00")
-  @test_amount_alt Money.new!(:USD, "225,000.00")
+  @test_amount Money.new!(:USD, 12_500_000)
+  @test_amount_alt Money.new!(:USD, 22_500_000)
   @valid_with_amount_attrs %{
     description: "Spending Money",
     date: DateTime.utc_now(),

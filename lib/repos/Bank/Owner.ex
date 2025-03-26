@@ -45,13 +45,17 @@ defmodule SoftBank.Owner do
   Create new account with default ledgers
   """
   def new(name) do
+    config = SoftBank.Config.new()
+
     default_currency = Config.get(:default_currency, :USD)
 
     account_number = Account.bank_account_number()
 
-    owner =
+    params =
       %Owner{name: name, account_number: account_number}
-      |> Repo.insert!()
+
+    owner =
+      Repo.insert!(config, params)
       |> Map.delete(:accounts)
 
     accounts = Account.new(owner, default_currency)
@@ -65,14 +69,23 @@ defmodule SoftBank.Owner do
   def fetch(account, repo \\ Repo)
 
   def fetch(%{account_number: account_number}, repo) do
-    Owner
-    |> where([a], a.account_number == ^account_number)
-    |> select([a], %Owner{
-      account_number: a.account_number,
-      name: a.name,
-      id: a.id
-    })
-    |> repo.one()
-    |> repo.preload(:accounts)
+    config = SoftBank.Config.new()
+
+    query =
+      Owner
+      |> where([a], a.account_number == ^account_number)
+      |> select([a], %Owner{
+        account_number: a.account_number,
+        name: a.name,
+        id: a.id
+      })
+
+    result =
+      config
+      |> repo.one(query)
+
+    config
+    ## arity is wrong 2 vs 3
+    |> repo.preload(result, :accounts)
   end
 end

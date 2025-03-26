@@ -2,7 +2,7 @@ defmodule SoftBank.EctoCase do
   use ExUnit.CaseTemplate
 
   # setup do
-  #  :ok = Ecto.Adapters.SQL.Sandbox.checkout(SoftBank.TestRepo)
+  #  :ok = Ecto.Adapters.SQL.Sandbox.checkout(SoftBank.Repo)
   # end
 
   setup tags do

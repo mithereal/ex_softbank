@@ -2,15 +2,15 @@ defmodule SoftBank.Repo.Migrations.SetupTables do
   use Ecto.Migration
 
   def change do
-	  key_type =
-		  case Application.get_env(:soft_bank, :primary_key_type) do
-			  nil -> :integer
-			  :id -> :integer
-			  :integer -> :integer
-			  :uuid -> :uuid
-			  :binary_id -> :uuid
-			  _ -> :integer
-		  end
+    key_type =
+      case Application.get_env(:soft_bank, :primary_key_type) do
+        nil -> :integer
+        :id -> :integer
+        :integer -> :integer
+        :uuid -> :uuid
+        :binary_id -> :uuid
+        _ -> :integer
+      end
 
     execute("CREATE TYPE public.money_with_currency AS (currency_code char(3), amount numeric);")
     execute("CREATE TYPE public.currency AS (currency_code char(3));")
@@ -31,7 +31,9 @@ defmodule SoftBank.Repo.Migrations.SetupTables do
       add(:default_currency, :string, null: false)
       add(:contra, :boolean, default: false)
 
-      add(:owner_id, references(:softbank_owners, on_delete: :delete_all), null: false)
+      add(:owner_id, references(:softbank_owners, on_delete: :delete_all, type: key_type),
+        null: false
+      )
 
       timestamps(type: :utc_datetime_usec)
     end
@@ -52,8 +54,14 @@ defmodule SoftBank.Repo.Migrations.SetupTables do
       add(:id, key_type, primary_key: true)
       add(:type, :string, null: false)
       add(:amount, :money_with_currency)
-      add(:account_id, references(:softbank_accounts, on_delete: :delete_all), null: false)
-      add(:entry_id, references(:softbank_entries, on_delete: :delete_all), null: false)
+
+      add(:account_id, references(:softbank_accounts, on_delete: :delete_all, type: key_type),
+        null: false
+      )
+
+      add(:entry_id, references(:softbank_entries, on_delete: :delete_all, type: key_type),
+        null: false
+      )
 
       timestamps(type: :utc_datetime_usec)
     end

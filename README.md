@@ -42,7 +42,7 @@ mix install
 
 Add the following to your config.exs
 ```elixir
-config :soft_bank, :ecto_repos, [SoftBank.Repo]
+config :soft_bank, :ecto_repos, [Myapp.Repo]
 
 config :ex_money,
   exchange_rates_retrieve_every: 300_000,
@@ -63,16 +63,8 @@ config :ex_cldr,
 
 Add the following to your dev and/or prod config
 ```elixir
-config :soft_bank, :ecto_repos, [SoftBank.Repo]
 
-config :soft_bank, SoftBank.Repo,
-  adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
-  database: "softbank_dev",
-  hostname: "localhost",
-  pool_size: 10
-  #primary_key_type: :id
+config :soft_bank, repo: Myapp.Repo
 ```
 
 ## (Optional) Generate a `setup_softbank_tables` migration

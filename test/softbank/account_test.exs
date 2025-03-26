@@ -4,7 +4,7 @@ defmodule SoftBank.AccountTest do
   :ok = Ecto.Adapters.SQL.Sandbox.checkout(SoftBank.TestRepo)
 
   import SoftBank.TestFactory
-  alias SoftBank.{Account, TestRepo}
+  alias SoftBank.{Account, Repo, Config}
 
   @valid_attrs params_for(:account)
   @invalid_attrs %{}
@@ -28,7 +28,7 @@ defmodule SoftBank.AccountTest do
     equity = insert(:account, name: "Equity", type: "equity", owner: owner)
     drawing = insert(:account, name: "Drawing", type: "equity", contra: true, owner: owner)
 
-    result = Account.test_balance(TestRepo)
+    result = Account.test_balance(Repo)
 
     assert result == Money.new(:USD, 0)
 
@@ -36,17 +36,17 @@ defmodule SoftBank.AccountTest do
       amounts: [build(:credit, account_id: asset.id), build(:debit, account_id: equity.id)]
     )
 
-    assert Money.to_string!(Account.test_balance(TestRepo), locale: "en") == "$0.00"
+    assert Money.to_string!(Account.test_balance(Repo), locale: "en") == "$0.00"
 
     insert(:entry,
       amounts: [build(:credit, account_id: equity.id), build(:debit, account_id: drawing.id)]
     )
 
-    assert Money.to_string!(Account.test_balance(TestRepo), locale: "en") == "$0.00"
+    assert Money.to_string!(Account.test_balance(Repo), locale: "en") == "$0.00"
 
     insert(:entry, amounts: [build(:credit, account_id: asset.id)])
 
-    refute Money.to_string!(Account.test_balance(TestRepo), locale: "en") == "$0.00"
+    refute Money.to_string!(Account.test_balance(Repo), locale: "en") == "$0.00"
   end
 
   test "account balances with entries and dates" do
@@ -62,8 +62,8 @@ defmodule SoftBank.AccountTest do
       amounts: [build(:credit, account_id: equity.id), build(:debit, account_id: drawing.id)]
     )
 
-    assert Account.account_balance(TestRepo, equity) ==
-             Account.balance(TestRepo, equity, %{
+    assert Account.account_balance(Repo, equity) ==
+             Account.balance(Repo, equity, %{
                to_date: DateTime.utc_now()
              })
 
@@ -72,8 +72,8 @@ defmodule SoftBank.AccountTest do
       amounts: [build(:credit, account_id: equity.id), build(:debit, account_id: drawing.id)]
     )
 
-    assert Account.account_balance(TestRepo, equity) ==
-             Account.balance(TestRepo, equity, %{
+    assert Account.account_balance(Repo, equity) ==
+             Account.balance(Repo, equity, %{
                to_date: DateTime.utc_now()
              })
   end

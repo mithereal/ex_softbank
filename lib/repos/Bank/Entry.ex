@@ -81,17 +81,23 @@ defmodule SoftBank.Entry do
   """
   @spec(balanced?(Ecto.Repo.t(), SoftBank.Entry.t()) :: Boolean.t(), String.t())
   def balanced?(repo \\ Repo, entry = %Entry{}, default_currency \\ :USD) do
-    credits =
+    config = SoftBank.Config.new()
+
+    query =
       Amount
       |> Amount.for_entry(entry)
       |> Amount.select_type("credit")
-      |> repo.all
 
-    debits =
+    credits =
+      config
+      |> repo.all(query)
+
+    query =
       Amount
       |> Amount.for_entry(entry)
       |> Amount.select_type("debit")
-      |> repo.all
+
+    debits = config |> repo.all(query)
 
     default_amount = Money.new(default_currency, 0)
 

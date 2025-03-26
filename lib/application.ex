@@ -4,8 +4,10 @@ defmodule SoftBank.Application do
   use Application
 
   def start(_type, args) do
+	  config = SoftBank.Config.new()
+
     children = [
-      {SoftBank.Repo, args},
+      {config.repo, args},
       {Cldr.Currency, [callback: {SoftBank.Currencies, :init, []}]},
       {Registry, keys: :unique, name: :soft_bank_accounts},
       {SoftBank.ExchangeRates.Supervisor, [restart: true, start_retriever: true]},
@@ -31,7 +33,9 @@ defmodule SoftBank.Application do
   defp check_db_tables(response = {:ok, _reply}) do
     Enum.each([SoftBank.Amount, SoftBank.Account, SoftBank.Entry, SoftBank.Currencies], fn x ->
       try do
-        if SoftBank.Repo.exists?(x) == false do
+        config = SoftBank.Config.new()
+
+        if SoftBank.Repo.exists?(config, x) == false do
           raise("Unable To Read Database Table(s)")
         end
       rescue

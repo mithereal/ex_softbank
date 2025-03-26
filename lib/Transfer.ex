@@ -39,7 +39,9 @@ defmodule SoftBank.Transfer do
     if account_number == applied_changeset.sender.account_number do
       add_error(changeset, :recipient, "cannot transfer to the same account")
     else
-      case Repo.one(from(a in Account, where: a.account_number == ^account_number)) do
+      config = SoftBank.Config.new()
+
+      case Repo.one(config, from(a in Account, where: a.account_number == ^account_number)) do
         %Account{} = account ->
           put_embed(changeset, :recipient, account)
 
@@ -87,7 +89,8 @@ defmodule SoftBank.Transfer do
             ]
           }
 
-          Repo.insert(entry_changeset)
+          config = SoftBank.Config.new()
+          Repo.insert(config, entry_changeset)
 
           {:ok, transfer}
 

@@ -27,8 +27,9 @@ defmodule SoftBank.Currencies do
   end
 
   def new(params) do
+    config = SoftBank.Config.new()
     changeset = SoftBank.Currency.changeset(%SoftBank.Currency{}, params)
-    {status, x} = Repo.insert(changeset)
+    {status, x} = Repo.insert(config, changeset)
 
     Logger.info("Loading New Currency: " <> x.name)
 
@@ -51,7 +52,8 @@ defmodule SoftBank.Currencies do
   end
 
   def reload() do
-    currencies = Repo.all(Currency)
+    config = SoftBank.Config.new()
+    currencies = Repo.all(config, Currency)
 
     Logger.info("Reloading Custom Currencies")
 

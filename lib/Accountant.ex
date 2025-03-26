@@ -23,6 +23,7 @@ defmodule SoftBank.Accountant do
   end
 
   def start_link(account_number) do
+    IO.inspect(account_number, label: "account_number")
     data = Owner.fetch(%{account_number: account_number}, Repo)
     name = via_tuple(account_number)
     GenServer.start_link(__MODULE__, data, name: name)
@@ -158,7 +159,8 @@ defmodule SoftBank.Accountant do
         ]
       })
 
-    reply = Repo.insert(changeset)
+    config = SoftBank.Config.new()
+    reply = Repo.insert(config, changeset)
     reload()
     {:reply, reply, state}
   end
@@ -177,7 +179,8 @@ defmodule SoftBank.Accountant do
         ]
       })
 
-    reply = Repo.insert(changeset)
+    config = SoftBank.Config.new()
+    reply = Repo.insert(config, changeset)
     reload()
     {:reply, reply, state}
   end

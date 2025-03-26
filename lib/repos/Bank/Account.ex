@@ -117,13 +117,16 @@ defmodule SoftBank.Account do
 
         account_number = bank_account_number()
 
-        {_, debit_account} =
+        config = SoftBank.Config.new()
+
+        query =
           %Account{}
           |> Account.to_changeset(asset_struct)
           |> put_change(:account_number, account_number)
           |> put_assoc(:owner, owner)
           |> validate_required(@required_fields)
-          |> Repo.insert()
+
+        {_, debit_account} = config |> Repo.insert(query)
 
         liablilty_struct = %{
           name: name <> " Liabilities",
@@ -133,25 +136,27 @@ defmodule SoftBank.Account do
 
         account_number = bank_account_number()
 
-        {_, credit_account} =
+        query =
           %Account{}
           |> Account.to_changeset(liablilty_struct)
           |> put_change(:account_number, account_number)
           |> put_assoc(:owner, owner)
           |> validate_required(@required_fields)
-          |> Repo.insert()
+
+        {_, credit_account} = config |> Repo.insert(query)
 
         equity_struct = %{name: name <> " Equity", type: "equity", default_currency: currency}
 
         account_number = bank_account_number()
 
-        {_, equity_account} =
+        query =
           %Account{}
           |> Account.to_changeset(equity_struct)
           |> put_change(:account_number, account_number)
           |> put_assoc(:owner, owner)
           |> validate_required(@required_fields)
-          |> Repo.insert()
+
+        {_, equity_account} = config |> Repo.insert(query)
 
         %{
           debit_account: debit_account,
@@ -167,11 +172,14 @@ defmodule SoftBank.Account do
   @doc false
   @spec amount_sum(Ecto.Repo.t(), SoftBank.Account.t(), String.t()) :: Decimal.t()
   def amount_sum(repo, account, type) do
-    records =
+    config = SoftBank.Config.new()
+
+    query =
       Amount
       |> Amount.for_account(account)
       |> Amount.select_type(type)
-      |> repo.all()
+
+    records = config |> repo.all(query)
 
     default_currency = account.default_currency
 
@@ -204,12 +212,15 @@ defmodule SoftBank.Account do
   @doc false
   @spec amount_sum(Ecto.Repo.t(), SoftBank.Account.t(), String.t(), map) :: Decimal.t()
   def amount_sum(repo, account, type, dates) do
-    records =
+    config = SoftBank.Config.new()
+
+    query =
       Amount
       |> Amount.for_account(account)
       |> Amount.dated(dates)
       |> Amount.select_type(type)
-      |> repo.all()
+
+    records = config |> repo.all(query)
 
     default_currency = account.default_currency
 
@@ -366,16 +377,20 @@ defmodule SoftBank.Account do
   def fetch(account, repo \\ Repo)
 
   def fetch(%{account_number: account_number}, repo) do
-    Account
-    |> where([a], a.account_number == ^account_number)
-    |> select([a], %Account{
-      account_number: a.account_number,
-      type: a.type,
-      contra: a.contra,
-      id: a.id,
-      default_currency: a.default_currency
-    })
-    |> repo.one()
+    config = SoftBank.Config.new()
+
+    query =
+      Account
+      |> where([a], a.account_number == ^account_number)
+      |> select([a], %Account{
+        account_number: a.account_number,
+        type: a.type,
+        contra: a.contra,
+        id: a.id,
+        default_currency: a.default_currency
+      })
+
+    config |> repo.one(query)
   end
 
   @doc """
@@ -383,7 +398,8 @@ defmodule SoftBank.Account do
   Returns Money type.
   """
   def test_balance(repo \\ Repo) do
-    accounts = repo.all(Account)
+    config = SoftBank.Config.new()
+    accounts = repo.all(config, Account)
 
     default_currency = Config.get(:default_currency, :USD)
 

@@ -3,7 +3,11 @@ defmodule SoftBank.Config do
   Return value by key from config.exs file.
   """
 
-  alias SoftBank.Repo
+  defstruct get_dynamic_repo: nil,
+            prefix: nil,
+            log: false,
+            name: SoftBank,
+            repo: nil
 
   def get(name, default \\ nil) do
     Application.get_env(:soft_bank, name, default)
@@ -16,5 +20,10 @@ defmodule SoftBank.Config do
       :integer -> :integer
       _ -> :binary_id
     end
+  end
+
+  def new(opts \\ []) do
+	  repo = SoftBank.Config.get(:repo)
+    struct!(__MODULE__, [repo: repo] ++ opts)
   end
 end
